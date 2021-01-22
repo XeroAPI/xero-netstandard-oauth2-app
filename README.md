@@ -1,23 +1,24 @@
-xero-netstandard-oauth2-starter-dotnet-core
-
 # Xero NetStandard OAuth 2.0 Starter App
-This is a starter app build with .NET Core 3.1 MVC to demonstrate Xero OAuth 2.0 Client Authentication & OAuth 2.0 APIs. 
+This is a companion app built with .NET Core 3.1 MVC to demonstrate Xero OAuth 2.0 Client Authentication & OAuth 2.0 APIs.
 
-![NetStandardDemo](https://user-images.githubusercontent.com/41350731/76293982-27636380-6306-11ea-8b83-e4dda46b7365.gif)
+__IMPORTANT!__ This application is for demo only. We recommend setting up a secure token storage for your production app.
 
 Its functions include:
 
-- connect & reconnect to xero
+- connect & reconnect to Xero
 - storing Xero token in a .json file
 - refresh Xero access token on expiry
-- read organisation information from /organisation endpoint
-- read contacts information from /contacts endpoint
-- create a new contact in Xero
+- allow user to switch between tenants/organisations
+- allow user to disconnect a tenant or revoke token
+- allow manual testing of many Xero API endpoints
+- display API call responses
+- display code snippets responsible for the call
 
-You can connect this starter app to an actual Xero organisation and make real API calls. Please use your Demo Company organisation for your testing. [Here](https://central.xero.com/s/article/Use-the-demo-company) is how to turn it on. 
+You can connect this companion app to an actual Xero organisation and make real API calls. Please use your Demo Company organisation for your testing. [Here](https://central.xero.com/s/article/Use-the-demo-company) is how to turn it on. 
 
 ### Create a Xero app
-You will need your Xero app credentials created to run this demo app. 
+You will need your Xero app credentials created to run this demo app.
+
 To obtain your API keys, follow these steps:
 
 * Create a [free Xero user account](https://www.xero.com/us/signup/api/) (if you don't have one)
@@ -51,7 +52,7 @@ Note that you will have to have a state. The CallbackUri has to be exactly the s
 ## Getting started with _dotnet_  & command line 
 You can run this application with [dotnet SDK](https://code.visualstudio.com/download) from command line. 
 ### Install dotnet SDK
-[Download](https://dotnet.microsoft.com/download) and install dotnet SDK on your machine. 
+[Download](https://code.visualstudio.com/download) and install dotnet SDK on your machine. 
 
 Verify in command line by:
 ```
@@ -59,7 +60,7 @@ $ dotnet --version
 3.1.102
 ```
 ### Build the project
-change directory to NetStandardApp directory where you can see XeroNetStandardApp.csproj, build the project by: 
+Change directory to NetStandardApp directory where you can see XeroNetStandardApp.csproj, build the project by: 
 
 ```
 $ dotnet build
@@ -123,10 +124,6 @@ Start your Testing.
 
 ## Some explanation of the code
 
-![image](https://user-images.githubusercontent.com/41350731/76298982-672e4900-630e-11ea-81ba-93bf791d353a.png)
-
-There are three controllers in this MVC app:
-
 **HomeController**
 - checks if there is a xerotoken.json, and 
 - passes a boolean firstTimeConnection to view to control the display of buttons. 
@@ -135,22 +132,72 @@ There are three controllers in this MVC app:
 - reads XeroConfiguration &  make httpClientFactory available via dependency injection
 - on /Authorization/, redirects user to Xero OAuth for authentication & authorization
 - receives callback on /Authorization/Callback request Xero token
-- get connected tenants (organisations) 
-- store token via a static method TokenUtilities.StoreToken(xeroToken);
+- gets connected tenants (organisations)
+- store token via a public static method TokenUtilities.StoreToken(xeroToken);
 
-**OrganisationInfoController**
-- gets or refreshes stored token
-- make api call to organisation endpoint 
-- displays in view
+**AssetsInfoController**
+- makes API call to assets endpoint (Asset API)
+- displays all current Fixed Assets (GET)
+- allows for creation of Fixed Asset (PUT)
+
+**AuEmployeesInfoController**
+- makes API call to employees endpoint (PayrollAu API)
+- displays all current AU employees (GET)
+- allows for creation of a new Employee (PUT)
+
+**BankfeedConnectionsController**
+- makes API call to feed connections endpoint (BankFeeds API)
+- displays all current feed connections (GET), allows for deletion (POST)
+- allows for creation of new feed connection (PUT)
+
+**BankfeedStatementsController**
+- makes API call to statements endpoint (BankFeeds API)
+- displays all current statements (GET)
+- allows for creation of new statement (PUT)
+
+**BankTransactionsInfoController**
+- makes API call to bank transactions endpoint (Accounting API)
+- displays all current bank transactions (GET)
 
 **ContactInfoController** 
-- gets or refreshes stored token 
-- make api call to contacts endpoint
+- makes api call to contacts endpoint
 - displays in view
-- static view Create.cshtml creates a webform and POST contact info to Create() action, and
+- static view Create.cshtml creates a web form and POST contact info to Create() action, and
 - makes an create operation to contacts endpoint 
 
-Xero token is stored in a JSON file in the root of the project "./xerotoken.json". The app serialise and deserialise with the static class functions in /Utilities/TokenUtilities.cs. 
+**IdentityInfoController**
+- gets the list of tenant connections
+- displays tenant information (GET /connections)
+- allows user to disconnect a specific tenant (DELETE /connections/{id})
+
+**InvoiceSyncController**
+- gets invoices in the last 7 days and displays them in view (GET /invoices)
+- allows user to upload attachments to a specific invoice (POST {id}/attachments)
+
+**NzEmployeesInfoController**
+- gets a list of employees in NZ Payroll (GET)
+- displays them in view
+- allows user to create new employees (POST)
+
+**OrganisationInfoController**
+- gets the current organisation information (GET)
+- displays in view
+
+**ProjectInfoController**
+- gets the list of projects in Xero projects (GET)
+- displays in view
+
+**PurchaseOrderSyncController**
+- gets a list of purchase orders (GET)
+- displays in view
+- allows user to create a new purchase order (POST)
+
+**UkEmployeeInfoController**
+- gets a list of employees in Uk Payroll (GET)
+- displays them in view
+- allows user to create new employees (POST)
+
+Xero token is stored in a JSON file in the root of the project "./xerotoken.json". The app serialise and deserialise with the static class functions in /Utilities/TokenUtilities.cs. Most controllers will get and refresh token before calling API methods.
 
 ## License
 
@@ -178,5 +225,3 @@ This software is published under the [MIT License](http://en.wikipedia.org/wiki/
 	WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 	FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 	OTHER DEALINGS IN THE SOFTWARE.
-
-
