@@ -20,9 +20,17 @@ public static class TokenUtilities
 
   public static XeroOAuth2Token GetStoredToken()
   {
-    string serializedXeroToken = System.IO.File.ReadAllText("./xerotoken.json");
-    var xeroToken = JsonSerializer.Deserialize<XeroOAuth2Token>(serializedXeroToken);
+    var xeroToken = new XeroOAuth2Token();
+    
+    try {
+      string serializedXeroToken = System.IO.File.ReadAllText("./xerotoken.json");
+      xeroToken = JsonSerializer.Deserialize<XeroOAuth2Token>(serializedXeroToken);
 
+      return xeroToken;
+    } catch (Exception) {
+      
+    }
+    
     return xeroToken;
   }
 

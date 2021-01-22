@@ -7,16 +7,18 @@
     </button>
 
     <div class="collapse navbar-collapse" id="navbarColor02">
+        @if (ViewBag.OrgPickerTenantList != null ) {
         <select name="orgSelector" id="orgSelector" class="form-control form-control-sm w-auto" onchange="location.href = this.value">
-          @foreach (var details in ViewBag.OrgPickerTenantList)
-          {
-            @if (details.TenantId == ViewBag.OrgPickerCurrentTenantId) {
-              <option value="@Url.Action("Index", "Home", new { tenantId = @details.TenantId })" selected="selected">@details.TenantName</option>
-            } else {
-              <option value="@Url.Action("Index", "Home", new { tenantId = @details.TenantId })">@details.TenantName</option>
+            @foreach (var details in ViewBag.OrgPickerTenantList)
+            {
+              @if (details.TenantId == ViewBag.OrgPickerCurrentTenantId) {
+                <option value="@Url.Action("Index", "Home", new { tenantId = @details.TenantId })" selected="selected">@details.TenantName</option>
+              } else {
+                <option value="@Url.Action("Index", "Home", new { tenantId = @details.TenantId })">@details.TenantName</option>
+              }
             }
-          }
         </select>
+        }
         
         <ul class="navbar-nav ml-auto">
           

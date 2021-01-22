@@ -18,11 +18,14 @@ namespace XeroNetStandardApp.ViewComponents{
       var xeroToken = TokenUtilities.GetStoredToken();
 
       var tenantId = TokenUtilities.GetCurrentTenantId();
-
-      ViewBag.OrgPickerCurrentTenantId = tenantId;
-      ViewBag.OrgPickerTenantList = xeroToken.Tenants.Select(
-        (t) => new TenantDetails { TenantName = t.TenantName, TenantId = t.TenantId }
-      ).ToList();
+      try {
+        ViewBag.OrgPickerCurrentTenantId = tenantId;
+        ViewBag.OrgPickerTenantList = xeroToken.Tenants.Select(
+          (t) => new TenantDetails { TenantName = t.TenantName, TenantId = t.TenantId }
+        ).ToList();
+      } catch (Exception) {
+        
+      }
 
       return View(TokenUtilities.TokenExists());
     }
