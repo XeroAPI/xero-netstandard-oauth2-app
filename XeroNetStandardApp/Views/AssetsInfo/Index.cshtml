@@ -1,0 +1,45 @@
+@model dynamic
+
+<h2>Xero Assets</h2>
+
+<table class="table table-responsive fixed-table-body">
+  <tr>
+    <th>Asset Name</th>
+    <th>Asset Number</th>
+  </tr>
+  @foreach (var item in Model) {
+    <tr>
+      <td>@item.AssetName</td>
+      <td>@item.AssetNumber</td>
+    </tr>
+  }
+</table>
+
+<br>
+<p><b>Raw JSON Response:</b></p>
+<textarea class="form-control" readonly style="height: 350px">
+@ViewBag.jsonResponse;
+</textarea>
+<br>
+<p><b>Code Example:</b></p>
+<p>Get all Fixed Assets</p>
+<pre>
+// Assuming accessToken and xeroTenantId has been provided
+var AssetApi = new AssetApi();
+
+var response = await AssetApi.GetAssetsAsync(
+  accessToken, 
+  xeroTenantId, 
+  AssetStatusQueryParam.DRAFT
+);
+
+return response.Items;
+</pre>
+<br>
+<p>
+  <button class="btn btn-link" onclick="location.href='@Url.Action("Index", "Home")'">Home</button>
+</p>
+
+<br>
+<br>
+<br>

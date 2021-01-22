@@ -1,0 +1,89 @@
+@model dynamic
+
+<h2>Create a Xero Bank Feed Statements</h2>
+
+<form method="POST">
+    <label for="FeedConnectionID">Feed Connection ID:</label>
+    <br>
+    <select id="FeedConnectionID" name="FeedConnectionID">
+    @foreach (var connectionID in Model) {
+    <option value=@connectionID>@connectionID</option>
+    }
+    </select>
+    <br>
+    <br>
+    <label for="StartBalanceAmount">Start Balance Amount:</label>
+    <br>
+    <input type="text" id="StartBalanceAmount" placeholder="Enter Start Balance Amount" name="StartBalanceAmount" class="form-control" required/>
+    <br>
+    <label for="startBalanceIndicator">Start Balance Credit/Debit Indicator:</label>
+    <br>
+    <select id="startBalanceIndicator" name="startBalanceIndicator">
+    <option value="CREDIT">CREDIT</option>
+    <option value="DEBIT">DEBIT</option>
+    </select>
+    <br>
+    <br>
+    <input class= "btn btn-primary" type="submit" />
+</form>
+<hr>
+
+<p><b>Code Example:</b></p>
+<p>Create Bankfeed Statement</p>
+<pre>
+// Assuming accessToken and xeroTenantId has been provided
+var BankfeedsApi = new BankFeedsApi();
+
+StartBalance startBalance = new StartBalance{
+  Amount = decimal.Parse(startBalanceAmount),
+  CreditDebitIndicator = startIndicatorEnum
+};
+
+
+StatementLine statementLine = new StatementLine{
+  PostedDate = DateTime.Today,
+  Description = "demo description",
+  Amount = 10,
+  CreditDebitIndicator = startIndicatorEnum,
+  TransactionId = Guid.NewGuid().ToString()
+};
+
+/*
+End balance must be the sum of start balance and statement line amounts
+to be accepted 
+*/
+EndBalance endBalance = new EndBalance{
+  Amount = decimal.Parse(startBalanceAmount) + statementLine.Amount,
+  CreditDebitIndicator = startIndicatorEnum
+};
+
+List&#60;StatementLine> statementLines = new List&#60;StatementLine>();
+statementLines.Add(statementLine);
+
+var statement = new Statement{
+  FeedConnectionId = new Guid(feedConnectionId),
+  StartDate = DateTime.Today.AddDays(-20),
+  EndDate = DateTime.Today,
+  StartBalance = startBalance,
+  EndBalance = endBalance,
+  StatementLines = statementLines,
+};
+
+List&#60;Statement> statementList = new List&#60;Statement>();
+statementList.Add(statement);
+
+Statements statements = new Statements{
+  Pagination = new Pagination(),
+  Items = statementList
+};
+
+await BankfeedsApi.CreateStatementsAsync(accessToken, xeroTenantId, statements);
+</pre>
+
+<br>
+<p>
+  <button class="btn btn-link" onclick="location.href='@Url.Action("Index", "Home")'">Home</button>
+</p>
+<br>
+<br>
+<br>

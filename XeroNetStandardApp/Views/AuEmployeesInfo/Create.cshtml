@@ -1,0 +1,55 @@
+<h2>Create an AU Xero Payroll Employee</h2>
+
+<form method="POST">
+    <label for="firstName">First Name:</label>
+    <br>
+    <input class="form-control" type="text" id="firstName" placeholder="" name="firstName"/>
+    <br>
+    <label for="lastName">Last Name:</label>
+    <br>
+    <input class="form-control" type="text" id="lastName" placeholder="" name="lastName" />
+    <br>
+    <br>
+    <input class= "btn btn-primary" type="submit" />
+</form>
+
+<hr>
+
+<p><b>Code Example:</b></p>
+<p>Create AU Employee</p>
+<pre>
+// Assuming accessToken and xeroTenantId has been provided
+DateTime dob = DateTime.Today.AddYears(-20);
+
+HomeAddress homeAddress = new HomeAddress() {
+  AddressLine1 = "123 Main St",
+  AddressLine2 = "St. Kilda",
+  Region = State.ACT,
+  City = "Waiwhetu",
+  PostalCode = "3182", 
+  Country = "AUSTRALIA"
+};
+
+Employee employee = new Employee() {
+  FirstName = firstName,
+  LastName = lastName,
+  DateOfBirth = dob,
+  HomeAddress = homeAddress
+};
+
+var employees = new List&#60;Employee>() { employee };
+
+var objectFullName = employees.GetType().FullName;
+String result = JsonConvert.SerializeObject(employees);
+
+var PayrollAUApi = new PayrollAuApi();
+var response = await PayrollAUApi.CreateEmployeeAsync(accessToken, xeroTenantId, employees);
+</pre>
+
+<br>
+<p>
+  <button class= "btn btn-link" onclick="location.href='@Url.Action("Index", "Home")'">Home</button>
+</p>
+<br>
+<br>
+<br>

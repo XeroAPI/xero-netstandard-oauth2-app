@@ -1,0 +1,33 @@
+<h2>Create a Xero Fixed Asset</h2>
+
+<form method="POST">
+    <label for="Name">Asset Name:</label>
+    <br>
+    <input class="form-control" type="text" id="Name" placeholder="Enter a name for the asset" name="Name" required/>
+    <br>
+    <label for="Number">Asset Number:</label>
+    <br>
+    <input class="form-control" type="text" id="Number" placeholder="Enter a number for the asset" name="Number" required/>
+    <br>
+    <br>
+    <input type="submit" class= "btn btn-primary" />
+</form>
+<hr>
+
+<p><b>Code Example:</b></p>
+<p>Create Contact</p>
+<pre>
+// Assuming accessToken and xeroTenantId has been provided
+var asset = new Asset() {
+  AssetName = Name,
+  AssetNumber = Number
+};
+
+var AssetApi = new AssetApi();
+var response = await AssetApi.CreateAssetAsync(accessToken, xeroTenantId, asset);
+</pre>
+
+<br>
+<p>
+  <button class="btn btn-link" onclick="location.href='@Url.Action("Index", "Home")'">Home</button>
+</p>

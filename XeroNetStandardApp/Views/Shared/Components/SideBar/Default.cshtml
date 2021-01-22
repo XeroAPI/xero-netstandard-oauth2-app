@@ -1,0 +1,108 @@
+@model bool
+
+@if (Model)
+{
+<div class="side-navbar">
+  <p class="sidebar-title">API Sets</p>
+  @* Accounting *@
+  <li class="list-sidebar">
+      <a class="link-holder" data-toggle="collapse" href="#collapseAccounting" onclick="UpdateLinkHolderColour(this)" role="button" aria-expanded="false">Accounting</a>
+      <div class="collapse" id="collapseAccounting">   
+          <div class="list-group">
+              <a class="link-sidebar py-2" asp-area="" asp-controller="ContactsInfo" asp-action="Index" onclick="UpdateActiveLink(this)">Get Contacts</a>
+              <a class="link-sidebar py-2" asp-area="" asp-controller="ContactsInfo" asp-action="Create">Create Contacts</a>
+              <a class="link-sidebar py-2" asp-area="" asp-controller="InvoiceSync" asp-action="Index">Get Invoices (Last 7 Days)</a>
+              <a class="link-sidebar py-2" asp-area="" asp-controller="InvoiceSync" asp-action="Create">Create Invoice</a>
+              <a class="link-sidebar py-2" asp-area="" asp-controller="PurchaseOrderSync" asp-action="Index">Get Purchase Order</a>
+              <a class="link-sidebar py-2" asp-area="" asp-controller="PurchaseOrderSync" asp-action="Create">Create Purchase Order</a>
+              <a class="link-sidebar py-2" asp-area="" asp-controller="BankTransactionsInfo" asp-action="Index">Get BankTransactions</a>
+          </div>              
+      </div>
+  </li>
+  @* Asset sidebar *@
+  <li class="list-sidebar">
+      <a class="link-holder" data-toggle="collapse" href="#collapseAsset" role="button" onclick="UpdateLinkHolderColour(this)" aria-expanded="false">Asset</a>
+      <div class="collapse" id="collapseAsset">   
+          <div class="list-group">
+              <a id="get-endpoint" class="link-sidebar py-2" asp-area="" asp-controller="AssetsInfo" asp-action="Index">Get Fixed Assets</a>
+              <a id="post-endpoint" class="link-sidebar py-2" asp-area="" asp-controller="AssetsInfo" asp-action="Create">Create Fixed Asset</a>
+          </div>                 
+      </div>
+  </li>
+  @* Identity sidebar *@
+  <li class="list-sidebar">
+      <a class="link-holder" data-toggle="collapse" href="#collapseIdentity" role="button" onclick="UpdateLinkHolderColour(this)" aria-expanded="false">Identity</a>
+          <div class="collapse" id="collapseIdentity">   
+          <div class="list-group">
+              <a class="link-sidebar py-2" asp-area="" asp-controller="IdentityInfo" asp-action="Index">Get Connections</a>
+          </div>                 
+      </div>
+  </li>
+  @* PayrollAu sidebar *@
+  <li class="list-sidebar">
+      <a class="link-holder" data-toggle="collapse" href="#collapsePayrollAu" role="button" onclick="UpdateLinkHolderColour(this)" aria-expanded="false">Payroll AU</a>
+          <div class="collapse" id="collapsePayrollAu">   
+          <div class="list-group">
+              <a class="link-sidebar py-2" asp-area="" asp-controller="AuEmployeesInfo" asp-action="Index" id="get-employees">Get Employees</a> 
+              <a class="link-sidebar py-2" asp-area="" asp-controller="AuEmployeesInfo" asp-action="Create">Create Employee</a> 
+          </div>                 
+      </div>
+  </li>
+  @* PayrollUk sidebar *@
+  <li class="list-sidebar">
+      <a class="link-holder" data-toggle="collapse" href="#collapsePayrollUk" role="button" onclick="UpdateLinkHolderColour(this)" aria-expanded="false">Payroll UK</a>
+          <div class="collapse" id="collapsePayrollUk">   
+          <div class="list-group">
+              <a class="link-sidebar py-2" asp-area="" asp-controller="UkEmployeesInfo" asp-action="Index">Get Employees</a> 
+              <a class="link-sidebar py-2" asp-area="" asp-controller="UkEmployeesInfo" asp-action="Create">Create Employee</a>
+          </div>                 
+      </div>
+  </li>
+  @* PayrollNz sidebar *@
+  <li class="list-sidebar">
+      <a class="link-holder" data-toggle="collapse" href="#collapsePayrollNz" role="button" onclick="UpdateLinkHolderColour(this)" aria-expanded="false">Payroll NZ</a>
+          <div class="collapse" id="collapsePayrollNz">   
+          <div class="list-group">
+              <a class="link-sidebar py-2" asp-area="" asp-controller="NzEmployeesInfo" asp-action="Index">Get Employees</a> 
+              <a class="link-sidebar py-2" asp-area="" asp-controller="NzEmployeesInfo" asp-action="Create">Create Employee</a>  
+          </div>                 
+      </div>
+  </li>
+  @* Project sidebar *@
+  <li class="list-sidebar">
+      <a class="link-holder" data-toggle="collapse" href="#collapseProject" role="button" onclick="UpdateLinkHolderColour(this)" aria-expanded="false">Project</a>
+          <div class="collapse" id="collapseProject">   
+          <div class="list-group">
+              <a class="link-sidebar py-2" asp-area="" asp-controller="ProjectInfo" asp-action="Index">Get Xero Projects</a>   
+              <a class="link-sidebar py-2" asp-area="" asp-controller="ProjectInfo" asp-action="Create">Create Xero Projects</a>   
+          </div>                 
+      </div>
+  </li>
+  @* BankFeed sidebar *@
+  <li class="list-sidebar">
+      <a class="link-holder" data-toggle="collapse" href="#collapseBankfeed" role="button" onclick="UpdateLinkHolderColour(this)" aria-expanded="false">Bankfeed</a>
+          <div class="collapse" id="collapseBankfeed">   
+          <div class="list-group">
+              <a class="link-sidebar py-2" asp-area="" asp-controller="BankfeedConnections" asp-action="Index">Get Feed Connections</a>    
+              <a class="link-sidebar py-2" asp-area="" asp-controller="BankfeedConnections" asp-action="Create">Create Feed Connections</a>
+              <a class="link-sidebar py-2" asp-area="" asp-controller="BankfeedStatements" asp-action="Index">Get Statements</a>    
+              <a class="link-sidebar py-2" asp-area="" asp-controller="BankfeedStatements" asp-action="Create">Create Statement</a>    
+          </div>                 
+      </div>
+  </li>
+  @* Files sidebar *@
+  @* <li class="list-sidebar">
+      <a class="link-holder" data-toggle="collapse" href="#collapseFiles" role="button" onclick="UpdateLinkHolderColour(this)" aria-expanded="false">Files</a>
+      <div class="collapse" id="collapseFiles">   
+          <div class="list-group">
+              <a class="link-sidebar py-2" asp-area="" asp-controller="ProjectInfo" asp-action="Index">Get Xero Projects</a>   
+              <a class="link-sidebar py-2" asp-area="" asp-controller="ProjectInfo" asp-action="Create">Create Xero Projects</a>   
+          </div>                 
+      </div>
+  </li> *@
+</div>
+}else{
+<div class="side-navbar">
+  <p class="sidebar-title">Please Connect to Xero</p>
+</div>
+}

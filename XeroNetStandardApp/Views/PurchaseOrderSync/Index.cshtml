@@ -1,0 +1,50 @@
+@model dynamic
+
+<h2>Xero Purchase Orders in the Last 7 Days</h2>
+
+<table class="table table-responsive fixed-table-body">
+  <tr>
+    <th>Purchase Order #</th>
+    <th>To</th>
+    <th>Date</th>
+    <th>Total Due</th>
+    <th>Attachment</th>
+  </tr>
+  @foreach (var purchaseOrder in Model) {
+    <tr>
+      <td>@purchaseOrder.PurchaseOrderID</td>
+      <td>@purchaseOrder.Contact.Name</td>
+      <td>@purchaseOrder.Date.ToString("dddd, dd MMMM yyyy")</td>
+      <td>@purchaseOrder.Total</td>
+      <td>
+        <form method="post" enctype="multipart/form-data" asp-controller="PurchaseOrderSyncFileUpload" asp-action="Index">
+          <input type="file" name="files" multiple />
+          <input type="hidden" name="purchaseOrderID" value="@purchaseOrder.PurchaseOrderID.ToString()"/>
+          <input type="submit" value="Upload" />
+        </form>
+      </td>
+    </tr>
+  }
+</table>
+<br>
+<p><b>Raw JSON Response:</b></p>
+<textarea class="form-control" readonly style="height: 350px">
+@ViewBag.jsonResponse;
+</textarea>
+<br>
+<p><b>Code Example:</b></p>
+<p>Get all Purchase Orders</p>
+<pre>
+// Assuming accessToken and xeroTenantId has been provided
+var AccountingApi = new AccountingApi();
+
+var response = await AccountingApi.GetPurchaseOrdersAsync(accessToken, xeroTenantId);
+return response._PurchaseOrders;
+</pre>
+<br>
+<p>
+  <button class="btn btn-link" onclick="location.href='@Url.Action("Index", "Home")'">Home</button>
+</p>
+<br>
+<br>
+<br>

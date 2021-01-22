@@ -1,0 +1,59 @@
+*.swp
+*.*~
+project.lock.json
+.DS_Store
+*.pyc
+nupkg/
+
+# Visual Studio Code
+.vscode
+
+# Rider
+.idea
+
+# User-specific files
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Build results
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]elease/
+[Rr]eleases/
+x64/
+x86/
+build/
+bld/
+[Bb]in/
+[Oo]bj/
+[Oo]ut/
+msbuild.log
+msbuild.err
+msbuild.wrn
+
+# Visual Studio 2015
+.vs/
+.fake
+.ionide
+XeroNetStandardApp/obj/Debug/netcoreapp3.1/XeroNetStandardApp.csprojAssemblyReference.cache
+XeroNetStandardApp/bin/Debug/netcoreapp3.1/Xero.NetStandard.OAuth2Client.dll
+XeroNetStandardApp/bin/Debug/netcoreapp3.1/XeroNetStandardApp.dll
+XeroNetStandardApp/bin/Debug/netcoreapp3.1/XeroNetStandardApp.pdb
+XeroNetStandardApp/bin/Debug/netcoreapp3.1/XeroNetStandardApp.Views.dll
+XeroNetStandardApp/bin/Debug/netcoreapp3.1/XeroNetStandardApp.Views.pdb
+XeroNetStandardApp/obj/Debug/netcoreapp3.1/Razor/Views/Home/Index.cshtml.g.cs
+XeroNetStandardApp/obj/Debug/netcoreapp3.1/XeroNetStandardApp.csproj.FileListAbsolute.txt
+XeroNetStandardApp/obj/Debug/netcoreapp3.1/XeroNetStandardApp.dll
+XeroNetStandardApp/obj/Debug/netcoreapp3.1/XeroNetStandardApp.pdb
+XeroNetStandardApp/obj/Debug/netcoreapp3.1/XeroNetStandardApp.RazorCoreGenerate.cache
+XeroNetStandardApp/obj/Debug/netcoreapp3.1/XeroNetStandardApp.Views.dll
+XeroNetStandardApp/obj/Debug/netcoreapp3.1/XeroNetStandardApp.Views.pdb
+XeroNetStandardApp/bin/Debug/netcoreapp3.1/xerotoken.json
+XeroNetStandardApp/bin/Debug/netcoreapp3.1/Xero.NetStandard.OAuth2.dll
+XeroNetStandardApp/obj/Debug/netcoreapp3.1/XeroNetStandardApp.csprojAssemblyReference.cache
+XeroNetStandardApp/xerotoken.json
+
+XeroNetStandardApp/tenantid.json
+XeroNetStandardApp/xerotoken.json

@@ -1,0 +1,45 @@
+<h2>Create a Xero UK Payroll Employee</h2>
+
+<form method="POST">
+    <label for="firstName">First Name:</label>
+    <br>
+    <input class="form-control" type="text" id="firstName" placeholder="" name="firstName" required/>
+    <br>
+    <label for="lastName">Last Name:</label>
+    <br>
+    <input class="form-control" type="text" id="lastName" placeholder="" name="lastName" required/>
+    <br>
+    <br>
+    <input class="btn btn-primary" type="submit" />
+</form>
+
+<hr>
+
+<p><b>Code Example:</b></p>
+<p>Create UK Employee</p>
+<pre>
+// Assuming accessToken and xeroTenantId has been provided
+DateTime dob = DateTime.Today.AddYears(-20);
+
+Address homeAddress = new Address() {
+  AddressLine1 = "171 Midsummer",
+  City = "Milton Keyness",
+  PostCode = "MK9 1EB"
+};
+
+Employee employee = new Employee() {
+  FirstName = firstName,
+  LastName = lastName,
+  DateOfBirth = dob,
+  Address = homeAddress,
+  Gender = Employee.GenderEnum.M,
+  Title = "Mr"
+};
+
+var PayrollAUApi = new PayrollUkApi();
+var response = await PayrollAUApi.CreateEmployeeAsync(accessToken, xeroTenantId, employee);
+</pre>
+<br>
+<p>
+  <button class="btn btn-link" onclick="location.href='@Url.Action("Index", "Home")'">Home</button>
+</p>

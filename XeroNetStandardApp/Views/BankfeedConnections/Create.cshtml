@@ -1,0 +1,68 @@
+<h2>Create a Xero Bank Feed Connection</h2>
+
+<form method="POST">
+    <label for="AccountToken">AccountToken:</label>
+    <br>
+    <input class="form-control" type="text" id="AccountToken" placeholder="Enter a AccountToken" name="AccountToken" required />
+    <br>
+    <label for="AccountNumber">AccountNumber:</label>
+    <br>
+    <input class="form-control" type="text" id="AccountNumber" placeholder="Enter AccountNumber" name="AccountNumber" required />
+    <br>
+    <label for="AccountType">Choose an AccountType:</label>
+    <br>
+    <select id="AccountType" name="AccountType">
+    <option class="dropdown-item" value="BANK">BANK</option>
+    <option class="dropdown-item" value="CREDITCARD">CREDITCARD</option>
+    </select>
+    <br>
+    <br>
+    <label for="AccountName">AccountName:</label>
+    <br>
+    <input class="form-control" type="text" id="AccountName" placeholder="Enter AccountName" name="AccountName" required />
+    <br>
+    <label for="Currency">Currency:</label>
+    <br>
+    <input class="form-control" type="text" id="Currency" placeholder="Enter Currency" name="Currency" required />
+    <br>
+    <label for="Country">Country:</label>
+    <br>
+    <input class="form-control" type="text" id="Country" placeholder="Enter Country" name="Country" required />
+    <br>
+    <input class= "btn btn-primary" type="submit" />
+</form>
+<hr>
+
+<p><b>Code Example:</b></p>
+<p>Create Bankfeed Connection</p>
+<pre>
+// Assuming accessToken and xeroTenantId has been provided
+var BankfeedsApi = new BankFeedsApi();
+
+var feedConnection = new FeedConnection{
+  AccountToken = accountToken, 
+  AccountNumber = accountNumber,
+  AccountType =  accountTypeEnum,
+  AccountName = accountName,
+  Currency = currencyCode,
+  Country = countryCode
+};
+
+List&#60;FeedConnection> list = new List&#60;FeedConnection>();
+list.Add(feedConnection);
+
+FeedConnections items = new FeedConnections{
+  Pagination = new Pagination(),
+  Items = list
+};
+
+await BankfeedsApi.CreateFeedConnectionsAsync(accessToken, xeroTenantId, items);
+</pre>
+
+<br>
+<p>
+  <button class= "btn btn-link" onclick="location.href='@Url.Action("Index", "Home")'">Home</button>
+</p>
+<br>
+<br>
+<br>

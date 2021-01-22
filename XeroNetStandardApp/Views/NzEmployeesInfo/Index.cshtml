@@ -1,0 +1,41 @@
+@model dynamic
+
+<h2>Xero NZ Payroll Employees</h2>
+
+<table class="table table-responsive fixed-table-body">
+  <tr>
+    <th>First Name</th>
+    <th>Last Name</th>
+    <th>Job Title</th>
+    <th>Gender</th>
+  </tr>
+  @foreach (var employee in Model) {
+    <tr>
+      <td>@employee.FirstName</td>
+      <td>@employee.LastName</td>
+      <td>@employee.Title</td>
+      <td>@employee.Gender</td>
+    </tr>
+  }
+</table>
+<br>
+<p><b>Raw JSON Response:</b></p>
+<textarea class="form-control" readonly style="height: 350px">
+@ViewBag.jsonResponse;
+</textarea>
+<br>
+<p><b>Code Example:</b></p>
+<p>Get all NZ Employees</p>
+<pre>
+// Assuming accessToken and xeroTenantId has been provided
+var PayrollNzApi = new PayrollNzApi();
+var response = await PayrollNzApi.GetEmployeesAsync(accessToken, xeroTenantId);
+return response._Employees;
+</pre>
+<br>
+<p>
+  <button class="btn btn-link" onclick="location.href='@Url.Action("Index", "Home")'">Home</button>
+</p>
+<br>
+<br>
+<br>

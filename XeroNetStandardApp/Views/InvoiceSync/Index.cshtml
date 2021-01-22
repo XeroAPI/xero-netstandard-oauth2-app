@@ -1,0 +1,61 @@
+@model dynamic
+
+<h2>Xero Invoices in the Last 7 Days</h2>
+
+<table class="table table-responsive fixed-table-body">
+  <tr>
+    <th>Invoice #</th>
+    <th>To</th>
+    <th>Date</th>
+    <th>Due Date</th>
+    <th>Total Due</th>
+    <th>Attachment</th>
+  </tr>
+  @foreach (var invoice in Model) {
+    <tr>
+      <td>@invoice.InvoiceNumber</td>
+      <td>@invoice.Contact.Name</td>
+      <td>@invoice.Date.ToString("dddd, dd MMMM yyyy")</td>
+      <td>@invoice.DueDate.ToString("dddd, dd MMMM yyyy")</td>
+      <td>@invoice.Total</td>
+      <td>
+        <form method="post" enctype="multipart/form-data" asp-controller="InvoiceFileUpload" asp-action="Index">
+          <input class="form-control" type="file" name="files" multiple />
+          <input class="form-control" type="hidden" name="invoiceId" value="@invoice.InvoiceID.ToString()"/>
+          <input class="btn btn-primary" type="submit" value="Upload" />
+        </form>
+      </td>
+    </tr>
+  }
+</table>
+<br>
+<p><b>Raw JSON Response:</b></p>
+<textarea class="form-control" readonly style="height: 350px">
+@ViewBag.jsonResponse;
+</textarea>
+<br>
+<p><b>Code Example:</b></p>
+<p>Get all Invoice in the Last 7 Days</p>
+<pre>
+// Assuming accessToken and xeroTenantId has been provided
+var AccountingApi = new AccountingApi();
+
+var sevenDaysAgo = DateTime.Now.AddDays(-7).ToString("yyyy, MM, dd");
+var invoicesFilter = "Date >= DateTime(" + sevenDaysAgo + ")";
+
+var response = await AccountingApi.GetInvoicesAsync(
+  accessToken, 
+  xeroTenantId, 
+  null, 
+  invoicesFilter
+);
+
+return response._Invoices;
+</pre>
+<br>
+<p>
+  <button class="btn btn-link" onclick="location.href='@Url.Action("Index", "Home")'">Home</button>
+</p>
+<br>
+<br>
+<br>

@@ -1,0 +1,37 @@
+@model dynamic
+
+<h2>Xero Contacts</h2>
+
+<table class="table table-responsive fixed-table-body">
+  <tr>
+    <th>Name</th>
+    <th>Email</th>
+  </tr>
+  @foreach (var contact in Model) {
+    <tr>
+      <td>@contact.Name</td>
+      <td>@contact.EmailAddress</td>
+    </tr>
+  }
+</table>
+<br>
+<p><b>Raw JSON Response:</b></p>
+<textarea class="form-control" readonly style="height: 350px">
+@ViewBag.jsonResponse;
+</textarea>
+<br>
+<p><b>Code Example:</b></p>
+<p>Get all Contacts</p>
+<pre>
+// Assuming accessToken and xeroTenantId has been provided
+var AccountingApi = new AccountingApi();
+var response = await AccountingApi.GetContactsAsync(accessToken, xeroTenantId);
+return response._Contacts;
+</pre>
+<br>
+<p>
+  <button class="btn btn-link" onclick="location.href='@Url.Action("Index", "Home")'">Home</button>
+</p>
+<br>
+<br>
+<br>

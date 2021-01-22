@@ -1,0 +1,56 @@
+
+@model dynamic
+
+<h2>Xero Bank Feed Statements</h2>
+
+<table class="table table-responsive fixed-table-body">
+  <tr>
+    <th>ID</th>
+    <th>Feed Connection ID</th>
+    <th>Status</th>
+    <th>Start Date</th>
+    <th>End Date</th>
+    <th>Start Balance Amount</th>
+    <th>Start Balance Credit Debit Indicator</th>
+    <th>End Balance Amount</th>
+    <th>End Balance Credit Debit Indicator</th>
+    <th>Statement Line Count</th>
+  </tr>
+  @foreach (var item in Model) {
+    <tr>
+      <td>@item.Id.ToString()</td>
+      <td>@item.FeedConnectionId</td>
+      <td>@item.Status.ToString()</td>
+      <td>@item.StartDate.ToString()</td>
+      <td>@item.EndDate.ToString()</td>
+      <td>@item.StartBalance.Amount</td>
+      <td>@item.StartBalance.CreditDebitIndicator.ToString()</td>
+      <td>@item.EndBalance.Amount</td>
+      <td>@item.EndBalance.CreditDebitIndicator.ToString()</td>
+      <td>@item.StatementLineCount</td>    
+    </tr>
+  }
+</table>
+<br>
+<p><b>Raw JSON Response:</b></p>
+<textarea class="form-control" readonly style="height: 350px">
+@ViewBag.jsonResponse;
+</textarea>
+<br>
+<p><b>Code Example:</b></p>
+<p>Get all Statements</p>
+<pre>
+// Assuming accessToken and xeroTenantId has been provided
+var BankFeedsApi = new BankFeedsApi();
+var response = await BankFeedsApi.GetStatementsAsync(accessToken, xeroTenantId);
+
+return response.Items;
+</pre>
+<br>
+<p>
+  <button class="btn btn-link" onclick="location.href='@Url.Action("Index", "Home")'">Home</button>
+</p>
+
+<br>
+<br>
+<br>

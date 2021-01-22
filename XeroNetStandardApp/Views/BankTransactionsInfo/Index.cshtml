@@ -1,0 +1,43 @@
+@model dynamic
+
+<h2>Xero BankTransactions</h2>
+
+<table class="table table-responsive fixed-table-body">
+  <tr>
+    <th>Date</th>
+    <th>Reference</th>
+    <th>Type</th>
+    <th>Total</th>
+  </tr>
+  @foreach (var bankTransaction in Model) {
+    <tr>
+      <td>@bankTransaction.Date.ToString("dddd, dd MMMM yyyy")</td>
+      <td>@bankTransaction.Reference</td>
+      <td>@bankTransaction.Type</td>
+      <td>@bankTransaction.Total</td>
+    </tr>
+  }
+</table>
+<br>
+<p><b>Raw JSON Response:</b></p>
+<textarea class="form-control" readonly style="height: 350px">
+@ViewBag.jsonResponse;
+</textarea>
+<br>
+<p><b>Code Example:</b></p>
+<p>Getting all Bank Transactions</p>
+<pre>
+// Assuming accessToken and xeroTenantId has been provided
+var AccountingApi = new AccountingApi();
+
+var response = await AccountingApi.GetBankTransactionsAsync(accessToken, xeroTenantId);
+return response._BankTransactions;
+</pre>
+<br>
+<p>
+  <button class="btn btn-link" onclick="location.href='@Url.Action("Index", "Home")'">Home</button>
+</p>
+
+<br>
+<br>
+<br>

@@ -1,0 +1,20 @@
+@model Xero.NetStandard.OAuth2.Model.Accounting.Organisation
+
+<h2>Organisation Info</h2>
+
+<p>Name: @Model.Name</p>
+<p>ID: @Model.OrganisationID</p>
+<p>Type: @Model.OrganisationEntityType</p>
+<p>Base Currency: @Model.BaseCurrency</p>
+
+<br>
+<p><b>Raw JSON Response:</b></p>
+<textarea class="form-control" readonly style="height: 350px">
+@ViewBag.jsonResponse;
+</textarea>
+<br>
+
+<button class="btn btn-link" onclick="location.href='@Url.Action("Index", "Home")'">Home</button>
+<br>
+<br>
+<br>
