@@ -1,0 +1,20 @@
+@model dynamic
+
+<h2>Rename File</h2>
+
+<form method="POST" action="/FilesSync/Rename">
+    <select id="fileId" name="fileId">
+    <option value=@ViewBag.fileID>@ViewBag.fileID</option>
+    </select>   
+    <br> 
+    <label for="NewName">New File Name:</label>
+    <br>
+    <input class="form-control" type="text" id="NewName" placeholder="Enter a new file name" name="NewName" value=@ViewBag.fileName required/>    
+    <br>
+    <input class="btn btn-primary form-control" type="submit" />
+</form>
+
+<br>
+<p>
+  <button class="btn btn-link" onclick="location.href='@Url.Action("Index", "FilesSync")'">Back</button>
+</p>
