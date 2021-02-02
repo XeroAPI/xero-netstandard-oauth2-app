@@ -197,6 +197,26 @@ Start your Testing.
 - displays them in view
 - allows user to create new employees (POST)
 
+**FilesSyncController**
+- makes API call to files endpoint (Files API)
+- displays all current files (GET)
+- allows for upload of new files (POST)
+- can modify existing files (GET /FilesSync/{fileId})
+- can delete existing files (PUT)
+
+**FoldersSyncController**
+- makes API call to folders endpoint (Files API)
+- displays all current folders (GET)
+- allows user to create new folders (POST)
+- can modify existing folders (GET /FoldersSync/{folderId})
+- can delete existing folders (PUT)
+
+**AssociationsSyncController**
+- makes API call to associations endpoint (Files API)
+- displays all current associations (GET)
+- allows user to create new associations (POST)
+- can delete existing folders (PUT)
+
 Xero token is stored in a JSON file in the root of the project "./xerotoken.json". The app serialise and deserialise with the static class functions in /Utilities/TokenUtilities.cs. Most controllers will get and refresh token before calling API methods.
 
 ## License
