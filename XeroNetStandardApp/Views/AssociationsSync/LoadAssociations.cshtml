@@ -1,0 +1,29 @@
+@model dynamic
+
+<h2>File Associations</h2>
+</br>
+<table class="table table-responsive fixed-table-body">
+  <tr>
+    <th>File Id</th>
+    <th>Object Id</th>
+    <th>Object Type</th>
+    <th>Object Group</th>
+    <th>Delete</th>
+  </tr>
+  @foreach (var association in Model)
+  {
+      <tr>
+        <td>@association.FileId.ToString()</td>
+        <td>@association.ObjectId.ToString()</td>
+        <td>@association.ObjectType.ToString()</td>
+        <td>@association.ObjectGroup.ToString()</td>
+        <td>
+          <button class= "btn btn-primary" onclick="location.href='@Url.Action("Delete", "AssociationsSync", new { fileId = @association.FileId, objectId =  @association.ObjectId })'">Delete</button>
+        </td>
+    </tr>
+  }
+</table>
+
+<br>
+  <button class="btn btn-link" onclick="location.href='@Url.Action("Index", "AssociationsSync")'">Back</button>
+</br>

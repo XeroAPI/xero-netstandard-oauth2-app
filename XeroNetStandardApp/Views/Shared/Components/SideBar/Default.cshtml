@@ -91,15 +91,18 @@
       </div>
   </li>
   @* Files sidebar *@
-  @* <li class="list-sidebar">
+  <li class="list-sidebar">
       <a class="link-holder" data-toggle="collapse" href="#collapseFiles" role="button" onclick="UpdateLinkHolderColour(this)" aria-expanded="false">Files</a>
       <div class="collapse" id="collapseFiles">   
           <div class="list-group">
-              <a class="link-sidebar py-2" asp-area="" asp-controller="ProjectInfo" asp-action="Index">Get Xero Projects</a>   
-              <a class="link-sidebar py-2" asp-area="" asp-controller="ProjectInfo" asp-action="Create">Create Xero Projects</a>   
+            <a class="link-sidebar py-2" asp-area="" asp-controller="FilesSync" asp-action="Index">Get Files</a>  
+            <a class="link-sidebar py-2" asp-area="" asp-controller="FoldersSync" asp-action="Index">Get Folders</a>   
+            <a class="link-sidebar py-2" asp-area="" asp-controller="FoldersSync" asp-action="Create">Create Folder</a>   
+            <a class="link-sidebar py-2" asp-area="" asp-controller="AssociationsSync" asp-action="Index">Get Associations</a>
+            <a class="link-sidebar py-2" asp-area="" asp-controller="AssociationsSync" asp-action="Create">Create Association</a>      
           </div>                 
       </div>
-  </li> *@
+  </li>
 </div>
 }else{
 <div class="side-navbar">
