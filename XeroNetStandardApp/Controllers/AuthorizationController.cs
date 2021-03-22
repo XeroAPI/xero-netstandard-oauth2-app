@@ -9,6 +9,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using Xero.NetStandard.OAuth2.Models;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace XeroNetStandardApp.Controllers
 {
@@ -16,7 +17,7 @@ namespace XeroNetStandardApp.Controllers
   {
     private readonly ILogger<AuthorizationController> _logger;
     private readonly IOptions<XeroConfiguration> XeroConfig;
-
+    
     // GET /Authorization/
     public AuthorizationController(IOptions<XeroConfiguration> XeroConfig, ILogger<AuthorizationController> logger)
     {
@@ -26,15 +27,23 @@ namespace XeroNetStandardApp.Controllers
 
     public IActionResult Index()
     {
-
       var client = new XeroClient(XeroConfig.Value);
+      
+      var clientState = Guid.NewGuid().ToString(); 
+      TokenUtilities.StoreState(clientState);
 
-      return Redirect(client.BuildLoginUri());
+      return Redirect(client.BuildLoginUri(clientState));
     }
 
     // GET /Authorization/Callback
     public async Task<ActionResult> Callback(string code, string state)
     {
+      var clientState = TokenUtilities.GetCurrentState();
+      
+      if (state != clientState) {
+        return Content("Cross site forgery attack detected!");
+      }    
+
       var client = new XeroClient(XeroConfig.Value);
       var xeroToken = (XeroOAuth2Token)await client.RequestAccessTokenAsync(code);
 
