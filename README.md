@@ -220,7 +220,7 @@ Start your Testing.
 Xero token is stored in a JSON file in the root of the project "./xerotoken.json". The app serialise and deserialise with the static class functions in /Utilities/TokenUtilities.cs. Most controllers will get and refresh token before calling API methods.
 
 ## Cross Site Forgery Attack Example
-For demonstrating OAuth 2.0 [CSFR](https://auth0.com/docs/protocols/state-parameters]implementation), two static methods were created to handle local storage of current state (state.json): TokenUtilities.StoreState(string state) and TokenUtilities.GetCurrentState(). 
+For demonstrating OAuth 2.0 [CSFR](https://auth0.com/docs/protocols/state-parameters) implementation, two static methods were created to handle local storage of current state (state.json): TokenUtilities.StoreState(string state) and TokenUtilities.GetCurrentState(). 
 
 In AuthenticationController, on construction it generates a random GUID string as state. The Index() will store the state to state.json, then be retrieved on Callback(). If state does not match, the controller returns a warning "Cross site forgery attack detected!" instead of carrying forward the token request flow.
 
