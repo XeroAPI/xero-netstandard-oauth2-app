@@ -23,13 +23,12 @@ namespace XeroNetStandardApp.Controllers
     {
       _logger = logger;
       this.XeroConfig = XeroConfig;
-
     }
 
     public IActionResult Index()
     {
       var client = new XeroClient(XeroConfig.Value);
-
+      
       var clientState = Guid.NewGuid().ToString(); 
       TokenUtilities.StoreState(clientState);
 
@@ -43,8 +42,7 @@ namespace XeroNetStandardApp.Controllers
       
       if (state != clientState) {
         return Content("Cross site forgery attack detected!");
-      }
-      
+      }    
 
       var client = new XeroClient(XeroConfig.Value);
       var xeroToken = (XeroOAuth2Token)await client.RequestAccessTokenAsync(code);
