@@ -12,6 +12,14 @@ using Microsoft.Extensions.DependencyInjection;
 
 public static class TokenUtilities
 {
+  [Serializable]
+  public struct State
+  {  
+    public string state {get; set;}
+    public State(string state){
+      this.state = state;
+    }
+  }
   public static void StoreToken(XeroOAuth2Token xeroToken)
   {
     string serializedXeroToken = JsonSerializer.Serialize(xeroToken);
@@ -78,4 +86,28 @@ public static class TokenUtilities
 
     return id;
   }
+
+  public static void StoreState(string state)
+  {
+    State currentState = new State(state);
+    string serializedState = JsonSerializer.Serialize(currentState);
+    System.IO.File.WriteAllText("./state.json", serializedState);
+  }
+
+  public static string GetCurrentState()
+  {
+    string state;
+    try
+    {
+      string serializedIndexFile = System.IO.File.ReadAllText("./state.json");
+      state = JsonSerializer.Deserialize<State>(serializedIndexFile).state;
+    }
+    catch (IOException)
+    {
+      state = null;
+    }
+
+    return state;
+  }
+
 }
