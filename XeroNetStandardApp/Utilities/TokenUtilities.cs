@@ -109,5 +109,4 @@ public static class TokenUtilities
 
     return state;
   }
-
 }
