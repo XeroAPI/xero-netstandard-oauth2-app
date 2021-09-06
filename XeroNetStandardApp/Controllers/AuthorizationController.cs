@@ -47,18 +47,6 @@ namespace XeroNetStandardApp.Controllers
       var client = new XeroClient(XeroConfig.Value);
       var xeroToken = (XeroOAuth2Token)await client.RequestAccessTokenAsync(code);
 
-      var decodedIdToken = JwtUtils.decode(xeroToken.IdToken);
-
-      if ( !JwtUtils.validateIdToken(xeroToken.IdToken, XeroConfig.Value.ClientId) )
-      {
-        return Content("ID token is not valid");
-      }
-
-      if ( !JwtUtils.validateAccessToken(xeroToken.IdToken) )
-      {
-        return Content("Access token is not valid");
-      }
-
       List<Tenant> tenants = await client.GetConnectionsAsync(xeroToken);
 
       Tenant firstTenant = tenants[0];
