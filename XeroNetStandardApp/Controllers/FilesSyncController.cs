@@ -124,7 +124,6 @@ namespace XeroNetStandardApp.Controllers
       var response = await FilesApi.UploadFileAsync(
           accessToken,
           xeroTenantId,
-          null,
           byteArray,
           file.FileName,
           file.FileName,
