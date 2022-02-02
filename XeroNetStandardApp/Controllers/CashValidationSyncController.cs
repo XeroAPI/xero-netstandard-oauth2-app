@@ -69,7 +69,7 @@ namespace XeroNetStandardApp.Controllers
       // Requesting for today's cash position
       response = await FinanceApi.GetCashValidationAsync(accessToken, xeroTenantId, null, null, null);
 
-      ViewBag.jsonResponse = response.ToString();
+      ViewBag.jsonResponse = JsonConvert.SerializeObject(response);
 
       return View(response);
     }
