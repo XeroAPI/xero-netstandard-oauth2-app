@@ -1,0 +1,29 @@
+@model dynamic
+
+<h2>Xero Profit and Loss Statement</h2>
+
+<p><b>Raw JSON Response:</b></p>
+<textarea class="form-control" readonly style="height: 350px">
+@ViewBag.jsonResponse;
+</textarea>
+<br>
+<p><b>Code Example:</b></p>
+<p>Requesting profit and loss statement for the past 12 months from today</p>
+<pre>
+// Assuming accessToken and xeroTenantId has been provided
+
+var FinanceApi = new FinanceApi();
+
+var response = await FinanceApi.GetFinancialStatementProfitAndLossAsync(
+  accessToken,
+  xeroTenantId,
+  null,
+  null
+  );
+
+return response;
+</pre>
+<br>
+<p>
+  <button class="btn btn-link" onclick="location.href='@Url.Action("Index", "Home")'">Home</button>
+</p>

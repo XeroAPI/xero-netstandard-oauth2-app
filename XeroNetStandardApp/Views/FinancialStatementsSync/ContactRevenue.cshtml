@@ -1,0 +1,31 @@
+@model dynamic
+
+<h2>Xero Contact Revenue</h2>
+
+<p><b>Raw JSON Response:</b></p>
+<textarea class="form-control" readonly style="height: 350px">
+@ViewBag.jsonResponse;
+</textarea>
+<br>
+<p><b>Code Example:</b></p>
+<p>Requesting for revenue by contact report for the past 12 months excluding manual journals</p>
+<pre>
+// Assuming accessToken and xeroTenantId has been provided
+
+var FinanceApi = new FinanceApi();
+
+var response = await FinanceApi.GetFinancialStatementContactsRevenueAsync(
+  accessToken,
+  xeroTenantId,
+  null,
+  null,
+  null,
+  null
+  );
+
+return response;
+</pre>
+<br>
+<p>
+  <button class="btn btn-link" onclick="location.href='@Url.Action("Index", "Home")'">Home</button>
+</p>

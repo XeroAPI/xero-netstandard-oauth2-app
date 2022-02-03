@@ -49,6 +49,9 @@ In /NetStandardApp/appsettings.json, you should populate your XeroConfiguration 
 
 Note that you will have to have a state. The CallbackUri has to be exactly the same as redirect URI you put in Xero developer portal letter by letter. 
 
+Note that if Bankfeed and/or Finance API(s) is/are used with the example code, you must contact Xero via https://www.xero.com/uk/partner-programs/financialweb/contact/ for access request.
+If not, then just remove the finance API scopes from Scope variable in the json file.
+
 ## Getting started with _dotnet_  & command line 
 You can run this application with [dotnet SDK](https://code.visualstudio.com/download) from command line. 
 ### Install dotnet SDK
