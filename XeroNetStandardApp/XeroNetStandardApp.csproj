@@ -5,7 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="C:\Users\rlayh\Dropbox\Career\Xero\4. SDK\NetStandard\Xero.NetStandard.OAuth2\Xero.NetStandard.OAuth2.csproj" />
+    <PackageReference Include="Xero.NetStandard.OAuth2" Version="3.21.1" />
     <PackageReference Include="Xero.NetStandard.OAuth2Client" Version="1.5.1" />
     <PackageReference Include="Microsoft.AspNetCore.Session" Version="2.2.0" />
   </ItemGroup>
