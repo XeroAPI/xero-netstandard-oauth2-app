@@ -1,0 +1,30 @@
+@model dynamic
+
+<h2>Xero Bank Statements Plus</h2>
+
+<p><b>Raw JSON Response:</b></p>
+<textarea class="form-control" readonly style="height: 350px">
+@ViewBag.jsonResponse;
+</textarea>
+<br>
+<p><b>Code Example:</b></p>
+<p>Requesting bank statement plus</p>
+<pre>
+// Assuming accessToken, xeroTenantId, bankAccountId, fromDate, and toDate has been provided
+
+var FinanceApi = new FinanceApi();
+
+var response = await FinanceApi.GetBankStatementAccountingAsync (
+  accessToken,
+  xeroTenantId,
+  bankAccountId,
+  fromDate,
+  toDate
+  );
+
+return response;
+</pre>
+<br>
+<p>
+  <button class="btn btn-link" onclick="location.href='@Url.Action("Index", "Home")'">Home</button>
+</p>
