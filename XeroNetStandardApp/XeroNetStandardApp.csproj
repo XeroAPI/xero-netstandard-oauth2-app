@@ -6,8 +6,9 @@
 
   <ItemGroup>
     <!-- <ProjectReference Include="/Users/rett.behrens/Desktop/code/sdks/Xero-NetStandard/Xero.NetStandard.OAuth2/Xero.NetStandard.OAuth2.csproj" Version="3.23.0" /> -->
-    <PackageReference Include="Xero.NetStandard.OAuth2" Version="3.23.0" />
-    <PackageReference Include="Xero.NetStandard.OAuth2Client" Version="1.5.1" />
+    <PackageReference Include="Xero.NetStandard.OAuth2" Version="3.24.0" />
+    <!-- <ProjectReference Include="/Users/rett.behrens/Desktop/code/sdks/Xero-NetStandard/Xero.NetStandard.OAuth2Client/Xero.NetStandard.OAuth2Client.csproj" Version="1.5.2" /> -->
+    <PackageReference Include="Xero.NetStandard.OAuth2Client" Version="1.5.3" />
     <PackageReference Include="Microsoft.AspNetCore.Session" Version="2.2.0" />
   </ItemGroup>
 </Project>
