@@ -57,5 +57,7 @@ XeroNetStandardApp/xerotoken.json
 
 XeroNetStandardApp/tenantid.json
 XeroNetStandardApp/state.json
-XeroNetStandardApp/appsettings.json
 XeroNetStandardApp/localappsettings.json
+
+# Once pulled, during development alternate below appsettings.json part 
+#XeroNetStandardApp/appsettings.json
