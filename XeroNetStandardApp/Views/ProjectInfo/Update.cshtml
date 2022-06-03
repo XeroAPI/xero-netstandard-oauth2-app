@@ -1,0 +1,60 @@
+@model dynamic
+
+<h2>Update a Xero Project</h2>
+
+<form method="POST">
+    <label for="projectID">Project ID:</label>
+    <br>
+    <select id="projectID" name="projectID">
+    @foreach (var projectID in Model) {
+    <option value=@projectID>@projectID</option>
+    }
+    </select>
+    @* <input class="form-control" type="text" id="contactId" placeholder="Enter a contact ID for the project" name="contactId" required/> *@
+    <br>
+    <br>
+    <input class="form-control" type="text" id="newName" placeholder="Enter new name for the project" name="name" required/>
+    <br>
+    <input class="form-control" type="text" id="newDeadLine" placeholder="Enter new deadline for this project" name="newDeadLine" required/>
+    <br>
+    <input class="form-control" type="number" step="any" id="newEstimateAmount" placeholder="Enter new estimated amount for the project" name="newEstimateAmount" required/>
+    <br>
+    <br>
+    <input class="btn btn-primary" type="submit" />
+</form>
+
+<hr>
+
+<p><b>Code Example:</b></p>
+<p>Update Project</p>
+<pre>
+// Assuming accessToken and xeroTenantId has been provided
+// Initially get the currently existing project
+
+var ProjectApi = new ProjectApi();
+var response = await ProjectApi.GetProjectsAsync(accessToken, xeroTenantId);
+
+// Let the user select the project they wish to change and mark the name/ID
+
+Amount projectAmount = new Amount() {
+    Currency = CurrencyCode.AUD,
+    Value = Decimal.Parse(estimateAmount)
+};
+
+var project = new ProjectCreateOrUpdate() {
+    Name = newName,
+    EstimateAmount = Decimal.Parse(newEstimateAmount),
+    ContactId = Guid.Parse(contactId),
+    DeadlineUtc = newDeadlineUtc
+};
+
+var ProjectApi = new ProjectApi();
+await ProjectAPI.UpdateProjectAsync(accessToken, xeroTenantId, project);
+</pre>
+<br>
+<p>
+  <button class="btn btn-link" onclick="location.href='@Url.Action("Index", "Home")'">Home</button>
+</p>
+<br>
+<br>
+<br>
