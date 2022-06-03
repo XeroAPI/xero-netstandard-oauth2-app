@@ -60,4 +60,4 @@ XeroNetStandardApp/state.json
 XeroNetStandardApp/localappsettings.json
 
 # Once pulled, during development alternate below appsettings.json part 
-#XeroNetStandardApp/appsettings.json
+XeroNetStandardApp/appsettings.json
