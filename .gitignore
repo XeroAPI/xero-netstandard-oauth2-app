@@ -56,7 +56,6 @@ XeroNetStandardApp/obj/Debug/netcoreapp3.1/XeroNetStandardApp.csprojAssemblyRefe
 XeroNetStandardApp/xerotoken.json
 
 XeroNetStandardApp/tenantid.json
-XeroNetStandardApp/xerotoken.json
 XeroNetStandardApp/state.json
 XeroNetStandardApp/appsettings.json
 XeroNetStandardApp/localappsettings.json
