@@ -1,0 +1,43 @@
+@model dynamic
+
+<h2>Patch a Xero Project</h2>
+
+<form method="POST">
+    <label for="projectName">Project Name:</label>
+    <br>
+    <select id="projectName" name="projectName">
+    @foreach (var projectName in Model) {
+      <option value=@projectName>@projectName</option>
+    }
+    </select>
+    @* <input class="form-control" type="text" id="contactId" placeholder="Enter a contact ID for the project" name="contactId" required/> *@
+    <br>
+    <br>
+    <select id="projectStatusChoice" name="projectStatusChoice">
+      <option value="INPROGRESS">INPROGRESS</option>
+      <option value="CLOSED">CLOSED</option>
+    </select>
+    <br>
+    <br>
+    <input class="btn btn-primary" type="submit" />
+</form>
+
+<hr>
+
+<p><b>Code Example:</b></p>
+<p>Update Project</p>
+<pre>
+// Assuming accessToken and xeroTenantId has been provided
+// Initially get the currently existing project
+
+
+
+
+</pre>
+<br>
+<p>
+  <button class="btn btn-link" onclick="location.href='@Url.Action("Index", "Home")'">Home</button>
+</p>
+<br>
+<br>
+<br>
