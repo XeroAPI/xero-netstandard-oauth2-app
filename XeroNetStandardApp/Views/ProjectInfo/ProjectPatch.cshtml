@@ -30,9 +30,65 @@
 // Assuming accessToken and xeroTenantId has been provided
 // Initially get the currently existing project
 
+var ProjectApi = new ProjectApi();
+var projectsList = await ProjectApi.GetProjectsAsync(accessToken, xeroTenantId);
 
+Project projectToBeUpdate = new Project();
+Guid projectId = new Guid();
+var projectPatch = new ProjectPatch();
+Boolean stateChanged = false;
 
+foreach(Project project in projectsList.Items)
+{
+  if(Equals(projectName, project.Name))
+  {
+    projectToBeUpdate = project;
+    projectId = projectToBeUpdate.ProjectId.Value;
 
+    ProjectStatus status;
+
+    if (Enum.TryParse(projectStatusChoice, out status))
+    {
+      switch (status)
+      {
+        // Inprogress status was selected
+        case ProjectStatus.INPROGRESS:
+          if(projectToBeUpdate.Status != ProjectStatus.INPROGRESS)
+          {
+            projectPatch.Status = ProjectStatus.INPROGRESS;
+            stateChanged = true;
+          }
+        break;
+
+        case ProjectStatus.CLOSED:
+          if(projectToBeUpdate.Status != ProjectStatus.CLOSED)
+          {
+            projectPatch.Status = ProjectStatus.CLOSED;
+            stateChanged = true;
+          }
+        break;
+
+        default:
+        break;
+      }
+    }
+    else 
+    {
+        /* invalid enum value, handle */
+    }
+    break;
+  }
+}
+
+if(stateChanged)
+{
+  await ProjectApi.PatchProjectAsync(accessToken, xeroTenantId, projectId, projectPatch);
+  // Wait a second for the update made to be registered
+  System.Threading.Tasks.Task taskA = System.Threading.Tasks.Task.Run( () => System.Threading.Thread.Sleep(1000));
+  stateChanged = false;
+}
+
+return RedirectToAction("Index", "ProjectInfo");
 </pre>
 <br>
 <p>

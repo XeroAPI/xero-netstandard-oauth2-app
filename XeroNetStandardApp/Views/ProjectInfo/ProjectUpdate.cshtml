@@ -31,38 +31,38 @@
 // Assuming accessToken and xeroTenantId has been provided
 // Initially get the currently existing project
 
-    Amount projectAmount = new Amount() {
-        Currency = CurrencyCode.AUD,
-        Value = Decimal.Parse(newEstimateAmount)
-    };
-      
-    var ProjectApi = new ProjectApi();
-    var projectsList = await ProjectApi.GetProjectsAsync(accessToken, xeroTenantId);
+Amount projectAmount = new Amount() {
+    Currency = CurrencyCode.AUD,
+    Value = Decimal.Parse(newEstimateAmount)
+};
+    
+var ProjectApi = new ProjectApi();
+var projectsList = await ProjectApi.GetProjectsAsync(accessToken, xeroTenantId);
 
-    Project projectToBeUpdate = new Project();
-    Guid oldProjectId = new Guid();
+Project projectToBeUpdate = new Project();
+Guid oldProjectId = new Guid();
 
-    foreach(Project oldProject in projectsList.Items)
+foreach(Project oldProject in projectsList.Items)
+{
+    if(Equals(projectOldName, oldProject.Name))
     {
-        if(Equals(projectOldName, oldProject.Name))
-        {
-            projectToBeUpdate = oldProject;
-            oldProjectId = projectToBeUpdate.ProjectId.Value;
-            break;
-        }
+        projectToBeUpdate = oldProject;
+        oldProjectId = projectToBeUpdate.ProjectId.Value;
+        break;
     }
+}
 
-    var project = new ProjectCreateOrUpdate() {
-        Name = newName,
-        EstimateAmount = Decimal.Parse(newEstimateAmount),
-        ContactId = projectToBeUpdate.ContactId,
-        DeadlineUtc = newDeadline
-    };
+var project = new ProjectCreateOrUpdate() {
+    Name = newName,
+    EstimateAmount = Decimal.Parse(newEstimateAmount),
+    ContactId = projectToBeUpdate.ContactId,
+    DeadlineUtc = newDeadline
+};
 
-    await ProjectApi.UpdateProjectAsync(accessToken, xeroTenantId, oldProjectId, project);
+await ProjectApi.UpdateProjectAsync(accessToken, xeroTenantId, oldProjectId, project);
 
-    // Wait a second for the update made to be registered
-    System.Threading.Tasks.Task taskA = System.Threading.Tasks.Task.Run( () => System.Threading.Thread.Sleep(1000));
+// Wait a second for the update made to be registered
+System.Threading.Tasks.Task taskA = System.Threading.Tasks.Task.Run( () => System.Threading.Thread.Sleep(1000));
 </pre>
 <br>
 <p>
