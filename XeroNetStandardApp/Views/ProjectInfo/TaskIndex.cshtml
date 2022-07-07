@@ -26,13 +26,35 @@
 
 <br>
 <p><b>Code Example:</b></p>
-<p>Get all Projects</p>
+<p>Get all tasks of the selected project</p>
 <pre>
 // Assuming accessToken and xeroTenantId has been provided
-var ProjectApi = new ProjectApi();
-var response = await ProjectApi.GetProjectsAsync(accessToken, xeroTenantId);
 
-return response.Items;
+var ProjectApi = new ProjectApi();
+var projectsList = await ProjectApi.GetProjectsAsync(accessToken, xeroTenantId);
+
+Project projectToShowTask = new Project();
+Guid examinedProjectId = new Guid();
+List<string> projectNames = new List<string>();
+
+foreach(Project project in projectsList.Items)
+{
+  projectNames.Add(project.Name);
+
+  // Look for the project ID of the project selected
+  if(Equals(projectName, project.Name))
+  {
+    projectToShowTask = project;
+    examinedProjectId = projectToShowTask.ProjectId.Value;
+  }
+}
+
+var response = await ProjectApi.GetTasksAsync(accessToken, xeroTenantId, examinedProjectId);
+
+var tasks = response.Items;
+ViewBag.jsonResponse = response.ToJson();
+
+return View("TaskIndex", projectNames);
 </pre>
 <br>
 <p>
