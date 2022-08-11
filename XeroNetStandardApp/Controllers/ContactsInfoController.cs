@@ -1,20 +1,16 @@
 using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Collections.Generic;
-using Xero.NetStandard.OAuth2.Model.Accounting;
-using Xero.NetStandard.OAuth2.Token;
-using Xero.NetStandard.OAuth2.Api;
-using Xero.NetStandard.OAuth2.Config;
-using Xero.NetStandard.OAuth2.Client;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using System.Net.Http;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using Xero.NetStandard.OAuth2.Api;
+using Xero.NetStandard.OAuth2.Client;
+using Xero.NetStandard.OAuth2.Config;
+using Xero.NetStandard.OAuth2.Model.Accounting;
 
 namespace XeroNetStandardApp.Controllers
 {
-  public class ContactsInfo : Controller
+    public class ContactsInfo : Controller
   {
     private readonly ILogger<AuthorizationController> _logger;
     private readonly IOptions<XeroConfiguration> XeroConfig;
@@ -28,29 +24,10 @@ namespace XeroNetStandardApp.Controllers
     // GET: /Contacts/
     public async Task<ActionResult> Index()
     {
-      var xeroToken = TokenUtilities.GetStoredToken();
-      var utcTimeNow = DateTime.UtcNow;
-
-      if (utcTimeNow > xeroToken.ExpiresAtUtc)
-      {
-        var client = new XeroClient(XeroConfig.Value);
-        xeroToken = (XeroOAuth2Token)await client.RefreshAccessTokenAsync(xeroToken);
-        TokenUtilities.StoreToken(xeroToken);
-      }
-
-      string accessToken = xeroToken.AccessToken;
-      Guid tenantId = TokenUtilities.GetCurrentTenantId();
-      string xeroTenantId;
-      if (xeroToken.Tenants.Any((t) => t.TenantId == tenantId))
-      {
-        xeroTenantId = tenantId.ToString();
-      }
-      else
-      {
-        var id = xeroToken.Tenants.First().TenantId;
-        xeroTenantId = id.ToString();
-        TokenUtilities.StoreTenantId(id);
-      }
+      // Authentication   
+      var client = new XeroClient(XeroConfig.Value);
+      var accessToken = await TokenUtilities.GetCurrentAccessToken(client);
+      var xeroTenantId = TokenUtilities.GetCurrentTenantId().ToString();
 
       var AccountingApi = new AccountingApi();
       var response = await AccountingApi.GetContactsAsync(accessToken, xeroTenantId);
@@ -72,29 +49,10 @@ namespace XeroNetStandardApp.Controllers
     [HttpPost]
     public async Task<ActionResult> Create(string name, string emailAddress)
     {
-      var xeroToken = TokenUtilities.GetStoredToken();
-      var utcTimeNow = DateTime.UtcNow;
-
-      if (utcTimeNow > xeroToken.ExpiresAtUtc)
-      {
-        var client = new XeroClient(XeroConfig.Value);
-        xeroToken = (XeroOAuth2Token)await client.RefreshAccessTokenAsync(xeroToken);
-        TokenUtilities.StoreToken(xeroToken);
-      }
-
-      string accessToken = xeroToken.AccessToken;
-      Guid tenantId = TokenUtilities.GetCurrentTenantId();
-      string xeroTenantId;
-      if (xeroToken.Tenants.Any((t) => t.TenantId == tenantId))
-      {
-        xeroTenantId = tenantId.ToString();
-      }
-      else
-      {
-        var id = xeroToken.Tenants.First().TenantId;
-        xeroTenantId = id.ToString();
-        TokenUtilities.StoreTenantId(id);
-      }
+      // Authentication   
+      var client = new XeroClient(XeroConfig.Value);
+      var accessToken = await TokenUtilities.GetCurrentAccessToken(client);
+      var xeroTenantId = TokenUtilities.GetCurrentTenantId().ToString();
 
       var contact = new Contact{
           Name = name,
@@ -105,7 +63,7 @@ namespace XeroNetStandardApp.Controllers
       contacts._Contacts = new List<Contact>() { contact };
 
       var AccountingApi = new AccountingApi();
-      var response = await AccountingApi.CreateContactsAsync(accessToken, xeroTenantId, contacts);
+      await AccountingApi.CreateContactsAsync(accessToken, xeroTenantId, contacts);
 
       return RedirectToAction("Index", "ContactsInfo");
     }

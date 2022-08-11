@@ -1,21 +1,15 @@
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Threading.Tasks;
-using System.Collections.Generic;
-using Xero.NetStandard.OAuth2.Model.Files;
-using Xero.NetStandard.OAuth2.Token;
-using Xero.NetStandard.OAuth2.Api;
-using Xero.NetStandard.OAuth2.Config;
-using Xero.NetStandard.OAuth2.Client;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using System.Net.Http;
-using System.Linq;
+using System;
 using System.IO;
-using Microsoft.AspNetCore.Http;
-using System.Text;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Serialization;
+using System.Net.Http;
+using System.Threading.Tasks;
+using Xero.NetStandard.OAuth2.Api;
+using Xero.NetStandard.OAuth2.Client;
+using Xero.NetStandard.OAuth2.Config;
+using Xero.NetStandard.OAuth2.Model.Files;
 
 
 namespace XeroNetStandardApp.Controllers
