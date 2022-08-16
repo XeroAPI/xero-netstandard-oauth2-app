@@ -1,0 +1,40 @@
+@model dynamic
+
+<h2>Create Manual Journals</h2>
+<form method="POST">
+    <label for="narration">Narration:</label>
+    <br>
+    <input class="form-control" type="text" id="narration" placeholder="" name="narration"/>
+    <br>
+    <br>
+    <input class= "btn btn-primary" type="submit" />
+  </form>
+<hr>
+
+<br>
+<p><b>Code Example:</b></p>
+<p>Post Manual Journals</p>
+<pre>
+// Assuming accessToken and xeroTenantId has been provided
+ManualJournal manualJournal = new ManualJournal{
+Narration = narration,
+Status = myStatus,
+LineAmountTypes = myLineAmountType
+};
+
+var manualJournals = new ManualJournals();
+var manualJournalsList = new List<ManualJournal>();
+manualJournalsList.Add(manualJournal);
+manualJournals._ManualJournals = manualJournalsList;
+var AccountingApi = new AccountingApi();
+
+await AccountingApi.CreateManualJournalsAsync(accessToken, xeroTenantId, manualJournals, null);
+
+</pre>
+<p>
+  <button class="btn btn-link" onclick="location.href='@Url.Action("Index", "Home")'">Home</button>
+</p>
+
+<br>
+<br>
+<br>
