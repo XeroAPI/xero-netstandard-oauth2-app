@@ -30,29 +30,10 @@ namespace XeroNetStandardApp.Controllers
     // GET: /UkEmployeesInfo#Index
     public async Task<ActionResult> Index()
     {
-      var xeroToken = TokenUtilities.GetStoredToken();
-      var utcTimeNow = DateTime.UtcNow;
-
-      if (utcTimeNow > xeroToken.ExpiresAtUtc)
-      {
-        var client = new XeroClient(XeroConfig.Value);
-        xeroToken = (XeroOAuth2Token)await client.RefreshAccessTokenAsync(xeroToken);
-        TokenUtilities.StoreToken(xeroToken);
-      }
-
-      string accessToken = xeroToken.AccessToken;
-      Guid tenantId = TokenUtilities.GetCurrentTenantId();
-      string xeroTenantId;
-      if (xeroToken.Tenants.Any((t) => t.TenantId == tenantId))
-      {
-        xeroTenantId = tenantId.ToString();
-      }
-      else
-      {
-        var id = xeroToken.Tenants.First().TenantId;
-        xeroTenantId = id.ToString();
-        TokenUtilities.StoreTenantId(id);
-      }
+      // Authentication   
+      var client = new XeroClient(XeroConfig.Value);
+      var accessToken = await TokenUtilities.GetCurrentAccessToken(client);
+      var xeroTenantId = TokenUtilities.GetCurrentTenantId().ToString();
 
       var PayrollUKApi = new PayrollUkApi();
       var response = await PayrollUKApi.GetEmployeesAsync(accessToken, xeroTenantId);
@@ -76,31 +57,12 @@ namespace XeroNetStandardApp.Controllers
 
     // POST: /UkEmployeesInfo#Create
     [HttpPost]
-    public async Task<ActionResult> Create(string firstName, string lastName, string DateOfBirth)
+    public async Task<ActionResult> Create(string firstName, string lastName)
     {
-      var xeroToken = TokenUtilities.GetStoredToken();
-      var utcTimeNow = DateTime.UtcNow;
-
-      if (utcTimeNow > xeroToken.ExpiresAtUtc)
-      {
-        var client = new XeroClient(XeroConfig.Value);
-        xeroToken = (XeroOAuth2Token)await client.RefreshAccessTokenAsync(xeroToken);
-        TokenUtilities.StoreToken(xeroToken);
-      }
-
-      string accessToken = xeroToken.AccessToken;
-      Guid tenantId = TokenUtilities.GetCurrentTenantId();
-      string xeroTenantId;
-      if (xeroToken.Tenants.Any((t) => t.TenantId == tenantId))
-      {
-        xeroTenantId = tenantId.ToString();
-      }
-      else
-      {
-        var id = xeroToken.Tenants.First().TenantId;
-        xeroTenantId = id.ToString();
-        TokenUtilities.StoreTenantId(id);
-      }
+      // Authentication   
+      var client = new XeroClient(XeroConfig.Value);
+      var accessToken = await TokenUtilities.GetCurrentAccessToken(client);
+      var xeroTenantId = TokenUtilities.GetCurrentTenantId().ToString();
 
       DateTime dob = DateTime.Today.AddYears(-20);
 
@@ -120,7 +82,7 @@ namespace XeroNetStandardApp.Controllers
       };
 
       var PayrollAUApi = new PayrollUkApi();
-      var response = await PayrollAUApi.CreateEmployeeAsync(accessToken, xeroTenantId, employee);
+      await PayrollAUApi.CreateEmployeeAsync(accessToken, xeroTenantId, employee);
 
       return RedirectToAction("Index", "UkEmployeesInfo");
     }

@@ -10,7 +10,6 @@ using Xero.NetStandard.OAuth2.Api;
 using Xero.NetStandard.OAuth2.Client;
 using Xero.NetStandard.OAuth2.Config;
 using Xero.NetStandard.OAuth2.Model.Accounting;
-using Xero.NetStandard.OAuth2.Token;
 
 namespace XeroNetStandardApp.Controllers
 {
@@ -30,30 +29,11 @@ namespace XeroNetStandardApp.Controllers
         // GET: /ManualJournalInfo/
         public async Task<ActionResult> Index()
         {
-            // Authentication
-            var xeroToken = TokenUtilities.GetStoredToken();
-            var utcTimeNow = DateTime.UtcNow;
+            // Authentication   
+            var client = new XeroClient(XeroConfig.Value);
+            var accessToken = await TokenUtilities.GetCurrentAccessToken(client);
+            var xeroTenantId = TokenUtilities.GetCurrentTenantId().ToString();
 
-            if (utcTimeNow > xeroToken.ExpiresAtUtc)
-            {
-                var client = new XeroClient(XeroConfig.Value);
-                xeroToken = (XeroOAuth2Token)await client.RefreshAccessTokenAsync(xeroToken);
-                TokenUtilities.StoreToken(xeroToken);
-            }
-
-            string accessToken = xeroToken.AccessToken;
-            Guid tenantId = TokenUtilities.GetCurrentTenantId();
-            string xeroTenantId;
-            if (xeroToken.Tenants.Any((t) => t.TenantId == tenantId))
-            {
-                xeroTenantId = tenantId.ToString();
-            }
-            else
-            {
-                var id = xeroToken.Tenants.First().TenantId;
-                xeroTenantId = id.ToString();
-                TokenUtilities.StoreTenantId(id);
-            }
             var AccountingApi = new AccountingApi();
 
             var response = await AccountingApi.GetManualJournalsAsync(accessToken, xeroTenantId, null, null);
@@ -66,30 +46,11 @@ namespace XeroNetStandardApp.Controllers
         [HttpGet]
         public async Task<IActionResult> FindJournal(Guid manualJournalId)
         {
-            // Authentication
-            var xeroToken = TokenUtilities.GetStoredToken();
-            var utcTimeNow = DateTime.UtcNow;
+            // Authentication   
+            var client = new XeroClient(XeroConfig.Value);
+            var accessToken = await TokenUtilities.GetCurrentAccessToken(client);
+            var xeroTenantId = TokenUtilities.GetCurrentTenantId().ToString();
 
-            if (utcTimeNow > xeroToken.ExpiresAtUtc)
-            {
-                var client = new XeroClient(XeroConfig.Value);
-                xeroToken = (XeroOAuth2Token)await client.RefreshAccessTokenAsync(xeroToken);
-                TokenUtilities.StoreToken(xeroToken);
-            }
-
-            string accessToken = xeroToken.AccessToken;
-            Guid tenantId = TokenUtilities.GetCurrentTenantId();
-            string xeroTenantId;
-            if (xeroToken.Tenants.Any((t) => t.TenantId == tenantId))
-            {
-                xeroTenantId = tenantId.ToString();
-            }
-            else
-            {
-                var id = xeroToken.Tenants.First().TenantId;
-                xeroTenantId = id.ToString();
-                TokenUtilities.StoreTenantId(id);
-            }
             var AccountingApi = new AccountingApi();
 
             var response = await AccountingApi.GetManualJournalAsync(accessToken, xeroTenantId, manualJournalId);
@@ -111,30 +72,10 @@ namespace XeroNetStandardApp.Controllers
         [HttpPost]
         public async Task<ActionResult> Create(String narration, String taxType)
         {
-            // Authentication
-            var xeroToken = TokenUtilities.GetStoredToken();
-            var utcTimeNow = DateTime.UtcNow;
-
-            if (utcTimeNow > xeroToken.ExpiresAtUtc)
-            {
-                var client = new XeroClient(XeroConfig.Value);
-                xeroToken = (XeroOAuth2Token)await client.RefreshAccessTokenAsync(xeroToken);
-                TokenUtilities.StoreToken(xeroToken);
-            }
-
-            string accessToken = xeroToken.AccessToken;
-            Guid tenantId = TokenUtilities.GetCurrentTenantId();
-            string xeroTenantId;
-            if (xeroToken.Tenants.Any((t) => t.TenantId == tenantId))
-            {
-                xeroTenantId = tenantId.ToString();
-            }
-            else
-            {
-                var id = xeroToken.Tenants.First().TenantId;
-                xeroTenantId = id.ToString();
-                TokenUtilities.StoreTenantId(id);
-            }
+            // Authentication   
+            var client = new XeroClient(XeroConfig.Value);
+            var accessToken = await TokenUtilities.GetCurrentAccessToken(client);
+            var xeroTenantId = TokenUtilities.GetCurrentTenantId().ToString();
 
             // Creates two journal lines
             var manualJournalLines = new List<ManualJournalLine>();

@@ -1,21 +1,17 @@
 using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Threading.Tasks;
-using System.Collections.Generic;
-using Xero.NetStandard.OAuth2.Model.Bankfeeds;
-using Xero.NetStandard.OAuth2.Token;
-using Xero.NetStandard.OAuth2.Api;
-using Xero.NetStandard.OAuth2.Config;
-using Xero.NetStandard.OAuth2.Client;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using System;
 using System.Net.Http;
-using System.Linq;
+using System.Threading.Tasks;
+using Xero.NetStandard.OAuth2.Api;
+using Xero.NetStandard.OAuth2.Client;
+using Xero.NetStandard.OAuth2.Config;
 using Xero.NetStandard.OAuth2.Model.Files;
 
 namespace XeroNetStandardApp.Controllers
 {
-  public class FoldersSync : Controller
+    public class FoldersSync : Controller
   {
     private readonly ILogger<AuthorizationController> _logger;
     private readonly IOptions<XeroConfiguration> XeroConfig;
@@ -31,18 +27,10 @@ namespace XeroNetStandardApp.Controllers
     // GET: /FilesSync/
     public async Task<ActionResult> Index()
     {
-      var xeroToken = TokenUtilities.GetStoredToken();
-      var utcTimeNow = DateTime.UtcNow;
-
-      if (utcTimeNow > xeroToken.ExpiresAtUtc)
-      {
-        var client = new XeroClient(XeroConfig.Value);
-        xeroToken = (XeroOAuth2Token)await client.RefreshAccessTokenAsync(xeroToken);
-        TokenUtilities.StoreToken(xeroToken);
-      }
-
-      string accessToken = xeroToken.AccessToken;
-      string xeroTenantId = xeroToken.Tenants[0].TenantId.ToString();
+      // Authentication   
+      var client = new XeroClient(XeroConfig.Value);
+      var accessToken = await TokenUtilities.GetCurrentAccessToken(client);
+      var xeroTenantId = TokenUtilities.GetCurrentTenantId().ToString();
 
       var FilesApi = new FilesApi();
       var response = await FilesApi.GetFoldersAsync(accessToken, xeroTenantId);
@@ -71,19 +59,10 @@ namespace XeroNetStandardApp.Controllers
     [HttpPost]
     public async Task<ActionResult> Create(string name, string email)
     {
-      
-      var xeroToken = TokenUtilities.GetStoredToken();
-      var utcTimeNow = DateTime.UtcNow;
-
-      if (utcTimeNow > xeroToken.ExpiresAtUtc)
-      {
-        var client = new XeroClient(XeroConfig.Value);
-        xeroToken = (XeroOAuth2Token)await client.RefreshAccessTokenAsync(xeroToken);
-        TokenUtilities.StoreToken(xeroToken);
-      }
-
-      string accessToken = xeroToken.AccessToken;
-      string xeroTenantId = xeroToken.Tenants[0].TenantId.ToString();
+      // Authentication   
+      var client = new XeroClient(XeroConfig.Value);
+      var accessToken = await TokenUtilities.GetCurrentAccessToken(client);
+      var xeroTenantId = TokenUtilities.GetCurrentTenantId().ToString();
 
       var FilesApi = new FilesApi();
 
@@ -102,18 +81,10 @@ namespace XeroNetStandardApp.Controllers
     [HttpGet]
     public async Task<ActionResult> Delete(string FolderId)
     {
-      var xeroToken = TokenUtilities.GetStoredToken();
-      var utcTimeNow = DateTime.UtcNow;
-
-      if (utcTimeNow > xeroToken.ExpiresAtUtc)
-      {
-        var client = new XeroClient(XeroConfig.Value);
-        xeroToken = (XeroOAuth2Token)await client.RefreshAccessTokenAsync(xeroToken);
-        TokenUtilities.StoreToken(xeroToken);
-      }
-
-      string accessToken = xeroToken.AccessToken;
-      string xeroTenantId = xeroToken.Tenants[0].TenantId.ToString();      
+      // Authentication   
+      var client = new XeroClient(XeroConfig.Value);
+      var accessToken = await TokenUtilities.GetCurrentAccessToken(client);
+      var xeroTenantId = TokenUtilities.GetCurrentTenantId().ToString();
       
       Guid folderIdGuid = Guid.Parse(FolderId);
 
@@ -137,18 +108,10 @@ namespace XeroNetStandardApp.Controllers
     [HttpPost]
     public async Task<ActionResult> Rename(string folderId, string newName)
     {
-      var xeroToken = TokenUtilities.GetStoredToken();
-      var utcTimeNow = DateTime.UtcNow;
-
-      if (utcTimeNow > xeroToken.ExpiresAtUtc)
-      {
-        var client = new XeroClient(XeroConfig.Value);
-        xeroToken = (XeroOAuth2Token)await client.RefreshAccessTokenAsync(xeroToken);
-        TokenUtilities.StoreToken(xeroToken);
-      }
-
-      string accessToken = xeroToken.AccessToken;
-      string xeroTenantId = xeroToken.Tenants[0].TenantId.ToString();      
+      // Authentication   
+      var client = new XeroClient(XeroConfig.Value);
+      var accessToken = await TokenUtilities.GetCurrentAccessToken(client);
+      var xeroTenantId = TokenUtilities.GetCurrentTenantId().ToString();
       
       Guid folderIdGuid = Guid.Parse(folderId);
 
@@ -156,7 +119,7 @@ namespace XeroNetStandardApp.Controllers
       Folder folder = await filesApi.GetFolderAsync(accessToken, xeroTenantId, folderIdGuid);
       folder.Name = newName;
 
-      var response = await filesApi.UpdateFolderAsync(accessToken, xeroTenantId, folderIdGuid, folder);
+      await filesApi.UpdateFolderAsync(accessToken, xeroTenantId, folderIdGuid, folder);
 
       return RedirectToAction("Index", "FoldersSync");
     }
