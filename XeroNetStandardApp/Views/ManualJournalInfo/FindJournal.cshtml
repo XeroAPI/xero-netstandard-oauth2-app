@@ -1,23 +1,45 @@
 @model dynamic
 
 <h2>Manual Journal</h2>
-<p>@Model.ManualJournalID.ToString()</p>
 <table class="table table-responsive fixed-table-body">
   <tr>
-      <th>Line Amount</th>
-      <th>TaxAmount</th>
-      <th>Tracking</th>
+    <th>ManualJournalID</th>
+    <th>Narration</th>
+    <th>Date</th>
+    <th>Status</th>
+    <th>LineAmountTypes</th>
+  </tr>
+  <tr>
+  <tr>
+    <td>@Model.ManualJournalID.ToString()</td>
+    <td>@Model.Narration</td>
+    <td>@Model.Date</td>
+    <td>@Model.Status</td>
+    <td>@Model.LineAmountTypes</td>
+  </tr>
+</table>
+<br />
+<br />
+<h3>Journal Lines</h3>
+<table class="table table-responsive fixed-table-body">
+  <tr>
+    <th>Description</th>
+    <th>Line Amount</th>
+    <th>Tax Type</th>
+    <th>Tracking</th>
   </tr>
   @foreach (var item in Model.JournalLines)
   {
     <tr>
+      <td>@item.Description</td>
       <td>@item.LineAmount</td>
-      <td>@item.TaxAmount</td>
-      <td>@foreach (var trackingItem in item.Tracking) 
+      <td>@item.TaxType</td>
+      <td>
+        @foreach (var trackingItem in item.Tracking)
         {
           <p> @trackingItem.Name: @trackingItem.Option</p>
         }
-        </td>
+      </td>
     </tr>
   }
 </table>
@@ -30,19 +52,16 @@
 </textarea>
 <br>
 <p><b>Code Example:</b></p>
-<p>Get a Manual Journals</p>
+<p>Get a Manual Journal</p>
 <pre>
 // Assuming accessToken and xeroTenantId has been provided
 var AccountingApi = new AccountingApi();
 
-var response = await AccountingApi.GetManualJournalAsync(accessToken, xeroTenantId, new Guid(manualJournalId));
+var response = await AccountingApi.GetManualJournalAsync(accessToken, xeroTenantId,manualJournalId);
 
 var manualJournal = response._ManualJournals.First();
 </pre>
-<p>
-  <button class="btn btn-link" onclick="location.href='@Url.Action("Index", "Home")'">Home</button>
-</p>
-
+<button class="btn btn-link" onclick="location.href='@Url.Action("Index", "Home")'">Home</button>
 <br>
 <br>
 <br>
