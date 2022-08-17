@@ -112,7 +112,7 @@ namespace XeroNetStandardApp.Controllers
 
         // POST: /ManualJournalInfo#Create
         [HttpPost]
-        public async Task<ActionResult> Create(String narration)
+        public async Task<ActionResult> Create(String narration, String taxType)
         {
             // Authentication
             var xeroToken = TokenUtilities.GetStoredToken();
@@ -139,7 +139,7 @@ namespace XeroNetStandardApp.Controllers
                 TokenUtilities.StoreTenantId(id);
             }
 
-            // creates two journal lines
+            // Creates two journal lines
             var manualJournalLines = new List<ManualJournalLine>();
 
             var credit = new ManualJournalLine
@@ -147,8 +147,9 @@ namespace XeroNetStandardApp.Controllers
 
                 LineAmount = new decimal(100.0),
                 AccountCode = "400",
-                Description = "Hello there",
+                Description = "Credit",
                 Tracking = new List<TrackingCategory>(),
+                TaxType = taxType
             };
             manualJournalLines.Add(credit);
 
@@ -156,8 +157,9 @@ namespace XeroNetStandardApp.Controllers
             {
                 LineAmount = new decimal(-100.0),
                 AccountCode = "120",
-                Description = "Hello there",
-                Tracking = new List<TrackingCategory>()
+                Description = "Debit",
+                Tracking = new List<TrackingCategory>(),
+                TaxType = taxType
             };
             manualJournalLines.Add(debit);
 
@@ -165,7 +167,8 @@ namespace XeroNetStandardApp.Controllers
 
             // Picks first tracking category and option if available, and attaches to journal line
             var trackingCategoriesResponse = await AccountingApi.GetTrackingCategoriesAsync(accessToken, xeroTenantId, null, null);
-            if (trackingCategoriesResponse._TrackingCategories.Count != 0 && trackingCategoriesResponse._TrackingCategories.First().Options.First().TrackingOptionID != null){
+            if (trackingCategoriesResponse._TrackingCategories.Count != 0 && trackingCategoriesResponse._TrackingCategories.First().Options.First().TrackingOptionID != null)
+            {
                 var trackingCategory = new TrackingCategory
                 {
                     TrackingCategoryID = trackingCategoriesResponse._TrackingCategories.First().TrackingCategoryID,
@@ -178,13 +181,12 @@ namespace XeroNetStandardApp.Controllers
             }
 
 
-            // create manual journals
+            // Create manual journals
             ManualJournal manualJournal = new ManualJournal
             {
                 Narration = narration,
-                Status = ManualJournal.StatusEnum.DRAFT,
-                LineAmountTypes = LineAmountTypes.NoTax,
                 JournalLines = manualJournalLines,
+                Date = DateTime.Today
             };
 
             var manualJournals = new ManualJournals();
