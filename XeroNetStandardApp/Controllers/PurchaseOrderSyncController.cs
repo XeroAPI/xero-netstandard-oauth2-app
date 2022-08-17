@@ -1,26 +1,23 @@
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Collections.Generic;
-using Xero.NetStandard.OAuth2.Model.Accounting;
-using Xero.NetStandard.OAuth2.Token;
-using Xero.NetStandard.OAuth2.Api;
-using Xero.NetStandard.OAuth2.Config;
-using Xero.NetStandard.OAuth2.Client;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using System.Net.Http;
-using System.IO;
-using Microsoft.AspNetCore.Http;
-using System.Text;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Serialization;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Net.Http;
+using System.Threading.Tasks;
+using Xero.NetStandard.OAuth2.Api;
+using Xero.NetStandard.OAuth2.Client;
+using Xero.NetStandard.OAuth2.Config;
+using Xero.NetStandard.OAuth2.Model.Accounting;
 
 
 namespace XeroNetStandardApp.Controllers
 {
-  public class PurchaseOrderSync : Controller
+    public class PurchaseOrderSync : Controller
   {
     private readonly ILogger<AuthorizationController> _logger;
     private readonly IOptions<XeroConfiguration> XeroConfig;
@@ -36,29 +33,10 @@ namespace XeroNetStandardApp.Controllers
     // GET: /PurchaseOrderSync/
     public async Task<ActionResult> Index()
     {
-      var xeroToken = TokenUtilities.GetStoredToken();
-      var utcTimeNow = DateTime.UtcNow;
-
-      if (utcTimeNow > xeroToken.ExpiresAtUtc)
-      {
-        var client = new XeroClient(XeroConfig.Value);
-        xeroToken = (XeroOAuth2Token)await client.RefreshAccessTokenAsync(xeroToken);
-        TokenUtilities.StoreToken(xeroToken);
-      }
-
-      string accessToken = xeroToken.AccessToken;
-      Guid tenantId = TokenUtilities.GetCurrentTenantId();
-      string xeroTenantId;
-      if (xeroToken.Tenants.Any((t) => t.TenantId == tenantId))
-      {
-        xeroTenantId = tenantId.ToString();
-      }
-      else
-      {
-        var id = xeroToken.Tenants.First().TenantId;
-        xeroTenantId = id.ToString();
-        TokenUtilities.StoreTenantId(id);
-      }
+      // Authentication   
+      var client = new XeroClient(XeroConfig.Value);
+      var accessToken = await TokenUtilities.GetCurrentAccessToken(client);
+      var xeroTenantId = TokenUtilities.GetCurrentTenantId().ToString();
 
       var AccountingApi = new AccountingApi();
 
@@ -73,30 +51,10 @@ namespace XeroNetStandardApp.Controllers
     [HttpGet]
     public async Task<IActionResult> Create()
     {
-      var xeroToken = TokenUtilities.GetStoredToken();
-      var utcTimeNow = DateTime.UtcNow;
-
-      if (utcTimeNow > xeroToken.ExpiresAtUtc)
-      {
-        var client = new XeroClient(XeroConfig.Value);
-        xeroToken = (XeroOAuth2Token)await client.RefreshAccessTokenAsync(xeroToken);
-        TokenUtilities.StoreToken(xeroToken);
-      }
-
-      string accessToken = xeroToken.AccessToken;
-      Guid tenantId = TokenUtilities.GetCurrentTenantId();
-      string xeroTenantId;
-      if (xeroToken.Tenants.Any((t) => t.TenantId == tenantId))
-      {
-        xeroTenantId = tenantId.ToString();
-      }
-      else
-      {
-        var id = xeroToken.Tenants.First().TenantId;
-        xeroTenantId = id.ToString();
-        TokenUtilities.StoreTenantId(id);
-      }
-
+      // Authentication   
+      var client = new XeroClient(XeroConfig.Value);
+      var accessToken = await TokenUtilities.GetCurrentAccessToken(client);
+      var xeroTenantId = TokenUtilities.GetCurrentTenantId().ToString();
 
       var accountingApi = new AccountingApi();
       var contacts = await accountingApi.GetContactsAsync(accessToken, xeroTenantId);
@@ -107,29 +65,10 @@ namespace XeroNetStandardApp.Controllers
     [HttpPost]
     public async Task<ActionResult> Create(string contactId, string LineDescription, string LineQuantity, string LineUnitAmount, string LineAccountCode)
     {
-      var xeroToken = TokenUtilities.GetStoredToken();
-      var utcTimeNow = DateTime.UtcNow;
-
-      if (utcTimeNow > xeroToken.ExpiresAtUtc)
-      {
-        var client = new XeroClient(XeroConfig.Value);
-        xeroToken = (XeroOAuth2Token)await client.RefreshAccessTokenAsync(xeroToken);
-        TokenUtilities.StoreToken(xeroToken);
-      }
-
-      string accessToken = xeroToken.AccessToken;
-      Guid tenantId = TokenUtilities.GetCurrentTenantId();
-      string xeroTenantId;
-      if (xeroToken.Tenants.Any((t) => t.TenantId == tenantId))
-      {
-        xeroTenantId = tenantId.ToString();
-      }
-      else
-      {
-        var id = xeroToken.Tenants.First().TenantId;
-        xeroTenantId = id.ToString();
-        TokenUtilities.StoreTenantId(id);
-      }
+      // Authentication   
+      var client = new XeroClient(XeroConfig.Value);
+      var accessToken = await TokenUtilities.GetCurrentAccessToken(client);
+      var xeroTenantId = TokenUtilities.GetCurrentTenantId().ToString();
 
       var contact = new Contact();
       contact.ContactID = Guid.Parse(contactId);
@@ -175,29 +114,10 @@ namespace XeroNetStandardApp.Controllers
     [HttpPost("PurchaseOrderSyncFileUpload")]
     public async Task<IActionResult> Upload(List<IFormFile> files, string purchaseOrderId)
     {
-      var xeroToken = TokenUtilities.GetStoredToken();
-      var utcTimeNow = DateTime.UtcNow;
-
-      if (utcTimeNow > xeroToken.ExpiresAtUtc)
-      {
-        var client = new XeroClient(XeroConfig.Value);
-        xeroToken = (XeroOAuth2Token)await client.RefreshAccessTokenAsync(xeroToken);
-        TokenUtilities.StoreToken(xeroToken);
-      }
-
-      string accessToken = xeroToken.AccessToken;
-      Guid tenantId = TokenUtilities.GetCurrentTenantId();
-      string xeroTenantId;
-      if (xeroToken.Tenants.Any((t) => t.TenantId == tenantId))
-      {
-        xeroTenantId = tenantId.ToString();
-      }
-      else
-      {
-        var id = xeroToken.Tenants.First().TenantId;
-        xeroTenantId = id.ToString();
-        TokenUtilities.StoreTenantId(id);
-      }
+      // Authentication   
+      var client = new XeroClient(XeroConfig.Value);
+      var accessToken = await TokenUtilities.GetCurrentAccessToken(client);
+      var xeroTenantId = TokenUtilities.GetCurrentTenantId().ToString();
 
       var invoiceID = Guid.Parse(purchaseOrderId);
       long size = files.Sum(f => f.Length);
