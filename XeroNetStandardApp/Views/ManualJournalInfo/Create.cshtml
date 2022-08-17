@@ -1,3 +1,4 @@
+@using Xero.NetStandard.OAuth2.Model.Accounting;
 @model dynamic
 
 <h2>Create Manual Journals</h2>
@@ -8,7 +9,11 @@
   <br>
   <label for="taxType">Tax Type:</label>
   <br>
-  <input class="form-control" type="text" id="taxType" placeholder="NONE" name="taxType" />
+  <select name="taxType">
+      @foreach (var taxType in Enum.GetValues(typeof(TaxType))){
+        <option value=@taxType selected="@(taxType.ToString() == "NONE")">@taxType</option>
+    }
+  </select>
   <br>
   <br>
   <input class="btn btn-primary" type="submit" />

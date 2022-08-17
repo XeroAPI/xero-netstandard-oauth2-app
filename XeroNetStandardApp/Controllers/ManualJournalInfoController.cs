@@ -61,8 +61,6 @@ namespace XeroNetStandardApp.Controllers
             ViewBag.jsonResponse = response.ToJson();
 
             return View(response._ManualJournals);
-
-
         }
 
         [HttpGet]
@@ -99,7 +97,6 @@ namespace XeroNetStandardApp.Controllers
             ViewBag.jsonResponse = response.ToJson();
 
             return View(response._ManualJournals.First());
-
         }
 
 
@@ -180,7 +177,6 @@ namespace XeroNetStandardApp.Controllers
                 debit.Tracking.Add(trackingCategory);
             }
 
-
             // Create manual journals
             ManualJournal manualJournal = new ManualJournal
             {
@@ -198,7 +194,5 @@ namespace XeroNetStandardApp.Controllers
 
             return RedirectToAction("Index", "ManualJournalInfo");
         }
-
-
     }
 }
