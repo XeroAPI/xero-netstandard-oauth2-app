@@ -1,20 +1,21 @@
-@model dynamic
+﻿@model dynamic
 
-<h2>Xero Projects</h2>
+<h2>Xero Time entries</h2>
 
-<table class="table table-bordered table-responsive fixed-table-body">
+<table class="table table-responsive fixed-table-body">
   <tr>
-    <th>Project Name</th>
-    <th>Project Number</th>
+    <th>Task Id</th>
+    <th>User Id</th>
+    <th>Duration</th>
+    <th>Status</th>
   </tr>
   @foreach (var item in Model)
   {
     <tr>
-      <td>@item.Name</td>
-      <td>@item.Status</td>
-      <td>
-        <button class="btn btn-primary" onclick="location.href='@Url.Action("GetTimeEntries", "ProjectInfo", new { projectId = (Guid) @item.ProjectId } )'">View time entries</button>
-      </td>
+      <td>@item.TaskId.ToString()</td>
+      <td>@item.UserId.ToString()</td>
+      <td>@item.Duration</td>
+      <td>@item.Status.ToString()</td>
     </tr>
   }
 </table>
@@ -29,7 +30,9 @@
 <pre>
 // Assuming accessToken and xeroTenantId has been provided
 var ProjectApi = new ProjectApi();
-var response = await ProjectApi.GetProjectsAsync(accessToken, xeroTenantId);
+
+// replace with your project id
+var response = await ProjectApi.GetTimeEntriesAsync(accessToken, xeroTenantId, new Guid("YOUR-PROJECT-ID"));
 
 return response.Items;
 </pre>
