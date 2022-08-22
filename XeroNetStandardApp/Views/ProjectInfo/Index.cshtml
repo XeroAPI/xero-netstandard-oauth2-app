@@ -2,22 +2,27 @@
 
 <h2>Xero Projects</h2>
 
-<table table="table table-responsive fixed-table-body">
+<table class="table table-responsive fixed-table-body">
   <tr>
     <th>Project Name</th>
     <th>Project Number</th>
+    <th>Time entries</th>
   </tr>
-  @foreach (var item in Model) {
+  @foreach (var item in Model)
+  {
     <tr>
       <td>@item.Name</td>
       <td>@item.Status</td>
+      <td>
+        <button class="btn btn-primary" onclick="location.href='@Url.Action("GetTimeEntries", "ProjectInfo", new { projectId = (Guid) @item.ProjectId } )'">View time entries</button>
+      </td>
     </tr>
   }
 </table>
 <br>
 <p><b>Raw JSON Response:</b></p>
 <textarea class="form-control" readonly style="height: 350px">
-@ViewBag.jsonResponse;
+  @ViewBag.jsonResponse;
 </textarea>
 <br>
 <p><b>Code Example:</b></p>
