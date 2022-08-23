@@ -14,7 +14,8 @@
     <th>Update</th>
     <th>Delete</th>
   </tr>
-  @foreach (var item in Model) {
+  @foreach (var item in Model)
+  {
     <tr>
       <td>@item.Name</td>
       <td>@item.MimeType</td>
@@ -24,10 +25,10 @@
       <td>@item.Id.ToString()</td>
       <td>@item.FolderId</td>
       <td>
-        <button class= "btn btn-primary" onclick="location.href='@Url.Action("Modify", "FilesSync", new { fileID = @item.Id, fileName = @item.Name })'">Rename</button>
+        <button class="btn btn-primary" onclick="location.href='@Url.Action("Modify", "FilesSync", new { fileID = @item.Id, fileName = @item.Name })'">Rename</button>
       </td>
       <td>
-        <button class= "btn btn-primary" onclick="location.href='@Url.Action("Delete", "FilesSync", new { fileID = @item.Id })'">Delete</button>
+        <button class="btn btn-primary" onclick="location.href='@Url.Action("Delete", "FilesSync", new { fileID = @item.Id })'">Delete</button>
       </td>
     </tr>
   }
@@ -37,15 +38,15 @@
 <h5>Upload File</h5>
 <p>
   <form method="post" enctype="multipart/form-data" asp-controller="FilesSyncFileUpload" asp-action="Index">
-    <input class="form-control"  type="file" name="files" multiple/>
-    <input class="btn btn-primary form-control"  type="submit" value="Upload New File" />
+    <input class="form-control" type="file" name="files" multiple />
+    <input class="btn btn-primary form-control" type="submit" value="Upload New File" />
   </form>
 </p>
 
 <br>
 <p><b>Raw JSON Response:</b></p>
 <textarea class="form-control" readonly style="height: 350px">
-@ViewBag.jsonResponse;
+  @ViewBag.jsonResponse;
 </textarea>
 <br>
 <p><b>Code Example:</b></p>
