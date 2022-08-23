@@ -1,0 +1,67 @@
+@model dynamic
+
+<h2>Manual Journal</h2>
+<table class="table table-responsive fixed-table-body">
+  <tr>
+    <th>ManualJournalID</th>
+    <th>Narration</th>
+    <th>Date</th>
+    <th>Status</th>
+    <th>LineAmountTypes</th>
+  </tr>
+  <tr>
+  <tr>
+    <td>@Model.ManualJournalID.ToString()</td>
+    <td>@Model.Narration</td>
+    <td>@Model.Date</td>
+    <td>@Model.Status</td>
+    <td>@Model.LineAmountTypes</td>
+  </tr>
+</table>
+<br>
+<br>
+<h3>Journal Lines</h3>
+<table class="table table-responsive fixed-table-body">
+  <tr>
+    <th>Description</th>
+    <th>Line Amount</th>
+    <th>Tax Type</th>
+    <th>Tracking</th>
+  </tr>
+  @foreach (var item in Model.JournalLines)
+  {
+    <tr>
+      <td>@item.Description</td>
+      <td>@item.LineAmount</td>
+      <td>@item.TaxType</td>
+      <td>
+        @foreach (var trackingItem in item.Tracking)
+        {
+          <p> @trackingItem.Name: @trackingItem.Option</p>
+        }
+      </td>
+    </tr>
+  }
+</table>
+<hr>
+
+<br>
+<p><b>Raw JSON Response:</b></p>
+<textarea class="form-control" readonly style="height: 350px">
+  @ViewBag.jsonResponse;
+</textarea>
+<br>
+<p><b>Code Example:</b></p>
+<p>Get a Manual Journal</p>
+<pre>
+// Assuming accessToken and xeroTenantId has been provided
+var AccountingApi = new AccountingApi();
+
+var response = await AccountingApi.GetManualJournalAsync(accessToken, xeroTenantId,manualJournalId);
+
+var manualJournal = response._ManualJournals.First();
+</pre>
+<button class="btn btn-link" onclick="location.href='@Url.Action("Index", "Home")'">Home</button>
+<br>
+<br>
+<br>
