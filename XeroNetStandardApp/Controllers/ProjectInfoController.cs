@@ -15,6 +15,15 @@ using System.Net.Http;
 
 namespace XeroNetStandardApp.Controllers
 {
+  // For the two example uses only
+  public class projectTaskExampleClass
+  {
+    public List<string> projectNames = new List<string>();
+    public List<string> taskNames = new List<string>();
+    public List<Guid> projectIds = new List<Guid>();
+    public Guid lastSelectedProjectId = new Guid();
+  }
+
   public class ProjectInfo : Controller
   {
     private readonly ILogger<AuthorizationController> _logger;
@@ -26,6 +35,7 @@ namespace XeroNetStandardApp.Controllers
       this.XeroConfig = XeroConfig;
     }
 
+    public static projectTaskExampleClass projectTaskExampleObject = new projectTaskExampleClass();
 
     /*===============================================================================================\\
     ||                                   Below is for Project                                        ||
@@ -123,6 +133,7 @@ namespace XeroNetStandardApp.Controllers
       string accessToken = xeroToken.AccessToken;
       Guid tenantId = TokenUtilities.GetCurrentTenantId();
       string xeroTenantId;
+
       if (xeroToken.Tenants.Any((t) => t.TenantId == tenantId))
       {
         xeroTenantId = tenantId.ToString();
@@ -380,8 +391,8 @@ namespace XeroNetStandardApp.Controllers
       if(stateChanged)
       {
         await ProjectApi.PatchProjectAsync(accessToken, xeroTenantId, projectId, projectPatch);
-        // Wait a second for the update made to be registered
-        System.Threading.Tasks.Task taskA = System.Threading.Tasks.Task.Run( () => System.Threading.Thread.Sleep(1000));
+        // Wait 3 seconds for the update made to be registered
+        System.Threading.Tasks.Task taskA = System.Threading.Tasks.Task.Run( () => System.Threading.Thread.Sleep(3000));
         stateChanged = false;
       }
 
@@ -590,8 +601,7 @@ namespace XeroNetStandardApp.Controllers
       return RedirectToAction("TaskIndex", "ProjectInfo");
     }
 
-
-
+    
     // GET: /Project Task #Delete
     [HttpGet]
     public async Task<IActionResult> TaskDelete()
@@ -620,21 +630,48 @@ namespace XeroNetStandardApp.Controllers
         TokenUtilities.StoreTenantId(id);
       }
 
-
-
       var ProjectApi = new ProjectApi();
       var projects = await ProjectApi.GetProjectsAsync(accessToken, xeroTenantId);
 
-      List<string> projectNames = new List<string>();
+      // Reset the saved static values
+      projectTaskExampleObject.projectNames.Clear();
+      projectTaskExampleObject.taskNames.Clear();
+      projectTaskExampleObject.projectIds.Clear();
+      projectTaskExampleObject.lastSelectedProjectId = Guid.Empty;
+
+      // Populate the list of projects retrieved
       foreach(Project project in projects.Items)
       {
-        projectNames.Add(project.Name);
+        projectTaskExampleObject.projectNames.Add(project.Name);
+        projectTaskExampleObject.projectIds.Add(project.ProjectId.Value);
       }
-      return View(projectNames);
+
+      // Check if there is any project
+      if(projectTaskExampleObject.projectNames.Count == 0)
+      {
+        projectTaskExampleObject.projectNames.Add("No Projects");
+        projectTaskExampleObject.taskNames.Add("No Tasks");
+        return View(projectTaskExampleObject);
+      }
+
+      // The initial project ID is the last selected project ID
+      projectTaskExampleObject.lastSelectedProjectId = projectTaskExampleObject.projectIds[0];
+      
+      // Get tasks for this initial project
+      var tasks = await ProjectApi.GetTasksAsync(accessToken, xeroTenantId, projectTaskExampleObject.lastSelectedProjectId);
+        
+      // Populate the list of projects retrieved
+      foreach(Xero.NetStandard.OAuth2.Model.Project.Task task in tasks.Items)
+        projectTaskExampleObject.taskNames.Add(task.Name);
+
+      if(projectTaskExampleObject.taskNames.Count == 0)
+        projectTaskExampleObject.taskNames.Add("No Tasks");
+
+      return View(projectTaskExampleObject);
     }
 
 
-    // POST: /Project Task #Delete
+    // POST: /Project Task #Delete project
     [HttpPost]
     public async Task<ActionResult> TaskDelete(string projectName, string taskName)
     {
@@ -662,28 +699,311 @@ namespace XeroNetStandardApp.Controllers
         TokenUtilities.StoreTenantId(id);
       }
 
-      // First find which project was selected and retrieve its Guid
+
       var ProjectApi = new ProjectApi();
-      var projectsList = await ProjectApi.GetProjectsAsync(accessToken, xeroTenantId);
-      List<string> projectNames = new List<string>();
+      var projects = await ProjectApi.GetProjectsAsync(accessToken, xeroTenantId);
 
-      Guid projectId = new Guid();
-      Guid taskID = new Guid();
+      int numberOfProjects = 0;
+      int selectedProjectPosition = 0;
 
-      foreach(Project project in projectsList.Items)
+      // Project selected to refresh tasks
+      if(taskName == null)
       {
-        projectNames.Add(project.Name);
+        // Reset the UI dropdown list for project
+        projectTaskExampleObject.projectNames.Clear();
 
-        if(Equals(projectName, project.Name))
+        foreach(Project project in projects.Items)
         {
-          projectId = project.ProjectId.Value;
+          numberOfProjects++;
+
+          projectTaskExampleObject.projectNames.Add(project.Name);
+
+          if(Equals(projectName, project.Name))
+          {
+            selectedProjectPosition = numberOfProjects;
+
+            // Save this selected project ID
+            projectTaskExampleObject.lastSelectedProjectId = project.ProjectId.Value;
+
+            var tasks = await ProjectApi.GetTasksAsync(accessToken, xeroTenantId, project.ProjectId.Value);
+
+            // Reset the UI dropdown list for task
+            projectTaskExampleObject.taskNames.Clear();
+
+            // Populate the list of tasks retrieved
+            foreach(Xero.NetStandard.OAuth2.Model.Project.Task task in tasks.Items)
+              projectTaskExampleObject.taskNames.Add(task.Name);
+
+            if(projectTaskExampleObject.taskNames.Count == 0)
+              projectTaskExampleObject.taskNames.Add("No Tasks");
+          }
+        }
+
+        if(selectedProjectPosition == 1)
+          // First project in the list was selected, no need for reorder
+          return View(projectTaskExampleObject);
+        else
+        {
+          // Reorder the project list and bring the selected one forward
+          for(int i = selectedProjectPosition; i > 1; i--)
+          {
+            projectTaskExampleObject.projectNames[i-1] = projectTaskExampleObject.projectNames[i-2];
+          }
+          projectTaskExampleObject.projectNames[0] = projectName;
+
+          return View(projectTaskExampleObject);
         }
       }
 
-      await ProjectApi.DeleteTaskAsync(accessToken, xeroTenantId, projectId, taskID);      
+      // Task selected to delete
+      if(projectName == null)
+      {
+        // Reset the UI dropdown list for task
+        projectTaskExampleObject.taskNames.Clear();
 
-      return RedirectToAction("TaskIndex", "ProjectInfo");
+        var tasks = await ProjectApi.GetTasksAsync(accessToken, xeroTenantId, projectTaskExampleObject.lastSelectedProjectId);
+
+        foreach(Xero.NetStandard.OAuth2.Model.Project.Task task in tasks.Items)
+        {
+          if(Equals(taskName, task.Name))
+          {
+            await ProjectApi.DeleteTaskAsync(accessToken, xeroTenantId, projectTaskExampleObject.lastSelectedProjectId, task.TaskId.Value);
+            
+            // After deleting task, reset the saved static list
+            projectTaskExampleObject.taskNames.Clear();
+            break;
+          }
+        }
+        
+        // Wait 3 seconds for the update made to be registered
+        System.Threading.Tasks.Task taskA = System.Threading.Tasks.Task.Run( () => System.Threading.Thread.Sleep(3000));
+
+        // Retrieve new list of tasks
+        tasks = await ProjectApi.GetTasksAsync(accessToken, xeroTenantId, projectTaskExampleObject.lastSelectedProjectId);
+
+        // Populate new list of tasks retrieved
+        foreach(Xero.NetStandard.OAuth2.Model.Project.Task task in tasks.Items)
+          projectTaskExampleObject.taskNames.Add(task.Name);
+
+        return View(projectTaskExampleObject);
+      }
+
+      return View(projectTaskExampleObject);
     }
-// DeleteTaskAsync (string accessToken, string xeroTenantId, Guid projectId, Guid taskId)
+
+
+
+
+
+
+
+
+
+
+
+
+
+    // GET: /Project Task #Update
+    [HttpGet]
+    public async Task<IActionResult> TaskUpdate()
+    {
+      var xeroToken = TokenUtilities.GetStoredToken();
+      var utcTimeNow = DateTime.UtcNow;
+
+      if (utcTimeNow > xeroToken.ExpiresAtUtc)
+      {
+        var client = new XeroClient(XeroConfig.Value);
+        xeroToken = (XeroOAuth2Token)await client.RefreshAccessTokenAsync(xeroToken);
+        TokenUtilities.StoreToken(xeroToken);
+      }
+
+      string accessToken = xeroToken.AccessToken;
+      Guid tenantId = TokenUtilities.GetCurrentTenantId();
+      string xeroTenantId;
+      if (xeroToken.Tenants.Any((t) => t.TenantId == tenantId))
+      {
+        xeroTenantId = tenantId.ToString();
+      }
+      else
+      {
+        var id = xeroToken.Tenants.First().TenantId;
+        xeroTenantId = id.ToString();
+        TokenUtilities.StoreTenantId(id);
+      }
+
+      var ProjectApi = new ProjectApi();
+      var projects = await ProjectApi.GetProjectsAsync(accessToken, xeroTenantId);
+
+      // Reset the saved static values
+      projectTaskExampleObject.projectNames.Clear();
+      projectTaskExampleObject.taskNames.Clear();
+      projectTaskExampleObject.projectIds.Clear();
+      projectTaskExampleObject.lastSelectedProjectId = Guid.Empty;
+
+      // Populate the list of projects retrieved
+      foreach(Project project in projects.Items)
+      {
+        projectTaskExampleObject.projectNames.Add(project.Name);
+        projectTaskExampleObject.projectIds.Add(project.ProjectId.Value);
+      }
+
+      // Check if there is any project
+      if(projectTaskExampleObject.projectNames.Count == 0)
+      {
+        projectTaskExampleObject.projectNames.Add("No Projects");
+        projectTaskExampleObject.taskNames.Add("No Tasks Can't Update");
+        return View(projectTaskExampleObject);
+      }
+
+      // The initial project ID is the last selected project ID
+      projectTaskExampleObject.lastSelectedProjectId = projectTaskExampleObject.projectIds[0];
+      
+      // Get tasks for this initial project
+      var tasks = await ProjectApi.GetTasksAsync(accessToken, xeroTenantId, projectTaskExampleObject.lastSelectedProjectId);
+        
+      // Populate the list of projects retrieved
+      foreach(Xero.NetStandard.OAuth2.Model.Project.Task task in tasks.Items)
+        projectTaskExampleObject.taskNames.Add(task.Name);
+
+      if(projectTaskExampleObject.taskNames.Count == 0)
+        projectTaskExampleObject.taskNames.Add("No Tasks Can't Update");
+
+      return View(projectTaskExampleObject);
+    }
+
+
+    // POST: /Project Task #Delete project
+    [HttpPost]
+    public async Task<ActionResult> TaskUpdate(string projectName, string taskName, string newTaskName, string taskRate, string estimateMinute, string taskChargeType)
+    {
+      var xeroToken = TokenUtilities.GetStoredToken();
+      var utcTimeNow = DateTime.UtcNow;
+
+      if (utcTimeNow > xeroToken.ExpiresAtUtc)
+      {
+        var client = new XeroClient(XeroConfig.Value);
+        xeroToken = (XeroOAuth2Token)await client.RefreshAccessTokenAsync(xeroToken);
+        TokenUtilities.StoreToken(xeroToken);
+      }
+
+      string accessToken = xeroToken.AccessToken;
+      Guid tenantId = TokenUtilities.GetCurrentTenantId();
+      string xeroTenantId;
+      if (xeroToken.Tenants.Any((t) => t.TenantId == tenantId))
+      {
+        xeroTenantId = tenantId.ToString();
+      }
+      else
+      {
+        var id = xeroToken.Tenants.First().TenantId;
+        xeroTenantId = id.ToString();
+        TokenUtilities.StoreTenantId(id);
+      }
+
+
+      var ProjectApi = new ProjectApi();
+      var projects = await ProjectApi.GetProjectsAsync(accessToken, xeroTenantId);
+
+      int numberOfProjects = 0;
+      int selectedProjectPosition = 0;
+
+      // Project selected to refresh tasks
+      if(newTaskName == null)
+      {
+        // Reset the UI dropdown list for project
+        projectTaskExampleObject.projectNames.Clear();
+
+        foreach(Project project in projects.Items)
+        {
+          numberOfProjects++;
+
+          projectTaskExampleObject.projectNames.Add(project.Name);
+
+          if(Equals(projectName, project.Name))
+          {
+            selectedProjectPosition = numberOfProjects;
+
+            // Save this selected project ID
+            projectTaskExampleObject.lastSelectedProjectId = project.ProjectId.Value;
+
+            var tasks = await ProjectApi.GetTasksAsync(accessToken, xeroTenantId, project.ProjectId.Value);
+
+            // Reset the UI dropdown list for task
+            projectTaskExampleObject.taskNames.Clear();
+
+            // Populate the list of tasks retrieved
+            foreach(Xero.NetStandard.OAuth2.Model.Project.Task task in tasks.Items)
+              projectTaskExampleObject.taskNames.Add(task.Name);
+
+            if(projectTaskExampleObject.taskNames.Count == 0)
+              projectTaskExampleObject.taskNames.Add("No Tasks Can't Update");
+          }
+        }
+
+        if(selectedProjectPosition == 1)
+          // First project in the list was selected, no need for reorder
+          return View(projectTaskExampleObject);
+        else
+        {
+          // Reorder the project list and bring the selected one forward
+          for(int i = selectedProjectPosition; i > 1; i--)
+          {
+            projectTaskExampleObject.projectNames[i-1] = projectTaskExampleObject.projectNames[i-2];
+          }
+          projectTaskExampleObject.projectNames[0] = projectName;
+
+          return View(projectTaskExampleObject);
+        }       
+      }
+
+      // Task selected to delete
+      if(projectName == null)
+      {
+        // Reset the UI dropdown list for task
+        projectTaskExampleObject.taskNames.Clear();
+
+        var tasks = await ProjectApi.GetTasksAsync(accessToken, xeroTenantId, projectTaskExampleObject.lastSelectedProjectId);
+
+        foreach(Xero.NetStandard.OAuth2.Model.Project.Task task in tasks.Items)
+        {
+          if(Equals(taskName, task.Name))
+          {
+            Amount task_rate = new Amount()
+            {
+              Currency = CurrencyCode.AUD,
+              Value = Decimal.Parse(taskRate)
+            };
+
+            var newTask = new TaskCreateOrUpdate()
+            {
+              Name = newTaskName,
+              Rate = task_rate,
+              EstimateMinutes = int.Parse(estimateMinute),
+              ChargeType = (ChargeType) Enum.Parse(typeof(ChargeType), taskChargeType)
+            };
+            
+            await ProjectApi.UpdateTaskAsync(accessToken, xeroTenantId, projectTaskExampleObject.lastSelectedProjectId, task.TaskId.Value, newTask);
+            
+            // After deleting task, reset the saved static list
+            projectTaskExampleObject.taskNames.Clear();
+            break;
+          }
+        }
+        
+        // Wait 3 seconds for the update made to be registered
+        System.Threading.Tasks.Task taskA = System.Threading.Tasks.Task.Run( () => System.Threading.Thread.Sleep(3000));
+
+        // Retrieve new list of tasks
+        tasks = await ProjectApi.GetTasksAsync(accessToken, xeroTenantId, projectTaskExampleObject.lastSelectedProjectId);
+
+        // Populate new list of tasks retrieved
+        foreach(Xero.NetStandard.OAuth2.Model.Project.Task task in tasks.Items)
+          projectTaskExampleObject.taskNames.Add(task.Name);
+
+        return View(projectTaskExampleObject);
+      }
+
+      return View(projectTaskExampleObject);
+    }
   }
 }

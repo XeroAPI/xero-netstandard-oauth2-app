@@ -4,43 +4,40 @@
 
 <form method="POST">
     <label for="projectName">Project Name:</label>
-    <br>
-    <select id="projectName" name="projectName">
-    @foreach (var projectName in Model) {
-        <option value=@projectName>@projectName</option>
-    }
-    <br>>
-    <input class="btn btn-primary" type="submit" value="Select" onclick="selectingProject_Button_OnClick"/>
+    <table class="table table-responsive fixed-table-body">
+        <th>
+            <select id="projectName" name="projectName">
+                @foreach (var projectName in Model.projectNames)
+                {
+                    <option value=@projectName>@projectName</option>
+                }
+        </th>
+        <th>
+            <input class="btn btn-primary" type="submit" value="Select" onclick="selectingProject_Button_OnClick"/>
+        </th>
+    </table>
 </form>
+
+<br>
 
 <form method="POST">
     <label for="taskName">Task Name:</label>
-    <br>
-    <select id="taskName" name="taskName">
-    @foreach (var taskName in Model) {
-        <option value=@taskName>@taskName</option>
-    }
-    <br>>
-    <input class="btn btn-primary" type="submit" value="Delete" onclick="selectingTask_Button_OnClick"/>
+    <table class="table table-responsive fixed-table-body">
+        <th>
+            <select id="taskName" name="taskName">
+                @foreach (var taskName in Model.taskNames)
+                {
+                    <option value=@taskName>@taskName</option>
+                }
+        </th>
+    <th>
+        <input class="btn btn-primary" type="submit" value="Delete" onclick="selectingTask_Button_OnClick"/>
+    </th>
+    </table>
 </form>
 
-<hr>
-
-<p><b>Code Example:</b></p>
-<p>Update Project Task</p>
-<pre>
-// Assuming accessToken and xeroTenantId has been provided
-// Initially get the currently existing project
-
-
-
-
-
-
-
-
-</pre>
 <br>
+
 <p>
   <button class="btn btn-link" onclick="location.href='@Url.Action("Index", "Home")'">Home</button>
 </p>
