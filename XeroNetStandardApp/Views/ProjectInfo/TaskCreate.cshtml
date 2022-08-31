@@ -1,0 +1,86 @@
+@model dynamic
+
+<h2>Create a Xero Project Task</h2>
+
+<form method="POST">
+    <label for="projectName">Project Name:</label>
+    <br>
+    <select id="projectName" name="projectName">
+    @foreach (var projectName in Model) {
+        <option value=@projectName>@projectName</option>
+    }
+    </select>
+    @* <input class="form-control" type="text" id="contactId" placeholder="Enter a contact ID for the project" name="contactId" required/> *@
+    <br>
+    <br>
+    <input class="form-control" type="text" id="taskName" placeholder="Enter new name for the task for the selected project" name="taskName" required/>
+    <br>
+    <input class="form-control" type="number" step="any" id="taskRate" placeholder="What is the rate for this task?" name="taskRate" required/>
+    <br>
+    <input class="form-control" type="number" step="any" id="estimateMinute" placeholder="Enter estimated minute required for this task" name="estimateMinute" required/>
+    <br>
+    <select id="taskChargeType" name="taskChargeType" required>
+        <option value="TIME">Per Hour</option>
+        <option value="FIXED">Fixed</option>
+        <option value="NON_CHARGEABLE">Non-Chargeable</option>
+    </select>
+    <br>
+    <br>
+    <input class="btn btn-primary" type="submit" />
+</form>
+
+<hr>
+
+<p><b>Code Example:</b></p>
+<p>Update Project Task</p>
+<pre>
+// Assuming accessToken and xeroTenantId has been provided
+// Initially get the currently existing project
+
+var ProjectApi = new ProjectApi();
+var projectsList = await ProjectApi.GetProjectsAsync(accessToken, xeroTenantId);
+List<string> projectNames = new List<string>();
+
+Guid projectId = new Guid();
+
+foreach(Project project in projectsList.Items)
+{
+  projectNames.Add(project.Name);
+
+  if(Equals(projectName, project.Name))
+  {
+    projectId = project.ProjectId.Value;
+  }
+}
+
+Amount task_rate = new Amount() {
+  Currency = CurrencyCode.AUD,
+  Value = Decimal.Parse(taskRate)
+};
+
+var task = new TaskCreateOrUpdate() {
+  Name = taskName,
+  Rate = task_rate,
+  EstimateMinutes = int.Parse(estimateMinute),
+  ChargeType = (ChargeType) Enum.Parse(typeof(ChargeType), taskChargeType)
+};
+
+await ProjectApi.CreateTaskAsync(accessToken, xeroTenantId, projectId, task);
+
+return RedirectToAction("TaskIndex", "ProjectInfo");
+
+
+
+
+
+
+
+
+</pre>
+<br>
+<p>
+  <button class="btn btn-link" onclick="location.href='@Url.Action("Index", "Home")'">Home</button>
+</p>
+<br>
+<br>
+<br>

@@ -1,0 +1,65 @@
+@model dynamic
+
+<h2>Xero Projects Tasks</h2>
+
+<form method="POST">
+  <table table="table table-responsive fixed-table-body">
+    <label for="projectName">Project Name:</label>
+      <br>
+      <select id="projectName" name="projectName">
+      @foreach (var projectName in Model) {
+          <option value=@projectName>@projectName</option>
+      }
+      </select>
+      <br>
+      <br>
+      <input class="btn btn-primary" type="submit" />
+  </table>
+</form>
+
+<hr>
+
+<p><b>Raw JSON Response:</b></p>
+<textarea class="form-control" readonly style="height: 350px" id="jsonBag">
+@ViewBag.jsonResponse;
+</textarea>
+
+<br>
+<p><b>Code Example:</b></p>
+<p>Get all tasks of the selected project</p>
+<pre>
+// Assuming accessToken and xeroTenantId has been provided
+
+var ProjectApi = new ProjectApi();
+var projectsList = await ProjectApi.GetProjectsAsync(accessToken, xeroTenantId);
+
+Project projectToShowTask = new Project();
+Guid examinedProjectId = new Guid();
+List<string> projectNames = new List<string>();
+
+foreach(Project project in projectsList.Items)
+{
+  projectNames.Add(project.Name);
+
+  // Look for the project ID of the project selected
+  if(Equals(projectName, project.Name))
+  {
+    projectToShowTask = project;
+    examinedProjectId = projectToShowTask.ProjectId.Value;
+  }
+}
+
+var response = await ProjectApi.GetTasksAsync(accessToken, xeroTenantId, examinedProjectId);
+
+var tasks = response.Items;
+ViewBag.jsonResponse = response.ToJson();
+
+return View("TaskIndex", projectNames);
+</pre>
+<br>
+<p>
+  <button class="btn btn-link" onclick="location.href='@Url.Action("Index", "Home")'">Home</button>
+</p>
+<br>
+<br>
+<br>
