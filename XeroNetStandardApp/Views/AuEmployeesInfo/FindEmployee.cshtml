@@ -1,0 +1,44 @@
+@model dynamic
+
+<h2>Xero AU Payroll Employee</h2>
+
+<table class="table table-responsive fixed-table-body">
+  <tr>
+    <th>First Name</th>
+    <th>Last Name</th>
+    <th>Job Title</th>
+    <th>Gender</th>
+    <th>Status</th>
+    <th>Employee ID</th>
+  </tr>
+  <tr>
+    <td>@Model.FirstName</td>
+    <td>@Model.LastName</td>
+    <td>@Model.JobTitle</td>
+    <td>@Model.Gender</td>
+    <td>@Model.Status</td>
+    <td>@Model.EmployeeID</td>
+  </tr>
+</table>
+<br>
+<br>
+<p><b>Raw JSON Response:</b></p>
+<textarea class="form-control" readonly style="height: 350px">
+@ViewBag.jsonResponse;
+</textarea>
+<br>
+<p><b>Code Example:</b></p>
+<p>Get one AU Employee</p>
+<pre>
+// Assuming accessToken and xeroTenantId has been provided
+var PayrollAuApi = new PayrollAuApi();
+var response = await PayrollAuApi.GetEmployeeAsync(accessToken, xeroTenantId, employeeID);
+return response._Employee;
+</pre>
+<br>
+<p>
+  <button class="btn btn-link" onclick="location.href='@Url.Action("Index", "Home")'">Home</button>
+</p>
+<br>
+<br>
+<br>

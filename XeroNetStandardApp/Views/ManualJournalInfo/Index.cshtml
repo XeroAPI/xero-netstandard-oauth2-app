@@ -9,16 +9,16 @@
     <th>Status</th>
     <th>LineAmountTypes</th>
   </tr>
-  @foreach (var item in Model)
+  @foreach (var journal in Model)
   {
     <tr>
-      <td>@item.ManualJournalID.ToString()</td>
-      <td>@item.Narration</td>
-      <td>@item.Date</td>
-      <td>@item.Status</td>
-      <td>@item.LineAmountTypes</td>
+      <td>@journal.ManualJournalID.ToString()</td>
+      <td>@journal.Narration</td>
+      <td>@journal.Date</td>
+      <td>@journal.Status</td>
+      <td>@journal.LineAmountTypes</td>
       <td>
-        <button class="btn btn-primary" onclick="location.href='@Url.Action("FindJournal", "ManualJournalInfo", new { manualJournalId = (Guid) @item.ManualJournalID } )'">View details</button>
+        <button class="btn btn-primary" onclick="location.href='@Url.Action("FindJournal", "ManualJournalInfo", new { manualJournalId = (Guid) @journal.ManualJournalID } )'">View details</button>
       </td>
     </tr>
   }

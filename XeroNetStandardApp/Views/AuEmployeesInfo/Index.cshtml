@@ -9,6 +9,7 @@
     <th>Job Title</th>
     <th>Gender</th>
     <th>Status</th>
+    <th>Employee ID</th>
   </tr>
   @foreach (var employee in Model) {
     <tr>
@@ -17,6 +18,10 @@
       <td>@employee.JobTitle</td>
       <td>@employee.Gender</td>
       <td>@employee.Status</td>
+      <td>@employee.EmployeeID</td>
+      <td>
+        <button class="btn btn-primary" onclick="location.href='@Url.Action("FindEmployee", "AuEmployeesInfo", new { employeeId = (Guid) @employee.EmployeeID } )'">Find Employee by ID</button>
+      </td>
     </tr>
   }
 </table>

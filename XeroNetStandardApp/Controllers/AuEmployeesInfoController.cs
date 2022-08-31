@@ -61,6 +61,42 @@ namespace XeroNetStandardApp.Controllers
       return View(employees);
     }
 
+    // GET: /AuEmployeesInfo#FindEmployee
+    [HttpGet]
+    public async Task<IActionResult> FindEmployee(Guid employeeId)
+    {
+        // Authentication
+        var xeroToken = TokenUtilities.GetStoredToken();
+        var utcTimeNow = DateTime.UtcNow;
+
+        if (utcTimeNow > xeroToken.ExpiresAtUtc)
+        {
+            var client = new XeroClient(XeroConfig.Value);
+            xeroToken = (XeroOAuth2Token)await client.RefreshAccessTokenAsync(xeroToken);
+            TokenUtilities.StoreToken(xeroToken);
+        }
+
+        string accessToken = xeroToken.AccessToken;
+        Guid tenantId = TokenUtilities.GetCurrentTenantId();
+        string xeroTenantId;
+        if (xeroToken.Tenants.Any((t) => t.TenantId == tenantId))
+        {
+            xeroTenantId = tenantId.ToString();
+        }
+        else
+        {
+            var id = xeroToken.Tenants.First().TenantId;
+            xeroTenantId = id.ToString();
+            TokenUtilities.StoreTenantId(id);
+        }
+        var PayrollAUApi = new PayrollAuApi();
+        var response = await PayrollAUApi.GetEmployeeAsync(accessToken, xeroTenantId, employeeId);
+        ViewBag.jsonResponse = response.ToJson();
+
+        return View(response._Employees.First());
+    }
+
+
     // GET: /AuEmployeesInfo#Create
     [HttpGet]
     public IActionResult Create()
@@ -70,7 +106,7 @@ namespace XeroNetStandardApp.Controllers
 
     // POST: /AuEmployeesInfo#Create
     [HttpPost]
-    public async Task<ActionResult> Create(string firstName, string lastName, string DateOfBirth)
+    public async Task<ActionResult> Create(string firstName, string lastName, string employeeId)
     {
       var xeroToken = TokenUtilities.GetStoredToken();
       var utcTimeNow = DateTime.UtcNow;
@@ -113,6 +149,11 @@ namespace XeroNetStandardApp.Controllers
         DateOfBirth = dob,
         HomeAddress = homeAddress
       };
+
+      // If only the employee ID is a valid Guid will it be used to create/update an employee.
+      // Otherwise, a new Guid will be created as CreateEmployeeAsync gets called
+      if((employeeId != null) && (Guid.TryParse(employeeId, out var guidOutput)))
+        employee.EmployeeID = Guid.Parse(employeeId);
 
       var employees = new List<Employee>() { employee };
 
