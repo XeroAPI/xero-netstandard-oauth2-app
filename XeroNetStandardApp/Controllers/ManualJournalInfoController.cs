@@ -146,7 +146,7 @@ namespace XeroNetStandardApp.Controllers
                 AccountCode = "400",
                 Description = "Credit",
                 Tracking = new List<TrackingCategory>(),
-                TaxType = (TaxType)Enum.Parse(typeof(TaxType), taxType)
+                TaxType = taxType
             };
             manualJournalLines.Add(credit);
 
@@ -156,7 +156,7 @@ namespace XeroNetStandardApp.Controllers
                 AccountCode = "120",
                 Description = "Debit",
                 Tracking = new List<TrackingCategory>(),
-                TaxType = (TaxType)Enum.Parse(typeof(TaxType), taxType)
+                TaxType = taxType
             };
             manualJournalLines.Add(debit);
 
