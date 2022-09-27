@@ -9,7 +9,7 @@ using Xero.NetStandard.OAuth2.Model.Asset;
 
 namespace XeroNetStandardApp.Controllers
 {
-    public class AssetsInfo : Controller
+  public class AssetsInfo : Controller
   {
     private readonly ILogger<AuthorizationController> _logger;
     private readonly IOptions<XeroConfiguration> XeroConfig;

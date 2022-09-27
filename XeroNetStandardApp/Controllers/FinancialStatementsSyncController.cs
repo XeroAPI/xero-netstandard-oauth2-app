@@ -10,7 +10,7 @@ using Xero.NetStandard.OAuth2.Config;
 
 namespace XeroNetStandardApp.Controllers
 {
-    public class FinancialStatementsSync : Controller
+  public class FinancialStatementsSync : Controller
   {
     private readonly ILogger<AuthorizationController> _logger;
     private readonly IOptions<XeroConfiguration> XeroConfig;
@@ -78,8 +78,7 @@ namespace XeroNetStandardApp.Controllers
       ViewBag.jsonResponse = response.ToJson();
       
       return View(response);
-    }
-    
+    }    
     
     // GET: /ContactRevenue/
     public async Task<ActionResult> ContactRevenue()
@@ -99,7 +98,6 @@ namespace XeroNetStandardApp.Controllers
       return View(response);
     }
 
-
     // GET: /ProfitAndLoss/
     public async Task<ActionResult> ProfitAndLoss()
     {
@@ -116,8 +114,7 @@ namespace XeroNetStandardApp.Controllers
       ViewBag.jsonResponse = response.ToJson();
       
       return View(response);
-    }
-    
+    } 
 
     // GET: /TrialBalance/
     public async Task<ActionResult> TrialBalance()
@@ -136,7 +133,6 @@ namespace XeroNetStandardApp.Controllers
       
       return View(response);
     }
-
 
     // GET: /FinancialStatementsSync#Create
     [HttpGet]

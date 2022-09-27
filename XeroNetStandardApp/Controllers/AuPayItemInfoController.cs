@@ -28,29 +28,10 @@ namespace XeroNetStandardApp.Controllers
         // GET: /AuPayItem/
         public async Task<ActionResult> Index()
         {
-            var xeroToken = TokenUtilities.GetStoredToken();
-            var utcTimeNow = DateTime.UtcNow;
-
-            if (utcTimeNow > xeroToken.ExpiresAtUtc)
-            {
-                var client = new XeroClient(XeroConfig.Value);
-                xeroToken = (XeroOAuth2Token)await client.RefreshAccessTokenAsync(xeroToken);
-                TokenUtilities.StoreToken(xeroToken);
-            }
-
-            string accessToken = xeroToken.AccessToken;
-            Guid tenantId = TokenUtilities.GetCurrentTenantId();
-            string xeroTenantId;
-            if (xeroToken.Tenants.Any((t) => t.TenantId == tenantId))
-            {
-                xeroTenantId = tenantId.ToString();
-            }
-            else
-            {
-                var id = xeroToken.Tenants.First().TenantId;
-                xeroTenantId = id.ToString();
-                TokenUtilities.StoreTenantId(id);
-            }
+            // Authentication   
+            var client = new XeroClient(XeroConfig.Value);
+            var accessToken = await TokenUtilities.GetCurrentAccessToken(client);
+            var xeroTenantId = TokenUtilities.GetCurrentTenantId().ToString();
 
             var PayrollAUApi = new PayrollAuApi();
             var response = await PayrollAUApi.GetPayItemsAsync(accessToken, xeroTenantId);
@@ -75,7 +56,6 @@ namespace XeroNetStandardApp.Controllers
             // Sends the Pay item information to View
             ViewBag.jsonResponse = response.ToJson();
             return View(payItemList);
-
         }
     }
 }

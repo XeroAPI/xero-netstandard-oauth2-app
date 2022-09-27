@@ -8,7 +8,7 @@ using Xero.NetStandard.OAuth2.Config;
 
 namespace XeroNetStandardApp.Controllers
 {
-    public class BankTransactionsInfo : Controller
+  public class BankTransactionsInfo : Controller
   {
 
     private readonly ILogger<AuthorizationController> _logger;

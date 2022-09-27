@@ -2,20 +2,20 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using System.Threading.Tasks;
+using Xero.NetStandard.OAuth2.Api;
 using Xero.NetStandard.OAuth2.Client;
 using Xero.NetStandard.OAuth2.Config;
-using Xero.NetStandard.OAuth2.Token;
 using Xero.NetStandard.OAuth2.Model.Accounting;
-using Xero.NetStandard.OAuth2.Api;
-using System.Threading.Tasks;
+using Xero.NetStandard.OAuth2.Token;
 using static Xero.NetStandard.OAuth2.Model.Accounting.TaxRate;
-using System.Collections.Generic;
 
 namespace XeroNetStandardApp.Controllers
 {
-    public class TaxRateInfoController : Controller
+  public class TaxRateInfoController : Controller
     {
         private readonly ILogger<TaxRateInfoController> _logger;
         private readonly IOptions<XeroConfiguration> XeroConfig;

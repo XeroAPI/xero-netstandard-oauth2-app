@@ -11,7 +11,7 @@ using Xero.NetStandard.OAuth2.Config;
 
 namespace XeroNetStandardApp.Controllers
 {
-    public class CashValidationSync : Controller
+  public class CashValidationSync : Controller
   {
     private readonly ILogger<AuthorizationController> _logger;
     private readonly IOptions<XeroConfiguration> XeroConfig;
@@ -23,7 +23,6 @@ namespace XeroNetStandardApp.Controllers
       this.XeroConfig = XeroConfig;
       this.httpClientFactory = httpClientFactory;
     }
-
 
     // GET: /CashValidationSync/
     public async Task<ActionResult> Index()
@@ -42,7 +41,6 @@ namespace XeroNetStandardApp.Controllers
 
       return View(response);
     }
-
 
     // GET: /CashValidationSync#Create
     [HttpGet]

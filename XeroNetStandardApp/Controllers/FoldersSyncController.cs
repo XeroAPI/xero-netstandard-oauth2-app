@@ -11,7 +11,7 @@ using Xero.NetStandard.OAuth2.Model.Files;
 
 namespace XeroNetStandardApp.Controllers
 {
-    public class FoldersSync : Controller
+  public class FoldersSync : Controller
   {
     private readonly ILogger<AuthorizationController> _logger;
     private readonly IOptions<XeroConfiguration> XeroConfig;
@@ -46,7 +46,6 @@ namespace XeroNetStandardApp.Controllers
 
       return View(response);
     }
-
 
     // GET: /Folders#Create
     [HttpGet]
@@ -94,7 +93,6 @@ namespace XeroNetStandardApp.Controllers
       return RedirectToAction("Index", "FoldersSync");
     }
 
-
     // GET: /FoldersSync#Modify
     [HttpGet("/FoldersSync/{folderId}")]
     public IActionResult Modify(string folderId, string folderName)
@@ -123,7 +121,5 @@ namespace XeroNetStandardApp.Controllers
 
       return RedirectToAction("Index", "FoldersSync");
     }
-
-
   }
 }

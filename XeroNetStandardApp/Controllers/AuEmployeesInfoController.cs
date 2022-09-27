@@ -11,7 +11,7 @@ using Xero.NetStandard.OAuth2.Model.PayrollAu;
 
 namespace XeroNetStandardApp.Controllers
 {
-    public class AuEmployeesInfo : Controller
+  public class AuEmployeesInfo : Controller
   {
     private readonly ILogger<AuthorizationController> _logger;
     private readonly IOptions<XeroConfiguration> XeroConfig;

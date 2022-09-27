@@ -10,7 +10,7 @@ using Xero.NetStandard.OAuth2.Config;
 
 namespace XeroNetStandardApp.Controllers
 {
-    public class AccountingActivitiesSync : Controller
+  public class AccountingActivitiesSync : Controller
   {
     private readonly ILogger<AuthorizationController> _logger;
     private readonly IOptions<XeroConfiguration> XeroConfig;
@@ -27,16 +27,16 @@ namespace XeroNetStandardApp.Controllers
     // GET: /AccountingUsage/
     public async Task<ActionResult> AccountingUsage()
     {
-			// Authentication   
-			var client = new XeroClient(XeroConfig.Value);
-			var accessToken = await TokenUtilities.GetCurrentAccessToken(client);
-			var xeroTenantId = TokenUtilities.GetCurrentTenantId().ToString();
+      // Authentication   
+      var client = new XeroClient(XeroConfig.Value);
+      var accessToken = await TokenUtilities.GetCurrentAccessToken(client);
+      var xeroTenantId = TokenUtilities.GetCurrentTenantId().ToString();
 
-			var FinanceApi = new FinanceApi();
+      var FinanceApi = new FinanceApi();
 
       // Requesting for 12 months prior to the end month will be used
       var response = await FinanceApi.GetAccountingActivityAccountUsageAsync(accessToken, xeroTenantId, null, null);
-    
+
       ViewBag.jsonResponse = response.ToJson();
 
       return View(response);
@@ -47,15 +47,15 @@ namespace XeroNetStandardApp.Controllers
     public async Task<ActionResult> LockHistory()
     {
       // Authentication   
-			var client = new XeroClient(XeroConfig.Value);
-			var accessToken = await TokenUtilities.GetCurrentAccessToken(client);
-			var xeroTenantId = TokenUtilities.GetCurrentTenantId().ToString();
+      var client = new XeroClient(XeroConfig.Value);
+      var accessToken = await TokenUtilities.GetCurrentAccessToken(client);
+      var xeroTenantId = TokenUtilities.GetCurrentTenantId().ToString();
 
       var FinanceApi = new FinanceApi();
 
       // Requesting for a history of locking of accounting books until now
       var response = await FinanceApi.GetAccountingActivityLockHistoryAsync(accessToken, xeroTenantId, null);
-      
+
       ViewBag.jsonResponse = response.ToJson();
 
       return View(response);
@@ -66,15 +66,15 @@ namespace XeroNetStandardApp.Controllers
     public async Task<ActionResult> ReportHistory()
     {
       // Authentication   
-			var client = new XeroClient(XeroConfig.Value);
-			var accessToken = await TokenUtilities.GetCurrentAccessToken(client);
-			var xeroTenantId = TokenUtilities.GetCurrentTenantId().ToString();
+      var client = new XeroClient(XeroConfig.Value);
+      var accessToken = await TokenUtilities.GetCurrentAccessToken(client);
+      var xeroTenantId = TokenUtilities.GetCurrentTenantId().ToString();
 
       var FinanceApi = new FinanceApi();
 
       // Requesting, for a specified organisation, a summary of all the reports published to this day.
       var response = await FinanceApi.GetAccountingActivityReportHistoryAsync(accessToken, xeroTenantId, null);
-      
+
       ViewBag.jsonResponse = response.ToJson();
 
       return View(response);
@@ -85,15 +85,15 @@ namespace XeroNetStandardApp.Controllers
     public async Task<ActionResult> UserActivities()
     {
       // Authentication   
-			var client = new XeroClient(XeroConfig.Value);
-			var accessToken = await TokenUtilities.GetCurrentAccessToken(client);
-			var xeroTenantId = TokenUtilities.GetCurrentTenantId().ToString();
+      var client = new XeroClient(XeroConfig.Value);
+      var accessToken = await TokenUtilities.GetCurrentAccessToken(client);
+      var xeroTenantId = TokenUtilities.GetCurrentTenantId().ToString();
 
       var FinanceApi = new FinanceApi();
 
       // Requesting, for a specified organisation, a summary of all the reports published to this day.
       var response = await FinanceApi.GetAccountingActivityUserActivitiesAsync(accessToken, xeroTenantId, null);
-      
+
       ViewBag.jsonResponse = response.ToJson();
 
       return View(response);

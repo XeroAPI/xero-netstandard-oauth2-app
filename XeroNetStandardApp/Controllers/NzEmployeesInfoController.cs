@@ -10,7 +10,7 @@ using Xero.NetStandard.OAuth2.Model.PayrollNz;
 
 namespace XeroNetStandardApp.Controllers
 {
-    public class NzEmployeesInfo : Controller
+  public class NzEmployeesInfo : Controller
   {
     private readonly ILogger<AuthorizationController> _logger;
     private readonly IOptions<XeroConfiguration> XeroConfig;

@@ -10,7 +10,7 @@ using Xero.NetStandard.OAuth2.Model.Accounting;
 
 namespace XeroNetStandardApp.Controllers
 {
-    public class ContactsInfo : Controller
+  public class ContactsInfo : Controller
   {
     private readonly ILogger<AuthorizationController> _logger;
     private readonly IOptions<XeroConfiguration> XeroConfig;

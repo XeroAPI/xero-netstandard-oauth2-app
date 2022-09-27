@@ -14,7 +14,7 @@ using Xero.NetStandard.OAuth2.Model.Files;
 
 namespace XeroNetStandardApp.Controllers
 {
-    public class AssociationsSync : Controller
+  public class AssociationsSync : Controller
   {
     private readonly ILogger<AuthorizationController> _logger;
     private readonly IOptions<XeroConfiguration> XeroConfig;
@@ -59,9 +59,7 @@ namespace XeroNetStandardApp.Controllers
       return View(response);
     }
 
-
-
-   // GET: /AssociationsSync#Create
+    // GET: /AssociationsSync#Create
     [HttpGet]
     public async Task<IActionResult> Create()
     {

@@ -1,16 +1,13 @@
 using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Collections.Generic;
-using Xero.NetStandard.OAuth2.Model.Bankfeeds;
-using Xero.NetStandard.OAuth2.Token;
-using Xero.NetStandard.OAuth2.Api;
-using Xero.NetStandard.OAuth2.Config;
-using Xero.NetStandard.OAuth2.Client;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using System.Net.Http;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using Xero.NetStandard.OAuth2.Api;
+using Xero.NetStandard.OAuth2.Client;
+using Xero.NetStandard.OAuth2.Config;
+using Xero.NetStandard.OAuth2.Model.Bankfeeds;
 
 namespace XeroNetStandardApp.Controllers
 {
@@ -116,7 +113,6 @@ namespace XeroNetStandardApp.Controllers
       var feedConnections = new FeedConnections{
           Items = list
       };
-
 
       var BankFeedsApi = new BankFeedsApi();
       await BankFeedsApi.DeleteFeedConnectionsAsync(accessToken, xeroTenantId, feedConnections);

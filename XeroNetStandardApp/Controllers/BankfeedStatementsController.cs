@@ -12,7 +12,7 @@ using Xero.NetStandard.OAuth2.Model.Bankfeeds;
 
 namespace XeroNetStandardApp.Controllers
 {
-    public class BankfeedStatements : Controller
+  public class BankfeedStatements : Controller
     {
         private readonly ILogger<AuthorizationController> _logger;
         private readonly IOptions<XeroConfiguration> XeroConfig;
@@ -123,4 +123,4 @@ namespace XeroNetStandardApp.Controllers
         }
 
     }
-}
+}m

@@ -13,7 +13,7 @@ using Xero.NetStandard.OAuth2.Model.Accounting;
 
 namespace XeroNetStandardApp.Controllers
 {
-    public class ManualJournalInfo : Controller
+  public class ManualJournalInfo : Controller
     {
         private readonly ILogger<ManualJournalInfo> _logger;
         private readonly IOptions<XeroConfiguration> XeroConfig;
@@ -59,7 +59,6 @@ namespace XeroNetStandardApp.Controllers
 
             return View(response._ManualJournals.First());
         }
-
 
         // GET: /ManualJournalInfo#Create
         [HttpGet]

@@ -12,7 +12,7 @@ using Xero.NetStandard.OAuth2.Config;
 
 namespace XeroNetStandardApp.Controllers
 {
-    public class BankStatementsPlusSync : Controller
+  public class BankStatementsPlusSync : Controller
   {
     private readonly ILogger<AuthorizationController> _logger;
     private readonly IOptions<XeroConfiguration> XeroConfig;
@@ -24,7 +24,6 @@ namespace XeroNetStandardApp.Controllers
       this.XeroConfig = XeroConfig;
       this.httpClientFactory = httpClientFactory;
     }
-
 
     // GET: /BankStatementsPlusSync/
     public async Task<ActionResult> Index()
@@ -40,7 +39,6 @@ namespace XeroNetStandardApp.Controllers
       var where = "Status==\"ACTIVE\" AND Type==\"BANK\"";
       var accountsResponse = await AccountingApi.GetAccountsAsync(accessToken, xeroTenantId, null, where);
       
-      
       Guid? accountId = accountsResponse._Accounts[0].AccountID;
       Guid accountIdGuid = accountId.Value;
       var fromDate = "2021-04-01";
@@ -51,7 +49,6 @@ namespace XeroNetStandardApp.Controllers
 
       return View(bankStatementsResponse);
     }
-
 
     // GET: /BankStatementsPlusSync#Create
     [HttpGet]
