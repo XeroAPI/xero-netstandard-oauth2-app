@@ -56,8 +56,6 @@ namespace XeroNetStandardApp.Controllers
 
             ViewBag.jsonResponse = response.ToJson();
 
-            
-
             return View(response._Accounts);
         }
     }
