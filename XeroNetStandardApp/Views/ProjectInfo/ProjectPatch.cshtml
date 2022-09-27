@@ -1,0 +1,99 @@
+@model dynamic
+
+<h2>Patch a Xero Project</h2>
+
+<form method="POST">
+    <label for="projectName">Project Name:</label>
+    <br>
+    <select id="projectName" name="projectName">
+    @foreach (var projectName in Model) {
+      <option value=@projectName>@projectName</option>
+    }
+    </select>
+    @* <input class="form-control" type="text" id="contactId" placeholder="Enter a contact ID for the project" name="contactId" required/> *@
+    <br>
+    <br>
+    <select id="projectStatusChoice" name="projectStatusChoice">
+      <option value="INPROGRESS">In Progress</option>
+      <option value="CLOSED">Closed</option>
+    </select>
+    <br>
+    <br>
+    <input class="btn btn-primary" type="submit" />
+</form>
+
+<hr>
+
+<p><b>Code Example:</b></p>
+<p>Update Project</p>
+<pre>
+// Assuming accessToken and xeroTenantId has been provided
+// Initially get the currently existing project
+
+var ProjectApi = new ProjectApi();
+var projectsList = await ProjectApi.GetProjectsAsync(accessToken, xeroTenantId);
+
+Project projectToBeUpdate = new Project();
+Guid projectId = new Guid();
+var projectPatch = new ProjectPatch();
+Boolean stateChanged = false;
+
+foreach(Project project in projectsList.Items)
+{
+  if(Equals(projectName, project.Name))
+  {
+    projectToBeUpdate = project;
+    projectId = projectToBeUpdate.ProjectId.Value;
+
+    ProjectStatus status;
+
+    if (Enum.TryParse(projectStatusChoice, out status))
+    {
+      switch (status)
+      {
+        // Inprogress status was selected
+        case ProjectStatus.INPROGRESS:
+          if(projectToBeUpdate.Status != ProjectStatus.INPROGRESS)
+          {
+            projectPatch.Status = ProjectStatus.INPROGRESS;
+            stateChanged = true;
+          }
+        break;
+
+        case ProjectStatus.CLOSED:
+          if(projectToBeUpdate.Status != ProjectStatus.CLOSED)
+          {
+            projectPatch.Status = ProjectStatus.CLOSED;
+            stateChanged = true;
+          }
+        break;
+
+        default:
+        break;
+      }
+    }
+    else 
+    {
+        /* invalid enum value, handle */
+    }
+    break;
+  }
+}
+
+if(stateChanged)
+{
+  await ProjectApi.PatchProjectAsync(accessToken, xeroTenantId, projectId, projectPatch);
+  // Wait a second for the update made to be registered
+  System.Threading.Tasks.Task taskA = System.Threading.Tasks.Task.Run( () => System.Threading.Thread.Sleep(1000));
+  stateChanged = false;
+}
+
+return RedirectToAction("Index", "ProjectInfo");
+</pre>
+<br>
+<p>
+  <button class="btn btn-link" onclick="location.href='@Url.Action("Index", "Home")'">Home</button>
+</p>
+<br>
+<br>
+<br>

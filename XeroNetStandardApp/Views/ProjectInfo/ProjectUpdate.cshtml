@@ -1,0 +1,73 @@
+@model dynamic
+
+<h2>Update a Xero Project</h2>
+
+<form method="POST">
+    <label for="projectOldName">Project Name:</label>
+    <br>
+    <select id="projectOldName" name="projectOldName">
+    @foreach (var projectOldName in Model) {
+        <option value=@projectOldName>@projectOldName</option>
+    }
+    </select>
+    @* <input class="form-control" type="text" id="contactId" placeholder="Enter a contact ID for the project" name="contactId" required/> *@
+    <br>
+    <br>
+    <input class="form-control" type="text" id="newName" placeholder="Enter new name for the project" name="newName" required/>
+    <br>
+    <input class="form-control" type="text" id="newDeadLine" placeholder="Enter new deadline for this project yyyy, MM, dd" name="newDeadLine" required/>
+    <br>
+    <input class="form-control" type="number" step="any" id="newEstimateAmount" placeholder="Enter new estimated amount for the project" name="newEstimateAmount" required/>
+    <br>
+    <br>
+    <input class="btn btn-primary" type="submit" />
+</form>
+
+<hr>
+
+<p><b>Code Example:</b></p>
+<p>Update Project</p>
+<pre>
+// Assuming accessToken and xeroTenantId has been provided
+// Initially get the currently existing project
+
+Amount projectAmount = new Amount() {
+    Currency = CurrencyCode.AUD,
+    Value = Decimal.Parse(newEstimateAmount)
+};
+    
+var ProjectApi = new ProjectApi();
+var projectsList = await ProjectApi.GetProjectsAsync(accessToken, xeroTenantId);
+
+Project projectToBeUpdate = new Project();
+Guid oldProjectId = new Guid();
+
+foreach(Project oldProject in projectsList.Items)
+{
+    if(Equals(projectOldName, oldProject.Name))
+    {
+        projectToBeUpdate = oldProject;
+        oldProjectId = projectToBeUpdate.ProjectId.Value;
+        break;
+    }
+}
+
+var project = new ProjectCreateOrUpdate() {
+    Name = newName,
+    EstimateAmount = Decimal.Parse(newEstimateAmount),
+    ContactId = projectToBeUpdate.ContactId,
+    DeadlineUtc = newDeadline
+};
+
+await ProjectApi.UpdateProjectAsync(accessToken, xeroTenantId, oldProjectId, project);
+
+// Wait a second for the update made to be registered
+System.Threading.Tasks.Task taskA = System.Threading.Tasks.Task.Run( () => System.Threading.Thread.Sleep(1000));
+</pre>
+<br>
+<p>
+  <button class="btn btn-link" onclick="location.href='@Url.Action("Index", "Home")'">Home</button>
+</p>
+<br>
+<br>
+<br>

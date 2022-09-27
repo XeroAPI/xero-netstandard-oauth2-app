@@ -14,11 +14,14 @@
               <a class="link-sidebar py-2" asp-area="" asp-controller="ContactsInfo" asp-action="Create">Create Contacts</a>
               <a class="link-sidebar py-2" asp-area="" asp-controller="InvoiceSync" asp-action="Index">Get Invoices (Last 7 Days)</a>
               <a class="link-sidebar py-2" asp-area="" asp-controller="InvoiceSync" asp-action="Create">Create Invoice</a>
+              <a class="link-sidebar py-2" asp-area="" asp-controller="OrganisationInfo" asp-action="Index">Get Organisation</a>
               <a class="link-sidebar py-2" asp-area="" asp-controller="PurchaseOrderSync" asp-action="Index">Get Purchase Order</a>
               <a class="link-sidebar py-2" asp-area="" asp-controller="PurchaseOrderSync" asp-action="Create">Create Purchase Order</a>
               <a class="link-sidebar py-2" asp-area="" asp-controller="BankTransactionsInfo" asp-action="Index">Get BankTransactions</a>
               <a class="link-sidebar py-2" asp-area="" asp-controller="ManualJournalInfo" asp-action="Index">Get Manual Journals</a>
               <a class="link-sidebar py-2" asp-area="" asp-controller="ManualJournalInfo" asp-action="Create">Create Manual Journals</a>
+              <a class="link-sidebar py-2" asp-area="" asp-controller="TaxRateInfo" asp-action="Index">Get Tax Rates</a>
+              <a class="link-sidebar py-2" asp-area="" asp-controller="TaxRateInfo" asp-action="Create">Create Tax Rates</a>
           </div>
       </div>
   </li>
@@ -93,6 +96,7 @@
           <div class="list-group">
               <a class="link-sidebar py-2" asp-area="" asp-controller="AuEmployeesInfo" asp-action="Index" id="get-employees">Get Employees</a> 
               <a class="link-sidebar py-2" asp-area="" asp-controller="AuEmployeesInfo" asp-action="Create">Create Employee</a> 
+              <a class="link-sidebar py-2" asp-area="" asp-controller="AuPayItemInfo" asp-action="Index">Get Pay Items</a> 
           </div>
       </div>
   </li>
@@ -121,8 +125,14 @@
       <a class="link-holder" data-toggle="collapse" href="#collapseProject" role="button" onclick="UpdateLinkHolderColour(this)" aria-expanded="false">Project</a>
           <div class="collapse" id="collapseProject">
           <div class="list-group">
-              <a class="link-sidebar py-2" asp-area="" asp-controller="ProjectInfo" asp-action="Index">Get Xero Projects</a>
-              <a class="link-sidebar py-2" asp-area="" asp-controller="ProjectInfo" asp-action="Create">Create Xero Projects</a>
+              <a class="link-sidebar py-2" asp-area="" asp-controller="ProjectInfo" asp-action="ProjectIndex">Get Xero Projects</a>
+              <a class="link-sidebar py-2" asp-area="" asp-controller="ProjectInfo" asp-action="ProjectCreate">Create Xero Projects</a>
+              <a class="link-sidebar py-2" asp-area="" asp-controller="ProjectInfo" asp-action="ProjectUpdate">Update Xero Projects</a>
+              <a class="link-sidebar py-2" asp-area="" asp-controller="ProjectInfo" asp-action="ProjectPatch">Patch Xero Projects</a>
+              <a class="link-sidebar py-2" asp-area="" asp-controller="ProjectInfo" asp-action="TaskIndex">Get Xero Projects Tasks</a>
+              <a class="link-sidebar py-2" asp-area="" asp-controller="ProjectInfo" asp-action="TaskCreate">Create Xero Projects Tasks</a>
+              <a class="link-sidebar py-2" asp-area="" asp-controller="ProjectInfo" asp-action="TaskUpdate">Update Xero Projects Tasks</a>
+              <a class="link-sidebar py-2" asp-area="" asp-controller="ProjectInfo" asp-action="TaskDelete">Delete Xero Projects Tasks</a>
           </div>
       </div>
   </li>
