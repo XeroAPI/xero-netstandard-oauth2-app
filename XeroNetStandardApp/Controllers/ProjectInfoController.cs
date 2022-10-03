@@ -194,7 +194,6 @@ namespace XeroNetStandardApp.Controllers
       var response = await ProjectApi.CreateProjectAsync(accessToken, xeroTenantId, project);
 
       return RedirectToAction("ViewProject", "ProjectInfo", response);
-      // return RedirectToAction("ProjectIndex", "ProjectInfo");
     }
   
 
