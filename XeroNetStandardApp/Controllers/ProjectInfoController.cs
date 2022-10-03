@@ -115,7 +115,7 @@ namespace XeroNetStandardApp.Controllers
       return View(contactIds);
     }
 
-    // GET: /Project #Create
+    // GET: /ViewProject
     [HttpGet]
     public async Task<IActionResult> ViewProject(Project project)
     {
