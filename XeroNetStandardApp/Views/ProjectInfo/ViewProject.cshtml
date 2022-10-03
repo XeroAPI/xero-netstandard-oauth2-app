@@ -1,0 +1,33 @@
+﻿@model dynamic
+
+<h2>Xero Projects</h2>
+
+<h3>You successfully created the following project!</h3>
+
+<table class="table table-responsive fixed-table-body">
+  <tr>
+    <th>Project Id</th>
+    <th>Project Number</th>
+    <th>Time entries</th>
+  </tr>
+    <tr>
+      <td>@Model.ProjectId</td>
+      <td>@Model.Name</td>
+      <td>
+        <button class="btn btn-primary" onclick="location.href='@Url.Action("GetTimeEntries", "ProjectInfo", new { projectId = (Guid) @Model.ProjectId } )'">View time entries</button>
+      </td>
+    </tr>
+</table>
+
+<p><b>Raw JSON Response:</b></p>
+<textarea class="form-control" readonly style="height: 350px" id="jsonBag">
+@ViewBag.jsonResponse;
+</textarea>
+<br>
+<p>
+  <button class="btn btn-link" onclick="location.href='@Url.Action("Index", "Home")'">Home</button>
+</p>
+<br>
+<br>
+<br>
+

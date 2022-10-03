@@ -115,6 +115,38 @@ namespace XeroNetStandardApp.Controllers
       return View(contactIds);
     }
 
+    // GET: /Project #Create
+    [HttpGet]
+    public async Task<IActionResult> ViewProject(Project project)
+    {
+      var xeroToken = TokenUtilities.GetStoredToken();
+      var utcTimeNow = DateTime.UtcNow;
+
+      if (utcTimeNow > xeroToken.ExpiresAtUtc)
+      {
+        var client = new XeroClient(XeroConfig.Value);
+        xeroToken = (XeroOAuth2Token)await client.RefreshAccessTokenAsync(xeroToken);
+        TokenUtilities.StoreToken(xeroToken);
+      }
+
+      string accessToken = xeroToken.AccessToken;
+      Guid tenantId = TokenUtilities.GetCurrentTenantId();
+      string xeroTenantId;
+      if (xeroToken.Tenants.Any((t) => t.TenantId == tenantId))
+      {
+        xeroTenantId = tenantId.ToString();
+      }
+      else
+      {
+        var id = xeroToken.Tenants.First().TenantId;
+        xeroTenantId = id.ToString();
+        TokenUtilities.StoreTenantId(id);
+      }
+
+      ViewBag.jsonResponse = project.ToJson();
+      return View(project);
+    }
+
     // POST: /Project #Create
     [HttpPost]
     public async Task<ActionResult> ProjectCreate(string contactId, string name, string estimateAmount)
@@ -161,7 +193,8 @@ namespace XeroNetStandardApp.Controllers
       var ProjectApi = new ProjectApi();
       var response = await ProjectApi.CreateProjectAsync(accessToken, xeroTenantId, project);
 
-      return RedirectToAction("ProjectIndex", "ProjectInfo");
+      return RedirectToAction("ViewProject", "ProjectInfo", response);
+      // return RedirectToAction("ProjectIndex", "ProjectInfo");
     }
   
 
