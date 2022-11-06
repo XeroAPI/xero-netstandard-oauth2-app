@@ -2,13 +2,17 @@ using System;
 using System.Configuration;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text.Json;
 using System.Net.Http;
+using System.Threading.Tasks;
 using Xero.NetStandard.OAuth2.Token;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Xero.NetStandard.OAuth2.Client;
 using Microsoft.Extensions.DependencyInjection;
+using Xero.NetStandard.OAuth2.Config;
+using Xero.NetStandard.OAuth2.Models;
 
 public static class TokenUtilities
 {
@@ -20,6 +24,23 @@ public static class TokenUtilities
       this.state = state;
     }
   }
+
+
+  public async static Task<XeroOAuth2Token> GetXeroOAuth2Token(XeroConfiguration xeroConfig)
+  {
+      var xeroToken = GetStoredToken();
+      var utcTimeNow = DateTime.UtcNow;
+
+      if (utcTimeNow > xeroToken.ExpiresAtUtc)
+      {
+          var client = new XeroClient(xeroConfig);
+          xeroToken = (XeroOAuth2Token) await client.RefreshAccessTokenAsync(xeroToken);
+          StoreToken(xeroToken);
+      }
+
+      return xeroToken;
+  }
+
   public static void StoreToken(XeroOAuth2Token xeroToken)
   {
     string serializedXeroToken = JsonSerializer.Serialize(xeroToken);
@@ -109,4 +130,23 @@ public static class TokenUtilities
 
     return state;
   }
+
+    public static string GetXeroTenantId(XeroOAuth2Token xeroToken)
+    {
+        Guid tenantId = GetCurrentTenantId();
+        string xeroTenantId;
+
+        if (xeroToken.Tenants.Any((t) => t.TenantId == tenantId))
+        {
+            xeroTenantId = tenantId.ToString();
+        }
+        else
+        {
+            var id = xeroToken.Tenants.First().TenantId;
+            xeroTenantId = id.ToString();
+            StoreTenantId(id);
+        }
+
+        return xeroTenantId;
+    }
 }
