@@ -91,7 +91,7 @@ namespace XeroNetStandardApp.Controllers
             var xeroTenantId = TokenUtilities.GetXeroTenantId(xeroToken);
 
             // Requesting, for a specified organisation, a summary of all the reports published to this day.
-            var response = await _financeApi.GetAccountingActivityUserActivitiesAsync(xeroToken.AccessToken, xeroTenantId, null);
+            var response = await _financeApi.GetAccountingActivityUserActivitiesAsync(xeroToken.AccessToken, xeroTenantId);
 
             ViewBag.jsonResponse = response.ToJson();
             return View(response);
