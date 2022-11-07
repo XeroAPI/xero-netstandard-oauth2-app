@@ -1,0 +1,43 @@
+﻿@model dynamic
+
+<h2>Xero Accounts</h2>
+
+<table class="table table-responsive fixed-table-body">
+  <tr>
+    <th>Name</th>
+    <th>Code</th>
+    <th>Type</th>
+    <th>Tax Rate</th>
+    <th>CurrencyCode</th>
+  </tr>
+  @foreach (var account in Model) {
+    <tr>
+      <td>@account.Name</td>
+      <td>@account.Code</td>
+      <td>@account.Type.ToString()</td>
+      <td>@account.TaxType.ToString()</td>
+      <td>@account.CurrencyCode.ToString()</td>
+    </tr>
+  }
+</table>
+<br>
+<p><b>Raw JSON Response:</b></p>
+<textarea class="form-control" readonly style="height: 350px">
+@ViewBag.jsonResponse;
+</textarea>
+<br>
+<p><b>Code Example:</b></p>
+<p>Get all accounts</p>
+<pre>
+// Assuming accessToken and xeroTenantId has been provided
+var AccountingApi = new AccountingApi();
+var response = await AccountingApi.GetAccountsAsync(accessToken, xeroTenantId);
+return response._Accounts;
+</pre>
+<br>
+<p>
+  <button class="btn btn-link" onclick="location.href='@Url.Action("Index", "Home")'">Home</button>
+</p>
+<br>
+<br>
+<br>
