@@ -3,214 +3,176 @@ using System;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using Xero.NetStandard.OAuth2.Model.Accounting;
-using Xero.NetStandard.OAuth2.Token;
 using Xero.NetStandard.OAuth2.Api;
 using Xero.NetStandard.OAuth2.Config;
-using Xero.NetStandard.OAuth2.Client;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using System.Net.Http;
 using System.Linq;
 using System.IO;
 using Microsoft.AspNetCore.Http;
-using System.Text;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Serialization;
-
 
 namespace XeroNetStandardApp.Controllers
 {
-  public class InvoiceSync : Controller
-  {
-    private readonly ILogger<AuthorizationController> _logger;
-    private readonly IOptions<XeroConfiguration> XeroConfig;
-    private readonly IHttpClientFactory httpClientFactory;
-
-    public InvoiceSync(IOptions<XeroConfiguration> XeroConfig, IHttpClientFactory httpClientFactory, ILogger<AuthorizationController> logger)
+    /// <summary>
+    /// Controller implementing methods demonstrating following Invoice endpoints:
+    /// <para>- GET: /InvoiceSync/</para>
+    /// <para>- POST: /InvoiceSync#Create/</para>
+    /// <para>- POST: /InvoiceSync/FileUpload#Upload</para>
+    /// </summary>
+    public class InvoiceSync : Controller
     {
-      _logger = logger;
-      this.XeroConfig = XeroConfig;
-      this.httpClientFactory = httpClientFactory;
-    }
+        private readonly IOptions<XeroConfiguration> _xeroConfig;
+        private readonly AccountingApi _accountingApi;
 
-    // GET: /InvoiceSync/
-    public async Task<ActionResult> Index()
-    {
-      var xeroToken = TokenUtilities.GetStoredToken();
-      var utcTimeNow = DateTime.UtcNow;
+        public InvoiceSync(IOptions<XeroConfiguration> xeroConfig)
+        {
+            _xeroConfig = xeroConfig;
+            _accountingApi = new AccountingApi();
+        }
 
-      if (utcTimeNow > xeroToken.ExpiresAtUtc)
-      {
-        var client = new XeroClient(XeroConfig.Value);
-        xeroToken = (XeroOAuth2Token)await client.RefreshAccessTokenAsync(xeroToken);
-        TokenUtilities.StoreToken(xeroToken);
-      }
+        #region GET Endpoints
+        /// <summary>
+        /// GET: /InvoiceSync/
+        /// </summary>
+        /// <returns>Returns list of invoices for last 7 days</returns>
+        public async Task<ActionResult> Index()
+        {
+            // Token and TenantId setup
+            var xeroToken = await TokenUtilities.GetXeroOAuth2Token(_xeroConfig.Value);
+            var xeroTenantId = TokenUtilities.GetXeroTenantId(xeroToken);
 
-      string accessToken = xeroToken.AccessToken;
-      Guid tenantId = TokenUtilities.GetCurrentTenantId();
-      string xeroTenantId;
-      if (xeroToken.Tenants.Any((t) => t.TenantId == tenantId))
-      {
-        xeroTenantId = tenantId.ToString();
-      }
-      else
-      {
-        var id = xeroToken.Tenants.First().TenantId;
-        xeroTenantId = id.ToString();
-        TokenUtilities.StoreTenantId(id);
-      }
+            // Call get invoices endpoint
+            var response = await _accountingApi.GetInvoicesAsync(xeroToken.AccessToken, xeroTenantId, null, GetSevenDayInvoiceFilter());
 
-      var AccountingApi = new AccountingApi();
+            ViewBag.jsonResponse = response.ToJson();
+            return View(response._Invoices);
+        }
 
+        /// <summary>
+        /// GET: /InvoiceSync#Create
+        /// <para>Helper method to return View</para>
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet]
+        public IActionResult Create()
+        {
+            return View();
+        }
+        #endregion
 
-      var sevenDaysAgo = DateTime.Now.AddDays(-7).ToString("yyyy, MM, dd");
-      var invoicesFilter = "Date >= DateTime(" + sevenDaysAgo + ")";
-
-      var response = await AccountingApi.GetInvoicesAsync(accessToken, xeroTenantId, null, invoicesFilter);
-      var invoices = response._Invoices;
-      ViewBag.jsonResponse = response.ToJson();
-      return View(invoices);
-    }
-
-    // GET: /InvoiceSync#Create
-    [HttpGet]
-    public IActionResult Create()
-    {
-      return View();
-    }
-
-    // POST: /InvoiceSync#Create
-    [HttpPost]
-    public async Task<ActionResult> Create(string Name, string LineDescription, string LineQuantity, string LineUnitAmount, string LineAccountCode)
-    {
-      var xeroToken = TokenUtilities.GetStoredToken();
-      var utcTimeNow = DateTime.UtcNow;
-
-      if (utcTimeNow > xeroToken.ExpiresAtUtc)
-      {
-        var client = new XeroClient(XeroConfig.Value);
-        xeroToken = (XeroOAuth2Token)await client.RefreshAccessTokenAsync(xeroToken);
-        TokenUtilities.StoreToken(xeroToken);
-      }
-
-      string accessToken = xeroToken.AccessToken;
-      Guid tenantId = TokenUtilities.GetCurrentTenantId();
-      string xeroTenantId;
-      if (xeroToken.Tenants.Any((t) => t.TenantId == tenantId))
-      {
-        xeroTenantId = tenantId.ToString();
-      }
-      else
-      {
-        var id = xeroToken.Tenants.First().TenantId;
-        xeroTenantId = id.ToString();
-        TokenUtilities.StoreTenantId(id);
-      }
-
-      var contact = new Contact();
-      contact.Name = Name;
-      
-      var line = new LineItem() {
-        Description = LineDescription,
-        Quantity = decimal.Parse(LineQuantity),
-        UnitAmount = decimal.Parse(LineUnitAmount),
-        AccountCode = LineAccountCode
-      };
-
-      var lines = new List<LineItem>() {
-        line
-      };
-
-      var invoice = new Invoice() {
-        Type = Invoice.TypeEnum.ACCREC,
-        Contact = contact,
-        Date = DateTime.Today,
-        DueDate = DateTime.Today.AddDays(30),
-        LineItems = lines
-      };
-
-      var invoiceList = new List<Invoice>();
-      invoiceList.Add(invoice);
-
-      var invoices = new Invoices();
-      invoices._Invoices = invoiceList;
-
-      var objectFullName = invoices.GetType().FullName;
-      String result = JsonConvert.SerializeObject(invoices);
-
-      var AccountingApi = new AccountingApi();
-      var response = await AccountingApi.CreateInvoicesAsync(accessToken, xeroTenantId, invoices);
-      
-      var updatedUTC = response._Invoices[0].UpdatedDateUTC;
-
-      return RedirectToAction("Index", "InvoiceSync");
-    }
+        #region POST Endpoints
+        /// <summary>
+        /// POST: /InvoiceSync#Create
+        /// </summary>
+        /// <param name="name">Name of invoice</param>
+        /// <param name="lineDescription">Description of line item</param>
+        /// <param name="lineQuantity">Quantity of line item</param>
+        /// <param name="lineUnitAmount">Unit amount of line item</param>
+        /// <param name="lineAccountCode">Line item account code</param>
+        /// <returns>Returns action result to redirect user to get invoices page</returns>
+        [HttpPost]
+        public async Task<ActionResult> Create(string name, string lineDescription, string lineQuantity,
+            string lineUnitAmount, string lineAccountCode)
+        {
+            // Token and TenantId setup
+            var xeroToken = await TokenUtilities.GetXeroOAuth2Token(_xeroConfig.Value);
+            var xeroTenantId = TokenUtilities.GetXeroTenantId(xeroToken);
 
 
-    // POST: /InvoiceSync/FileUpload#Upload
-
-    [HttpPost("InvoiceFileUpload")]
-    public async Task<IActionResult> Upload(List<IFormFile> files, string invoiceId)
-    {
-      var xeroToken = TokenUtilities.GetStoredToken();
-      var utcTimeNow = DateTime.UtcNow;
-
-      if (utcTimeNow > xeroToken.ExpiresAtUtc)
-      {
-        var client = new XeroClient(XeroConfig.Value);
-        xeroToken = (XeroOAuth2Token)await client.RefreshAccessTokenAsync(xeroToken);
-        TokenUtilities.StoreToken(xeroToken);
-      }
-
-
-      string accessToken = xeroToken.AccessToken;
-      Guid tenantId = TokenUtilities.GetCurrentTenantId();
-      string xeroTenantId;
-      if (xeroToken.Tenants.Any((t) => t.TenantId == tenantId))
-      {
-        xeroTenantId = tenantId.ToString();
-      }
-      else
-      {
-        var id = xeroToken.Tenants.First().TenantId;
-        xeroTenantId = id.ToString();
-        TokenUtilities.StoreTenantId(id);
-      }
-
-      var invoiceID = Guid.Parse(invoiceId);
-      long size = files.Sum(f => f.Length);
-                      
-      var filePaths = new List<string>();
-      foreach (var formFile in files)
-      {
-          if (formFile.Length > 0)
-          {
-            // full path to file in temp location
-            var filePath = Path.GetTempFileName(); //we are using Temp file name just for the example. Add your own file path.
-            filePaths.Add(filePath);
-
-            byte [] byteArray; 
-
-            // using (var stream = new FileStream(filePath, FileMode.Create))
-            // {
-            //     await formFile.CopyToAsync(stream);
-            // }
-
-            using (MemoryStream data = new MemoryStream())
+            // Construct invoice
+            var invoice = ConstructInvoice(name, lineDescription, lineQuantity, lineUnitAmount, lineAccountCode);
+            var invoices = new Invoices
             {
-              formFile.CopyTo(data);
-              byteArray = data.ToArray();
+                _Invoices = new List<Invoice> { invoice }
+            };
+
+            // Call create invoice endpoint
+            await _accountingApi.CreateInvoicesAsync(xeroToken.AccessToken, xeroTenantId, invoices);
+
+            return RedirectToAction("Index", "InvoiceSync");
+        }
+
+        /// <summary>
+        /// POST: /InvoiceSync/FileUpload#Upload
+        /// </summary>
+        /// <param name="files">File to upload to specified invoice</param>
+        /// <param name="invoiceId">Invoice id to associate file with</param>
+        /// <returns>Returns information for account files</returns>
+        [HttpPost("InvoiceFileUpload")]
+        public async Task<IActionResult> Upload(List<IFormFile> files, Guid invoiceId)
+        {
+            // Token and TenantId setup
+            var xeroToken = await TokenUtilities.GetXeroOAuth2Token(_xeroConfig.Value);
+            var xeroTenantId = TokenUtilities.GetXeroTenantId(xeroToken);
+
+            // Setup
+            var size = files.Sum(f => f.Length);
+            var filePaths = new List<string>();
+
+            foreach (var formFile in files)
+            {
+                if (formFile.Length > 0)
+                {
+                    var filePath = Path.GetTempFileName();
+                    filePaths.Add(filePath);
+
+                    byte[] byteArray;
+                    using (MemoryStream ms = new MemoryStream())
+                    {
+                        await formFile.CopyToAsync(ms);
+                        byteArray = ms.ToArray();
+                    }
+
+                    // Call attach file to invoice endpoint
+                    await _accountingApi.CreateInvoiceAttachmentByFileNameAsync(xeroToken.AccessToken, xeroTenantId, invoiceId, formFile.FileName, byteArray);
+                }
             }
 
-            var AccountingApi = new AccountingApi();
-            var response = await AccountingApi.CreateInvoiceAttachmentByFileNameAsync(accessToken, xeroTenantId, invoiceID, formFile.FileName, byteArray);
-          }
-      }
+            return Ok(new { count = files.Count, size, filePaths });
+        }
+        #endregion
 
-      // process uploaded files
-      // Don't rely on or trust the FileName property without validation.
+        #region Helper Methods
+        /// <summary>
+        /// Generate invoice filter string for datetime seven days ago
+        /// </summary>
+        /// <returns>Formatted invoice filter string</returns>
+        private string GetSevenDayInvoiceFilter()
+        {
+            var sevenDaysAgo = DateTime.Now.AddDays(-7).ToString("yyyy, MM, dd");
+            return "Date >= DateTime(" + sevenDaysAgo + ")";
+        }
 
-      return Ok(new { count = files.Count, size, filePaths });
+        /// <summary>
+        /// Generate invoice object
+        /// </summary>
+        /// <param name="name">Name of invoice</param>
+        /// <param name="lineDescription">Description of line item</param>
+        /// <param name="lineQuantity">Quantity of line item</param>
+        /// <param name="lineUnitAmount">Unit amount of line item</param>
+        /// <param name="lineAccountCode">Line item account code</param>
+        /// <returns>Returns instantiated invoice object</returns>
+        private Invoice ConstructInvoice(string name, string lineDescription, string lineQuantity, string lineUnitAmount, string lineAccountCode)
+        {
+            var contact = new Contact { Name = name };
+            var lineItems = new List<LineItem>
+            {
+                new LineItem
+                {
+                    Description = lineDescription,
+                    Quantity = decimal.Parse(lineQuantity),
+                    UnitAmount = decimal.Parse(lineUnitAmount),
+                    AccountCode = lineAccountCode,
+                }
+            };
+            return new Invoice
+            {
+                Type = Invoice.TypeEnum.ACCREC,
+                Contact = contact,
+                Date = DateTime.Today,
+                DueDate = DateTime.Today.AddDays(30),
+                LineItems = lineItems
+            };
+        }
+        #endregion
     }
-  }
 }
