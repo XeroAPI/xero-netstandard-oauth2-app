@@ -10,6 +10,8 @@ namespace XeroNetStandardApp.Controllers
 {
     /// <summary>
     /// Controller implementing methods demonstrating following NZ Employee info endpoints:
+    /// <para>- GET: /NzEmployeesInfo#Index</para>
+    /// <para>- POST: /NzEmployeesInfo#Create</para>
     /// </summary>
     public class NzEmployeesInfo : Controller
     {

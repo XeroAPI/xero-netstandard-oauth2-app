@@ -23,6 +23,8 @@ namespace XeroNetStandardApp.Controllers
             _payrollAuApi = new PayrollAuApi();
         }
 
+        #region GET Endpoints
+
         /// <summary>
         /// GET: /AuEmployeesInfo#Index
         /// </summary>
@@ -51,6 +53,10 @@ namespace XeroNetStandardApp.Controllers
             return View();
         }
 
+        #endregion
+
+        #region POST Endpoints
+
         /// <summary>
         /// POST: /AuEmployeesInfo#Create
         /// </summary>
@@ -74,6 +80,10 @@ namespace XeroNetStandardApp.Controllers
         }
 
 
+        #endregion
+
+        #region Helper Methods
+
         /// <summary>
         /// Helper method to create a new employee object
         /// </summary>
@@ -93,6 +103,8 @@ namespace XeroNetStandardApp.Controllers
 
             return employee;
         }
+
+        #endregion
 
     }
 }
