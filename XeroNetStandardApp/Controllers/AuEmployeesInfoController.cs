@@ -11,6 +11,8 @@ namespace XeroNetStandardApp.Controllers
 {
     /// <summary>
     /// Controller implementing methods demonstrating following AU employee endpoints:
+    /// <para>- GET: /AuEmployeesInfo#Index</para>
+    /// <para>- POST: /AuEmployeesInfo#Create</para>
     /// </summary>
     public class AuEmployeesInfo : Controller
     {
