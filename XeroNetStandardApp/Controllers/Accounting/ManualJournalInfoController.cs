@@ -109,7 +109,7 @@ namespace XeroNetStandardApp.Controllers
 
         // POST: /ManualJournalInfo#Create
         [HttpPost]
-        public async Task<ActionResult> Create(String narration, String taxType)
+        public async Task<ActionResult> Create(string narration, string taxType)
         {
             // Authentication
             var xeroToken = TokenUtilities.GetStoredToken();

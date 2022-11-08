@@ -1,37 +1,35 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
+using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Linq;
-using System.Net.Http;
-using Xero.NetStandard.OAuth2.Client;
-using Xero.NetStandard.OAuth2.Config;
-using Xero.NetStandard.OAuth2.Token;
-using Xero.NetStandard.OAuth2.Model.Accounting;
-using Xero.NetStandard.OAuth2.Api;
 using System.Threading.Tasks;
-using static Xero.NetStandard.OAuth2.Model.Accounting.TaxRate;
 using System.Collections.Generic;
+using Xero.NetStandard.OAuth2.Model.PayrollUk;
+using Xero.NetStandard.OAuth2.Token;
+using Xero.NetStandard.OAuth2.Api;
+using Xero.NetStandard.OAuth2.Config;
+using Xero.NetStandard.OAuth2.Client;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using System.Net.Http;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 
 namespace XeroNetStandardApp.Controllers
 {
-    public class TaxRateInfoController : Controller
+    public class UkEmployeesInfo : Controller
     {
-        private readonly ILogger<TaxRateInfoController> _logger;
+        private readonly ILogger<AuthorizationController> _logger;
         private readonly IOptions<XeroConfiguration> XeroConfig;
-        private readonly IHttpClientFactory httpClientFactory;
 
-        public TaxRateInfoController(IOptions<XeroConfiguration> XeroConfig, IHttpClientFactory httpClientFactory, ILogger<TaxRateInfoController> logger)
+        public UkEmployeesInfo(IOptions<XeroConfiguration> XeroConfig, ILogger<AuthorizationController> logger)
         {
             _logger = logger;
             this.XeroConfig = XeroConfig;
-            this.httpClientFactory = httpClientFactory;
         }
 
-        // GET: /TaxRateInfo/
+        // GET: /UkEmployeesInfo#Index
         public async Task<ActionResult> Index()
         {
-            // Authentication
             var xeroToken = TokenUtilities.GetStoredToken();
             var utcTimeNow = DateTime.UtcNow;
 
@@ -55,27 +53,31 @@ namespace XeroNetStandardApp.Controllers
                 xeroTenantId = id.ToString();
                 TokenUtilities.StoreTenantId(id);
             }
-            var AccountingApi = new AccountingApi();
 
-            var response = await AccountingApi.GetTaxRatesAsync(accessToken, xeroTenantId);
+            var PayrollUKApi = new PayrollUkApi();
+            var response = await PayrollUKApi.GetEmployeesAsync(accessToken, xeroTenantId);
 
+            var timesheetResponse = await PayrollUKApi.GetTimesheetsAsync(accessToken, xeroTenantId);
+            Console.WriteLine("--- timesheet Response ---");
+            Console.WriteLine(timesheetResponse.ToString());
+
+            var employees = response._Employees;
             ViewBag.jsonResponse = response.ToJson();
 
-            return View(response._TaxRates);
+            return View(employees);
         }
 
-        // GET: /TaxRateInfo#Create
+        // GET: /UkEmployeesInfo#Create
         [HttpGet]
         public IActionResult Create()
         {
             return View();
         }
 
-        // POST: /TaxRateInfo#Create
+        // POST: /UkEmployeesInfo#Create
         [HttpPost]
-        public async Task<ActionResult> Create(String name, String status, String reportTaxType, decimal rate)
+        public async Task<ActionResult> Create(string firstName, string lastName, string DateOfBirth)
         {
-            // Authentication
             var xeroToken = TokenUtilities.GetStoredToken();
             var utcTimeNow = DateTime.UtcNow;
 
@@ -99,32 +101,30 @@ namespace XeroNetStandardApp.Controllers
                 xeroTenantId = id.ToString();
                 TokenUtilities.StoreTenantId(id);
             }
-            
-            var taxComponent = new TaxComponent() {
-                Name = "State Tax",
-                Rate = rate
-            };
-            var taxComponents = new List<TaxComponent>();
-            taxComponents.Add(taxComponent);
 
-            var taxRate = new TaxRate()
+            DateTime dob = DateTime.Today.AddYears(-20);
+
+            Address homeAddress = new Address()
             {
-                Name = name,
-                Status = (StatusEnum)Enum.Parse(typeof(StatusEnum), status),
-                ReportTaxType = (ReportTaxTypeEnum)Enum.Parse(typeof(ReportTaxTypeEnum), reportTaxType),
-                TaxComponents = taxComponents
+                AddressLine1 = "171 Midsummer",
+                City = "Milton Keyness",
+                PostCode = "MK9 1EB"
             };
 
-            var taxRates = new TaxRates();
-            var taxRatesList = new List<TaxRate>();
-            taxRatesList.Add(taxRate);
-            taxRates._TaxRates = taxRatesList;
+            Employee employee = new Employee()
+            {
+                FirstName = firstName,
+                LastName = lastName,
+                DateOfBirth = dob,
+                Address = homeAddress,
+                Gender = Employee.GenderEnum.M,
+                Title = "worker"
+            };
 
-            var AccountingApi = new AccountingApi();
+            var PayrollAUApi = new PayrollUkApi();
+            var response = await PayrollAUApi.CreateEmployeeAsync(accessToken, xeroTenantId, employee);
 
-            await AccountingApi.CreateTaxRatesAsync(accessToken, xeroTenantId, taxRates);
-
-            return RedirectToAction("Index", "TaxRateInfo");
+            return RedirectToAction("Index", "UkEmployeesInfo");
         }
     }
 }

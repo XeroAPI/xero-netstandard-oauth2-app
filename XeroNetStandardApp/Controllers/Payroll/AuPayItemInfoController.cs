@@ -54,7 +54,7 @@ namespace XeroNetStandardApp.Controllers
 
             var PayrollAUApi = new PayrollAuApi();
             var response = await PayrollAUApi.GetPayItemsAsync(accessToken, xeroTenantId);
-            
+
             // Extracts the name from the different pay item types
             var earnings = response._PayItems.EarningsRates
               .Select(x => x.Name)

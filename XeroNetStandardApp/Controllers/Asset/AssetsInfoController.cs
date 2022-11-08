@@ -23,7 +23,7 @@ namespace XeroNetStandardApp.Controllers
         }
 
         #region GET Endpoints
-        
+
         /// <summary>
         /// GET: /Assets/
         /// </summary>
