@@ -10,7 +10,7 @@ using Xero.NetStandard.OAuth2.Client;
 using Xero.NetStandard.OAuth2.Config;
 using Xero.NetStandard.OAuth2.Token;
 
-namespace XeroNetStandardApp.Controllers.Payroll
+namespace XeroNetStandardApp.Controllers
 {
     public class AuPayItemInfoController : Controller
     {

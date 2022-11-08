@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using Xero.NetStandard.OAuth2.Api;
 using Xero.NetStandard.OAuth2.Config;
 
-namespace XeroNetStandardApp.Controllers.Accounting
+namespace XeroNetStandardApp.Controllers
 {
     /// <summary>
     /// Controller supporting get accounts endpoint

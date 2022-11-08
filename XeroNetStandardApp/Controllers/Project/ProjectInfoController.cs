@@ -12,7 +12,7 @@ using Xero.NetStandard.OAuth2.Config;
 using Xero.NetStandard.OAuth2.Model.Project;
 using Xero.NetStandard.OAuth2.Token;
 
-namespace XeroNetStandardApp.Controllers.Project
+namespace XeroNetStandardApp.Controllers
 {
     // For the two example uses only
     public class projectTaskExampleClass

@@ -4,7 +4,7 @@ using Xero.NetStandard.OAuth2.Api;
 using Xero.NetStandard.OAuth2.Config;
 using Microsoft.Extensions.Options;
 
-namespace XeroNetStandardApp.Controllers.Finance
+namespace XeroNetStandardApp.Controllers
 {
     /// <summary>
     /// Controller implementing methods demonstrating following finance endpoints:

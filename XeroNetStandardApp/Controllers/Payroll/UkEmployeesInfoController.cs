@@ -14,7 +14,7 @@ using System.Net.Http;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 
-namespace XeroNetStandardApp.Controllers.Payroll
+namespace XeroNetStandardApp.Controllers
 {
     public class UkEmployeesInfo : Controller
     {

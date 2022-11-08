@@ -12,7 +12,7 @@ using Xero.NetStandard.OAuth2.Config;
 using Xero.NetStandard.OAuth2.Model.Accounting;
 using Xero.NetStandard.OAuth2.Token;
 
-namespace XeroNetStandardApp.Controllers.Accounting
+namespace XeroNetStandardApp.Controllers
 {
     public class ManualJournalInfo : Controller
     {

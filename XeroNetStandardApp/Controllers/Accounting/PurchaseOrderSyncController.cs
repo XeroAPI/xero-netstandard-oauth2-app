@@ -18,7 +18,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 
 
-namespace XeroNetStandardApp.Controllers.Accounting
+namespace XeroNetStandardApp.Controllers
 {
     public class PurchaseOrderSync : Controller
     {

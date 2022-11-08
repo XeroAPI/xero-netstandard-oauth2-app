@@ -11,7 +11,7 @@ using Microsoft.Extensions.Options;
 using System.Linq;
 using System.Collections.Generic;
 
-namespace XeroNetStandardApp.Controllers.Accounting
+namespace XeroNetStandardApp.Controllers
 {
     public class BankTransactionsInfo : Controller
     {

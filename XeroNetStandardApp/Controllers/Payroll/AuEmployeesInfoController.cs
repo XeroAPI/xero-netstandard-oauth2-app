@@ -7,7 +7,7 @@ using Xero.NetStandard.OAuth2.Api;
 using Xero.NetStandard.OAuth2.Config;
 using Microsoft.Extensions.Options;
 
-namespace XeroNetStandardApp.Controllers.Payroll
+namespace XeroNetStandardApp.Controllers
 {
     /// <summary>
     /// Controller implementing methods demonstrating following AU employee endpoints:

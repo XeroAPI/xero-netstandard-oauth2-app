@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 using static Xero.NetStandard.OAuth2.Model.Accounting.TaxRate;
 using System.Collections.Generic;
 
-namespace XeroNetStandardApp.Controllers.Accounting
+namespace XeroNetStandardApp.Controllers
 {
     public class TaxRateInfoController : Controller
     {

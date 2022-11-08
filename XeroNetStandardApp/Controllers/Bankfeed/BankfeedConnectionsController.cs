@@ -12,7 +12,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System.Net.Http;
 
-namespace XeroNetStandardApp.Controllers.Bankfeed
+namespace XeroNetStandardApp.Controllers
 {
     public class BankfeedConnections : Controller
     {

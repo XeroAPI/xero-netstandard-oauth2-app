@@ -5,7 +5,7 @@ using Xero.NetStandard.OAuth2.Api;
 using Xero.NetStandard.OAuth2.Config;
 using Microsoft.Extensions.Options;
 
-namespace XeroNetStandardApp.Controllers.Asset
+namespace XeroNetStandardApp.Controllers
 {
     /// <summary>
     /// Controller implementing methods demonstrating following asset endpoints:

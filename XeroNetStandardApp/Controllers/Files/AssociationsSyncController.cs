@@ -9,7 +9,7 @@ using Microsoft.Extensions.Options;
 using System.Linq;
 using Microsoft.AspNetCore.Routing;
 
-namespace XeroNetStandardApp.Controllers.Files
+namespace XeroNetStandardApp.Controllers
 {
     /// <summary>
     /// Controller implementing methods demonstrating following file endpoints:

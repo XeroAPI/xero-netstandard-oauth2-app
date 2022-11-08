@@ -10,7 +10,7 @@ using System.Linq;
 using System.IO;
 using Microsoft.AspNetCore.Http;
 
-namespace XeroNetStandardApp.Controllers.Accounting
+namespace XeroNetStandardApp.Controllers
 {
     /// <summary>
     /// Controller implementing methods demonstrating following Invoice endpoints:

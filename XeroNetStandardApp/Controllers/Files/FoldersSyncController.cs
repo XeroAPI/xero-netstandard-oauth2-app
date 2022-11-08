@@ -13,7 +13,7 @@ using System.Net.Http;
 using System.Linq;
 using Xero.NetStandard.OAuth2.Model.Files;
 
-namespace XeroNetStandardApp.Controllers.Files
+namespace XeroNetStandardApp.Controllers
 {
     public class FoldersSync : Controller
     {

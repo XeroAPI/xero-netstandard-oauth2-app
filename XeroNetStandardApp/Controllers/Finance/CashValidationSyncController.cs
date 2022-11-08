@@ -19,7 +19,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 
 
-namespace XeroNetStandardApp.Controllers.Finance
+namespace XeroNetStandardApp.Controllers
 {
     public class CashValidationSync : Controller
     {
