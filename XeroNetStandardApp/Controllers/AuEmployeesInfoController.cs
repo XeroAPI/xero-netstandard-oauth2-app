@@ -1,128 +1,112 @@
 using Microsoft.AspNetCore.Mvc;
 using System;
-using System.Linq;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using Xero.NetStandard.OAuth2.Model.PayrollAu;
-using Xero.NetStandard.OAuth2.Token;
 using Xero.NetStandard.OAuth2.Api;
 using Xero.NetStandard.OAuth2.Config;
-using Xero.NetStandard.OAuth2.Client;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Newtonsoft.Json;
 
 namespace XeroNetStandardApp.Controllers
 {
-  public class AuEmployeesInfo : Controller
-  {
-    private readonly ILogger<AuthorizationController> _logger;
-    private readonly IOptions<XeroConfiguration> XeroConfig;
-
-    public AuEmployeesInfo(IOptions<XeroConfiguration> XeroConfig, ILogger<AuthorizationController> logger)
+    /// <summary>
+    /// Controller implementing methods demonstrating following AU employee endpoints:
+    /// <para>- GET: /AuEmployeesInfo#Index</para>
+    /// <para>- POST: /AuEmployeesInfo#Create</para>
+    /// </summary>
+    public class AuEmployeesInfo : Controller
     {
-      _logger = logger;
-      this.XeroConfig = XeroConfig;
+        private readonly IOptions<XeroConfiguration> _xeroConfig;
+        private readonly PayrollAuApi _payrollAuApi;
+
+        public AuEmployeesInfo(IOptions<XeroConfiguration> xeroConfig)
+        {
+            _xeroConfig = xeroConfig;
+            _payrollAuApi = new PayrollAuApi();
+        }
+
+        #region GET Endpoints
+
+        /// <summary>
+        /// GET: /AuEmployeesInfo#Index
+        /// </summary>
+        /// <returns>Returns a list of AU employees</returns>
+        public async Task<ActionResult> Index()
+        {
+            // Token and TenantId setup
+            var xeroToken = await TokenUtilities.GetXeroOAuth2Token(_xeroConfig.Value);
+            var xeroTenantId = TokenUtilities.GetXeroTenantId(xeroToken);
+
+            // Call get employees AU endpoint
+            var response = await _payrollAuApi.GetEmployeesAsync(xeroToken.AccessToken, xeroTenantId);
+
+            ViewBag.jsonResponse = response.ToJson();
+            return View(response._Employees);
+        }
+
+        /// <summary>
+        /// GET: /AuEmployeesInfo#Create
+        /// <para>Helper method to return View</para>
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet]
+        public IActionResult Create()
+        {
+            return View();
+        }
+
+        #endregion
+
+        #region POST Endpoints
+
+        /// <summary>
+        /// POST: /AuEmployeesInfo#Create
+        /// </summary>
+        /// <param name="firstName">Firstname of employee to create</param>
+        /// <param name="lastName">Lastname of employee to create</param>
+        /// <returns></returns>
+        [HttpPost]
+        public async Task<ActionResult> Create(string firstName, string lastName)
+        {
+            // Token and TenantId setup
+            var xeroToken = await TokenUtilities.GetXeroOAuth2Token(_xeroConfig.Value);
+            var xeroTenantId = TokenUtilities.GetXeroTenantId(xeroToken);
+
+            // Construct employee object
+            var employees = new List<Employee> { ConstructEmployee(firstName, lastName) };
+
+            // Call create employee endpoint
+            await _payrollAuApi.CreateEmployeeAsync(xeroToken.AccessToken, xeroTenantId, employees);
+
+            return RedirectToAction("Index", "AuEmployeesInfo");
+        }
+
+
+        #endregion
+
+        #region Helper Methods
+
+        /// <summary>
+        /// Helper method to create a new employee object
+        /// </summary>
+        /// <param name="firstName">Firstname of employee object to instantiate</param>
+        /// <param name="lastName">Lastname of employee object to instantiate</param>
+        /// <returns></returns>
+        private Employee ConstructEmployee(string firstName, string lastName)
+        {
+            Employee employee = new Employee
+            {
+                FirstName = firstName,
+                LastName = lastName,
+                DateOfBirth = DateTime.Today.AddYears(-20),
+                Gender = Employee.GenderEnum.M,
+                Title = "worker"
+            };
+
+            return employee;
+        }
+
+        #endregion
+
     }
-
-    // GET: /AuEmployeesInfo#Index
-    public async Task<ActionResult> Index()
-    {
-      var xeroToken = TokenUtilities.GetStoredToken();
-      var utcTimeNow = DateTime.UtcNow;
-
-      if (utcTimeNow > xeroToken.ExpiresAtUtc)
-      {
-        var client = new XeroClient(XeroConfig.Value);
-        xeroToken = (XeroOAuth2Token)await client.RefreshAccessTokenAsync(xeroToken);
-        TokenUtilities.StoreToken(xeroToken);
-      }
-
-      string accessToken = xeroToken.AccessToken;
-      Guid tenantId = TokenUtilities.GetCurrentTenantId();
-      string xeroTenantId;
-      if (xeroToken.Tenants.Any((t) => t.TenantId == tenantId))
-      {
-        xeroTenantId = tenantId.ToString();
-      }
-      else
-      {
-        var id = xeroToken.Tenants.First().TenantId;
-        xeroTenantId = id.ToString();
-        TokenUtilities.StoreTenantId(id);
-      }
-
-      var PayrollAUApi = new PayrollAuApi();
-      var response = await PayrollAUApi.GetEmployeesAsync(accessToken, xeroTenantId);
-      ViewBag.jsonResponse = response.ToJson();
-
-      var employees = response._Employees;
-
-      return View(employees);
-    }
-
-    // GET: /AuEmployeesInfo#Create
-    [HttpGet]
-    public IActionResult Create()
-    {
-      return View();
-    }
-
-    // POST: /AuEmployeesInfo#Create
-    [HttpPost]
-    public async Task<ActionResult> Create(string firstName, string lastName, string DateOfBirth)
-    {
-      var xeroToken = TokenUtilities.GetStoredToken();
-      var utcTimeNow = DateTime.UtcNow;
-
-      if (utcTimeNow > xeroToken.ExpiresAtUtc)
-      {
-        var client = new XeroClient(XeroConfig.Value);
-        xeroToken = (XeroOAuth2Token)await client.RefreshAccessTokenAsync(xeroToken);
-        TokenUtilities.StoreToken(xeroToken);
-      }
-
-      string accessToken = xeroToken.AccessToken;
-      Guid tenantId = TokenUtilities.GetCurrentTenantId();
-      string xeroTenantId;
-      if (xeroToken.Tenants.Any((t) => t.TenantId == tenantId))
-      {
-        xeroTenantId = tenantId.ToString();
-      }
-      else
-      {
-        var id = xeroToken.Tenants.First().TenantId;
-        xeroTenantId = id.ToString();
-        TokenUtilities.StoreTenantId(id);
-      }
-
-      DateTime dob = DateTime.Today.AddYears(-20);
-
-      HomeAddress homeAddress = new HomeAddress() {
-        AddressLine1 = "123 Main St",
-        AddressLine2 = "St. Kilda",
-        Region = State.ACT,
-        City = "Waiwhetu",
-        PostalCode = "3182", 
-        Country = "AUSTRALIA"
-      };
-
-      Employee employee = new Employee() {
-        FirstName = firstName,
-        LastName = lastName,
-        DateOfBirth = dob,
-        HomeAddress = homeAddress
-      };
-
-      var employees = new List<Employee>() { employee };
-
-      var objectFullName = employees.GetType().FullName;
-      String result = JsonConvert.SerializeObject(employees);
-
-      var PayrollAUApi = new PayrollAuApi();
-      var response = await PayrollAUApi.CreateEmployeeAsync(accessToken, xeroTenantId, employees);
-
-      return RedirectToAction("Index", "AuEmployeesInfo");
-    }
-  }
 }
