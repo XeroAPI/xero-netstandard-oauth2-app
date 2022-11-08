@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 using static Xero.NetStandard.OAuth2.Model.Accounting.TaxRate;
 using System.Collections.Generic;
 
-namespace XeroNetStandardApp.Controllers
+namespace XeroNetStandardApp.Controllers.Accounting
 {
     public class TaxRateInfoController : Controller
     {
@@ -73,7 +73,7 @@ namespace XeroNetStandardApp.Controllers
 
         // POST: /TaxRateInfo#Create
         [HttpPost]
-        public async Task<ActionResult> Create(String name, String status, String reportTaxType, decimal rate)
+        public async Task<ActionResult> Create(string name, string status, string reportTaxType, decimal rate)
         {
             // Authentication
             var xeroToken = TokenUtilities.GetStoredToken();
@@ -99,8 +99,9 @@ namespace XeroNetStandardApp.Controllers
                 xeroTenantId = id.ToString();
                 TokenUtilities.StoreTenantId(id);
             }
-            
-            var taxComponent = new TaxComponent() {
+
+            var taxComponent = new TaxComponent()
+            {
                 Name = "State Tax",
                 Rate = rate
             };

@@ -12,7 +12,7 @@ using Xero.NetStandard.OAuth2.Config;
 using Xero.NetStandard.OAuth2.Model.Accounting;
 using Xero.NetStandard.OAuth2.Token;
 
-namespace XeroNetStandardApp.Controllers
+namespace XeroNetStandardApp.Controllers.Accounting
 {
     public class ManualJournalInfo : Controller
     {
@@ -109,7 +109,7 @@ namespace XeroNetStandardApp.Controllers
 
         // POST: /ManualJournalInfo#Create
         [HttpPost]
-        public async Task<ActionResult> Create(String narration, String taxType)
+        public async Task<ActionResult> Create(string narration, string taxType)
         {
             // Authentication
             var xeroToken = TokenUtilities.GetStoredToken();

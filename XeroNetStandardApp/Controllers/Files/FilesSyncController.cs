@@ -18,7 +18,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 
 
-namespace XeroNetStandardApp.Controllers
+namespace XeroNetStandardApp.Controllers.Files
 {
     public class FilesSync : Controller
     {

@@ -9,15 +9,4 @@
     <PackageReference Include="Xero.NetStandard.OAuth2Client" Version="1.6.0" />
     <PackageReference Include="Microsoft.AspNetCore.Session" Version="2.2.0" />
   </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Controllers\Accounting\" />
-    <Folder Include="Controllers\Asset\" />
-    <Folder Include="Controllers\Bankfeed\" />
-    <Folder Include="Controllers\Files\" />
-    <Folder Include="Controllers\Finance\" />
-    <Folder Include="Controllers\Identity\" />
-    <Folder Include="Controllers\Project\" />
-    <Folder Include="Controllers\Payroll\" />
-  </ItemGroup>
 </Project>

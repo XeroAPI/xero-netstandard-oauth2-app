@@ -10,7 +10,7 @@ using Xero.NetStandard.OAuth2.Client;
 using Xero.NetStandard.OAuth2.Config;
 using Xero.NetStandard.OAuth2.Token;
 
-namespace XeroNetStandardApp.Controllers
+namespace XeroNetStandardApp.Controllers.Payroll
 {
     public class AuPayItemInfoController : Controller
     {
@@ -54,7 +54,7 @@ namespace XeroNetStandardApp.Controllers
 
             var PayrollAUApi = new PayrollAuApi();
             var response = await PayrollAUApi.GetPayItemsAsync(accessToken, xeroTenantId);
-            
+
             // Extracts the name from the different pay item types
             var earnings = response._PayItems.EarningsRates
               .Select(x => x.Name)

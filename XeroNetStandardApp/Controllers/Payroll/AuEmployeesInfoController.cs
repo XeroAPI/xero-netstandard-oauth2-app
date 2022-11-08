@@ -1,50 +1,51 @@
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Threading.Tasks;
-using Xero.NetStandard.OAuth2.Model.PayrollNz;
+using System.Collections.Generic;
+using Xero.NetStandard.OAuth2.Model.PayrollAu;
 using Xero.NetStandard.OAuth2.Api;
 using Xero.NetStandard.OAuth2.Config;
 using Microsoft.Extensions.Options;
 
-namespace XeroNetStandardApp.Controllers
+namespace XeroNetStandardApp.Controllers.Payroll
 {
     /// <summary>
-    /// Controller implementing methods demonstrating following NZ Employee info endpoints:
-    /// <para>- GET: /NzEmployeesInfo#Index</para>
-    /// <para>- POST: /NzEmployeesInfo#Create</para>
+    /// Controller implementing methods demonstrating following AU employee endpoints:
+    /// <para>- GET: /AuEmployeesInfo#Index</para>
+    /// <para>- POST: /AuEmployeesInfo#Create</para>
     /// </summary>
-    public class NzEmployeesInfo : Controller
+    public class AuEmployeesInfo : Controller
     {
         private readonly IOptions<XeroConfiguration> _xeroConfig;
-        private readonly PayrollNzApi _payrollNzApi;
+        private readonly PayrollAuApi _payrollAuApi;
 
-        public NzEmployeesInfo(IOptions<XeroConfiguration> xeroConfig)
+        public AuEmployeesInfo(IOptions<XeroConfiguration> xeroConfig)
         {
             _xeroConfig = xeroConfig;
-            _payrollNzApi = new PayrollNzApi();
+            _payrollAuApi = new PayrollAuApi();
         }
 
         #region GET Endpoints
 
         /// <summary>
-        /// GET: /NzEmployeesInfo#Index
+        /// GET: /AuEmployeesInfo#Index
         /// </summary>
-        /// <returns>Returns list of NZ employees</returns>
+        /// <returns>Returns a list of AU employees</returns>
         public async Task<ActionResult> Index()
         {
             // Token and TenantId setup
             var xeroToken = await TokenUtilities.GetXeroOAuth2Token(_xeroConfig.Value);
             var xeroTenantId = TokenUtilities.GetXeroTenantId(xeroToken);
 
-            // Call get employees endpoint
-            var employees = await _payrollNzApi.GetEmployeesAsync(xeroToken.AccessToken, xeroTenantId);
-            ViewBag.jsonResponse = employees.ToJson();
+            // Call get employees AU endpoint
+            var response = await _payrollAuApi.GetEmployeesAsync(xeroToken.AccessToken, xeroTenantId);
 
-            return View(employees._Employees);
+            ViewBag.jsonResponse = response.ToJson();
+            return View(response._Employees);
         }
 
         /// <summary>
-        /// GET: /NzEmployeesInfo#Create
+        /// GET: /AuEmployeesInfo#Create
         /// <para>Helper method to return View</para>
         /// </summary>
         /// <returns></returns>
@@ -57,12 +58,13 @@ namespace XeroNetStandardApp.Controllers
         #endregion
 
         #region POST Endpoints
+
         /// <summary>
-        /// POST: /NzEmployeesInfo#Create
+        /// POST: /AuEmployeesInfo#Create
         /// </summary>
         /// <param name="firstName">Firstname of employee to create</param>
         /// <param name="lastName">Lastname of employee to create</param>
-        /// <returns>Return action result to redirect user to get employees page</returns>
+        /// <returns></returns>
         [HttpPost]
         public async Task<ActionResult> Create(string firstName, string lastName)
         {
@@ -70,14 +72,20 @@ namespace XeroNetStandardApp.Controllers
             var xeroToken = await TokenUtilities.GetXeroOAuth2Token(_xeroConfig.Value);
             var xeroTenantId = TokenUtilities.GetXeroTenantId(xeroToken);
 
-            // Call create employee endpoint
-            await _payrollNzApi.CreateEmployeeAsync(xeroToken.AccessToken, xeroTenantId, ConstructEmployee(firstName, lastName));
+            // Construct employee object
+            var employees = new List<Employee> { ConstructEmployee(firstName, lastName) };
 
-            return RedirectToAction("Index", "NzEmployeesInfo");
+            // Call create employee endpoint
+            await _payrollAuApi.CreateEmployeeAsync(xeroToken.AccessToken, xeroTenantId, employees);
+
+            return RedirectToAction("Index", "AuEmployeesInfo");
         }
+
+
         #endregion
 
         #region Helper Methods
+
         /// <summary>
         /// Helper method to create a new employee object
         /// </summary>
@@ -86,25 +94,19 @@ namespace XeroNetStandardApp.Controllers
         /// <returns></returns>
         private Employee ConstructEmployee(string firstName, string lastName)
         {
-            Address homeAddress = new Address
-            {
-                AddressLine1 = "123 Mock Address",
-                City = "Mock City",
-                PostCode = "1234"
-            };
-
             Employee employee = new Employee
             {
                 FirstName = firstName,
                 LastName = lastName,
                 DateOfBirth = DateTime.Today.AddYears(-20),
-                Address = homeAddress,
                 Gender = Employee.GenderEnum.M,
                 Title = "worker"
             };
 
             return employee;
         }
+
         #endregion
+
     }
 }
