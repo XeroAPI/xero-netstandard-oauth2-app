@@ -1,131 +1,108 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System;
-using System.Linq;
-using System.Net.Http;
-using Xero.NetStandard.OAuth2.Client;
 using Xero.NetStandard.OAuth2.Config;
-using Xero.NetStandard.OAuth2.Token;
 using Xero.NetStandard.OAuth2.Model.Accounting;
 using Xero.NetStandard.OAuth2.Api;
 using System.Threading.Tasks;
-using static Xero.NetStandard.OAuth2.Model.Accounting.TaxRate;
 using System.Collections.Generic;
+using static Xero.NetStandard.OAuth2.Model.Accounting.TaxRate;
 
 namespace XeroNetStandardApp.Controllers
 {
+    /// <summary>
+    /// Controller implementing methods demonstrating following accounting endpoints:
+    /// <para>- GET: /TaxRateInfo/</para>
+    /// <para>- POST: /TaxRateInfo#Create</para>
+    /// </summary>
     public class TaxRateInfoController : Controller
     {
-        private readonly ILogger<TaxRateInfoController> _logger;
-        private readonly IOptions<XeroConfiguration> XeroConfig;
-        private readonly IHttpClientFactory httpClientFactory;
+        private readonly IOptions<XeroConfiguration> _xeroConfig;
+        private readonly AccountingApi _accountingApi;
 
-        public TaxRateInfoController(IOptions<XeroConfiguration> XeroConfig, IHttpClientFactory httpClientFactory, ILogger<TaxRateInfoController> logger)
+        public TaxRateInfoController(IOptions<XeroConfiguration> xeroConfig)
         {
-            _logger = logger;
-            this.XeroConfig = XeroConfig;
-            this.httpClientFactory = httpClientFactory;
+            _xeroConfig = xeroConfig;
+            _accountingApi = new AccountingApi();
         }
 
-        // GET: /TaxRateInfo/
+        #region GET Endpoints
+
+        /// <summary>
+        /// GET: /TaxRateInfo/
+        /// </summary>
+        /// <returns>Returns a list of tax rates</returns>
         public async Task<ActionResult> Index()
         {
-            // Authentication
-            var xeroToken = TokenUtilities.GetStoredToken();
-            var utcTimeNow = DateTime.UtcNow;
+            // Token and TenantId setup
+            var xeroToken = await TokenUtilities.GetXeroOAuth2Token(_xeroConfig.Value);
+            var xeroTenantId = TokenUtilities.GetXeroTenantId(xeroToken);
 
-            if (utcTimeNow > xeroToken.ExpiresAtUtc)
-            {
-                var client = new XeroClient(XeroConfig.Value);
-                xeroToken = (XeroOAuth2Token)await client.RefreshAccessTokenAsync(xeroToken);
-                TokenUtilities.StoreToken(xeroToken);
-            }
-
-            string accessToken = xeroToken.AccessToken;
-            Guid tenantId = TokenUtilities.GetCurrentTenantId();
-            string xeroTenantId;
-            if (xeroToken.Tenants.Any((t) => t.TenantId == tenantId))
-            {
-                xeroTenantId = tenantId.ToString();
-            }
-            else
-            {
-                var id = xeroToken.Tenants.First().TenantId;
-                xeroTenantId = id.ToString();
-                TokenUtilities.StoreTenantId(id);
-            }
-            var AccountingApi = new AccountingApi();
-
-            var response = await AccountingApi.GetTaxRatesAsync(accessToken, xeroTenantId);
+            // Call get tax rates endpoint
+            var response = await _accountingApi.GetTaxRatesAsync(xeroToken.AccessToken, xeroTenantId);
 
             ViewBag.jsonResponse = response.ToJson();
-
             return View(response._TaxRates);
         }
 
-        // GET: /TaxRateInfo#Create
+        /// <summary>
+        /// GET: /TaxRateInfo#Create
+        /// <para>Helper method for returning a view for create tax rate</para>
+        /// </summary>
+        /// <returns></returns>
         [HttpGet]
         public IActionResult Create()
         {
             return View();
         }
 
-        // POST: /TaxRateInfo#Create
+
+        #endregion
+
+        #region POST Endpoints
+
+        /// <summary>
+        /// POST: /TaxRateInfo#Create
+        /// </summary>
+        /// <param name="name">Name of tax component to create</param>
+        /// <param name="status">Status of tax rate to create</param>
+        /// <param name="reportTaxType">Report tax type of tax rate to create</param>
+        /// <param name="rate">Rate of tax component to create</param>
+        /// <returns>Returns action result to redirect user to get tax rates page</returns>
         [HttpPost]
         public async Task<ActionResult> Create(string name, string status, string reportTaxType, decimal rate)
         {
-            // Authentication
-            var xeroToken = TokenUtilities.GetStoredToken();
-            var utcTimeNow = DateTime.UtcNow;
+            // Token and TenantId setup
+            var xeroToken = await TokenUtilities.GetXeroOAuth2Token(_xeroConfig.Value);
+            var xeroTenantId = TokenUtilities.GetXeroTenantId(xeroToken);
 
-            if (utcTimeNow > xeroToken.ExpiresAtUtc)
+            // Construct tax rates object
+            var taxRates = new TaxRates
             {
-                var client = new XeroClient(XeroConfig.Value);
-                xeroToken = (XeroOAuth2Token)await client.RefreshAccessTokenAsync(xeroToken);
-                TokenUtilities.StoreToken(xeroToken);
-            }
-
-            string accessToken = xeroToken.AccessToken;
-            Guid tenantId = TokenUtilities.GetCurrentTenantId();
-            string xeroTenantId;
-            if (xeroToken.Tenants.Any((t) => t.TenantId == tenantId))
-            {
-                xeroTenantId = tenantId.ToString();
-            }
-            else
-            {
-                var id = xeroToken.Tenants.First().TenantId;
-                xeroTenantId = id.ToString();
-                TokenUtilities.StoreTenantId(id);
-            }
-
-            var taxComponent = new TaxComponent()
-            {
-                Name = "State Tax",
-                Rate = rate
-            };
-            var taxComponents = new List<TaxComponent>();
-            taxComponents.Add(taxComponent);
-
-            var taxRate = new TaxRate()
-            {
-                Name = name,
-                Status = (StatusEnum)Enum.Parse(typeof(StatusEnum), status),
-                ReportTaxType = (ReportTaxTypeEnum)Enum.Parse(typeof(ReportTaxTypeEnum), reportTaxType),
-                TaxComponents = taxComponents
+                _TaxRates = new List<TaxRate>
+                {
+                    new TaxRate
+                    {
+                        Name = name,
+                        Status = (StatusEnum)Enum.Parse(typeof(StatusEnum), status),
+                        ReportTaxType = (ReportTaxTypeEnum)Enum.Parse(typeof(ReportTaxTypeEnum), reportTaxType),
+                        TaxComponents = new List<TaxComponent>{
+                            new TaxComponent
+                            {
+                                Name = name,
+                                Rate = rate
+                            }
+                        }
+                    }
+                }
             };
 
-            var taxRates = new TaxRates();
-            var taxRatesList = new List<TaxRate>();
-            taxRatesList.Add(taxRate);
-            taxRates._TaxRates = taxRatesList;
-
-            var AccountingApi = new AccountingApi();
-
-            await AccountingApi.CreateTaxRatesAsync(accessToken, xeroTenantId, taxRates);
+            // Call create tax rates endpoint
+            await _accountingApi.CreateTaxRatesAsync(xeroToken.AccessToken, xeroTenantId, taxRates);
 
             return RedirectToAction("Index", "TaxRateInfo");
         }
+
+        #endregion
     }
 }
