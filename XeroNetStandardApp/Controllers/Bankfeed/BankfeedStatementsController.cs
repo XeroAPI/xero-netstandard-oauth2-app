@@ -3,184 +3,159 @@ using System;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using Xero.NetStandard.OAuth2.Model.Bankfeeds;
-using Xero.NetStandard.OAuth2.Token;
 using Xero.NetStandard.OAuth2.Api;
 using Xero.NetStandard.OAuth2.Config;
-using Xero.NetStandard.OAuth2.Client;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using System.Net.Http;
 using System.Linq;
 
 namespace XeroNetStandardApp.Controllers
 {
+    /// <summary>
+    /// Controller implementing methods demonstrating following bankfeed endpoints:
+    /// <para>- GET: /BankfeedStatements/</para>
+    /// <para>- POST: /BankfeedStatements#Create</para>
+    /// </summary>
     public class BankfeedStatements : Controller
     {
-        private readonly ILogger<AuthorizationController> _logger;
-        private readonly IOptions<XeroConfiguration> XeroConfig;
+        private readonly IOptions<XeroConfiguration> _xeroConfig;
+        private readonly BankFeedsApi _bankFeedsApi;
 
-        public BankfeedStatements(IOptions<XeroConfiguration> XeroConfig, ILogger<AuthorizationController> logger)
+        public BankfeedStatements(IOptions<XeroConfiguration> xeroConfig)
         {
-            _logger = logger;
-            this.XeroConfig = XeroConfig;
+            _xeroConfig = xeroConfig;
+            _bankFeedsApi = new BankFeedsApi();
         }
 
-        // GET: /BankfeedStatements/
+        #region GET Endpoints
+
+        /// <summary>
+        /// GET: /BankfeedStatements/
+        /// </summary>
+        /// <returns>Return a list of delivered statements</returns>
         [HttpGet]
         public async Task<ActionResult> Index()
         {
-            // Authentication   
-            var xeroToken = TokenUtilities.GetStoredToken();
-            var utcTimeNow = DateTime.UtcNow;
+            // Token and TenantId setup
+            var xeroToken = await TokenUtilities.GetXeroOAuth2Token(_xeroConfig.Value);
+            var xeroTenantId = TokenUtilities.GetXeroTenantId(xeroToken);
 
-            if (utcTimeNow > xeroToken.ExpiresAtUtc)
-            {
-                var client = new XeroClient(XeroConfig.Value);
-                xeroToken = (XeroOAuth2Token)await client.RefreshAccessTokenAsync(xeroToken);
-                TokenUtilities.StoreToken(xeroToken);
-            }
-
-            string accessToken = xeroToken.AccessToken;
-            Guid tenantId = TokenUtilities.GetCurrentTenantId();
-            string xeroTenantId;
-            if (xeroToken.Tenants.Any((t) => t.TenantId == tenantId))
-            {
-                xeroTenantId = tenantId.ToString();
-            }
-            else
-            {
-                var id = xeroToken.Tenants.First().TenantId;
-                xeroTenantId = id.ToString();
-                TokenUtilities.StoreTenantId(id);
-            }
-
-            // Instantiate BankFeed API and retrieve all statements 
-            var BankFeedsApi = new BankFeedsApi();
-            var response = await BankFeedsApi.GetStatementsAsync(accessToken, xeroTenantId);
-            ViewBag.jsonResponse = response.ToJson();
+            // Call get statements endpoint
+            var response = await _bankFeedsApi.GetStatementsAsync(xeroToken.AccessToken, xeroTenantId);
 
             var statements = response.Items;
+            ViewBag.jsonResponse = response.ToJson();
             return View(statements.Where(statement => statement.Status == Statement.StatusEnum.DELIVERED));
         }
 
-        // GET: /BankfeedStatements#Create
+        /// <summary>
+        /// GET: /BankfeedStatements#Create
+        /// <para>Helper method to populate create page for creating a new statement</para>
+        /// </summary>
+        /// <returns></returns>
         [HttpGet]
         public async Task<IActionResult> Create()
         {
-            var xeroToken = TokenUtilities.GetStoredToken();
-            var utcTimeNow = DateTime.UtcNow;
+            // Token and TenantId setup
+            var xeroToken = await TokenUtilities.GetXeroOAuth2Token(_xeroConfig.Value);
+            var xeroTenantId = TokenUtilities.GetXeroTenantId(xeroToken);
 
-            if (utcTimeNow > xeroToken.ExpiresAtUtc)
-            {
-                var client = new XeroClient(XeroConfig.Value);
-                xeroToken = (XeroOAuth2Token)await client.RefreshAccessTokenAsync(xeroToken);
-                TokenUtilities.StoreToken(xeroToken);
-            }
-
-            string accessToken = xeroToken.AccessToken;
-            Guid tenantId = TokenUtilities.GetCurrentTenantId();
-            string xeroTenantId;
-            if (xeroToken.Tenants.Any((t) => t.TenantId == tenantId))
-            {
-                xeroTenantId = tenantId.ToString();
-            }
-            else
-            {
-                var id = xeroToken.Tenants.First().TenantId;
-                xeroTenantId = id.ToString();
-                TokenUtilities.StoreTenantId(id);
-            }
-
-            var bankFeedsApi = new BankFeedsApi();
-            var connections = await bankFeedsApi.GetFeedConnectionsAsync(accessToken, xeroTenantId);
+            // Call get feed connection endpoint
+            var connections = await _bankFeedsApi.GetFeedConnectionsAsync(xeroToken.AccessToken, xeroTenantId);
 
             return View(connections.Items.Select(item => item.Id.ToString()));
         }
 
-        // POST: /BankfeedStatements#Create
+        #endregion
+
+        #region POST Endpoints
+
+        /// <summary>
+        /// POST: /BankfeedStatements#Create
+        /// </summary>
+        /// <param name="feedConnectionId">Feed connection id of statement to create</param>
+        /// <param name="startBalanceIndicator">Start balance indicator of statement to create</param>
+        /// <param name="startBalanceAmount">Start balance amount of statement to create</param>
+        /// <returns></returns>
         [HttpPost]
         public async Task<ActionResult> Create(
-          string feedConnectionId,
-          string startBalanceAmount,
-          string startBalanceIndicator
+            string feedConnectionId,
+            string startBalanceAmount,
+            string startBalanceIndicator
         )
         {
-            var xeroToken = TokenUtilities.GetStoredToken();
-            var utcTimeNow = DateTime.UtcNow;
+            // Token and TenantId setup
+            var xeroToken = await TokenUtilities.GetXeroOAuth2Token(_xeroConfig.Value);
+            var xeroTenantId = TokenUtilities.GetXeroTenantId(xeroToken);
 
-            if (utcTimeNow > xeroToken.ExpiresAtUtc)
-            {
-                var client = new XeroClient(XeroConfig.Value);
-                xeroToken = (XeroOAuth2Token)await client.RefreshAccessTokenAsync(xeroToken);
-                TokenUtilities.StoreToken(xeroToken);
-            }
+            // Construct statement object
+            Enum.TryParse<CreditDebitIndicator>(startBalanceIndicator, out var startBalanceIndicatorEnum);
+            var statements = ConstructStatements(
+                new Guid(feedConnectionId),
+                decimal.Parse(startBalanceAmount),
+                startBalanceIndicatorEnum
+            );
 
-            string accessToken = xeroToken.AccessToken;
-            Guid tenantId = TokenUtilities.GetCurrentTenantId();
-            string xeroTenantId;
-            if (xeroToken.Tenants.Any((t) => t.TenantId == tenantId))
-            {
-                xeroTenantId = tenantId.ToString();
-            }
-            else
-            {
-                var id = xeroToken.Tenants.First().TenantId;
-                xeroTenantId = id.ToString();
-                TokenUtilities.StoreTenantId(id);
-            }
-
-            var BankfeedsApi = new BankFeedsApi();
-
-            Enum.TryParse<CreditDebitIndicator>(startBalanceIndicator, out var startIndicatorEnum);
-
-            StartBalance startBalance = new StartBalance
-            {
-                Amount = decimal.Parse(startBalanceAmount),
-                CreditDebitIndicator = startIndicatorEnum
-            };
-
-
-            StatementLine statementLine = new StatementLine
-            {
-                PostedDate = DateTime.Today,
-                Description = "neat",
-                Amount = 10,
-                CreditDebitIndicator = startIndicatorEnum,
-                TransactionId = Guid.NewGuid().ToString()
-            };
-
-            EndBalance endBalance = new EndBalance
-            {
-                Amount = decimal.Parse(startBalanceAmount) + statementLine.Amount,
-                CreditDebitIndicator = startIndicatorEnum
-            };
-
-            List<StatementLine> statementLines = new List<StatementLine>();
-            statementLines.Add(statementLine);
-
-            var statement = new Statement
-            {
-                FeedConnectionId = new Guid(feedConnectionId),
-                StartDate = DateTime.Today.AddDays(-20),
-                EndDate = DateTime.Today,
-                StartBalance = startBalance,
-                EndBalance = endBalance,
-                StatementLines = statementLines,
-            };
-
-            List<Statement> statementList = new List<Statement>();
-            statementList.Add(statement);
-
-            Statements statements = new Statements
-            {
-                Pagination = new Pagination(),
-                Items = statementList
-            };
-
-            await BankfeedsApi.CreateStatementsAsync(accessToken, xeroTenantId, statements);
+            // Call create statement endpoint
+            await _bankFeedsApi.CreateStatementsAsync(xeroToken.AccessToken, xeroTenantId, statements);
 
             return RedirectToAction("Index", "BankfeedStatements");
         }
 
+        #endregion
+
+        #region Helper Methods
+
+        /// <summary>
+        /// Helper method to construct a mock statement
+        /// </summary>
+        /// <param name="feedConnectionId">Feed connection id of statement to create</param>
+        /// <param name="startBalanceAmount">Start balance amount of statement to create</param>
+        /// <param name="startBalanceIndicator">Start balance indicator of statement to create</param>
+        /// <returns></returns>
+        private Statements ConstructStatements(Guid feedConnectionId, decimal startBalanceAmount, CreditDebitIndicator startBalanceIndicator)
+        {
+            var startBalance = new StartBalance
+            {
+                Amount = startBalanceAmount,
+                CreditDebitIndicator = startBalanceIndicator
+            };
+
+            var endBalance = new EndBalance
+            {
+                Amount = startBalanceAmount + 10,
+                CreditDebitIndicator = startBalanceIndicator
+            };
+
+            var statementLines = new List<StatementLine>
+            {
+                new StatementLine
+                {
+                    PostedDate = DateTime.Today,
+                    Description = "mock description",
+                    Amount = 10,
+                    CreditDebitIndicator = startBalanceIndicator,
+                    TransactionId = Guid.NewGuid().ToString()
+                }
+            };
+
+            return new Statements
+            {
+                Pagination = new Pagination(),
+                Items = new List<Statement>
+                {
+                    new Statement
+                    {
+                        FeedConnectionId = feedConnectionId,
+                        StartDate = DateTime.Today.AddDays(-20),
+                        EndDate = DateTime.Today,
+                        StartBalance = startBalance,
+                        EndBalance = endBalance,
+                        StatementLines = statementLines,
+                    }
+                }
+            };
+        }
+
+        #endregion
     }
 }
