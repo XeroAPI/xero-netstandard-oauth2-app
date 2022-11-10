@@ -1,85 +1,42 @@
 using Microsoft.AspNetCore.Mvc;
-using System;
 using System.Threading.Tasks;
-using System.Collections.Generic;
-using Xero.NetStandard.OAuth2.Model.Accounting;
-using Xero.NetStandard.OAuth2.Model.Finance;
-using Xero.NetStandard.OAuth2.Token;
 using Xero.NetStandard.OAuth2.Api;
 using Xero.NetStandard.OAuth2.Config;
-using Xero.NetStandard.OAuth2.Client;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using System.Net.Http;
-using System.Linq;
-using System.IO;
-using Microsoft.AspNetCore.Http;
-using System.Text;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Serialization;
-
 
 namespace XeroNetStandardApp.Controllers
 {
+    /// <summary>
+    /// Controller implementing methods demonstrating following Finance endpoints:
+    /// <para>- GET: /CashValidationSync/</para>
+    /// </summary>
     public class CashValidationSync : Controller
     {
-        private readonly ILogger<AuthorizationController> _logger;
-        private readonly IOptions<XeroConfiguration> XeroConfig;
-        private readonly IHttpClientFactory httpClientFactory;
+        private readonly IOptions<XeroConfiguration> _xeroConfig;
+        private readonly FinanceApi _financeApi;
 
-        public CashValidationSync(IOptions<XeroConfiguration> XeroConfig, IHttpClientFactory httpClientFactory, ILogger<AuthorizationController> logger)
+        public CashValidationSync(IOptions<XeroConfiguration> xeroConfig)
         {
-            _logger = logger;
-            this.XeroConfig = XeroConfig;
-            this.httpClientFactory = httpClientFactory;
+            _xeroConfig = xeroConfig;
+            _financeApi = new FinanceApi();
         }
 
-
-        // GET: /CashValidationSync/
+        /// <summary>
+        /// GET: /CashValidationSync/
+        /// </summary>
+        /// <returns>Returns a list of cash validations</returns>
         public async Task<ActionResult> Index()
         {
-            var xeroToken = TokenUtilities.GetStoredToken();
-            var utcTimeNow = DateTime.UtcNow;
+            // Token and TenantId setup
+            var xeroToken = await TokenUtilities.GetXeroOAuth2Token(_xeroConfig.Value);
+            var xeroTenantId = TokenUtilities.GetXeroTenantId(xeroToken);
 
-            if (utcTimeNow > xeroToken.ExpiresAtUtc)
-            {
-                var client = new XeroClient(XeroConfig.Value);
-                xeroToken = (XeroOAuth2Token)await client.RefreshAccessTokenAsync(xeroToken);
-                TokenUtilities.StoreToken(xeroToken);
-            }
-
-            string accessToken = xeroToken.AccessToken;
-            Guid tenantId = TokenUtilities.GetCurrentTenantId();
-            string xeroTenantId;
-            if (xeroToken.Tenants.Any((t) => t.TenantId == tenantId))
-            {
-                xeroTenantId = tenantId.ToString();
-            }
-            else
-            {
-                var id = xeroToken.Tenants.First().TenantId;
-                xeroTenantId = id.ToString();
-                TokenUtilities.StoreTenantId(id);
-            }
-
-            var FinanceApi = new FinanceApi();
-
-            var response = new List<CashValidationResponse>();
-
-            // Requesting for today's cash position
-            response = await FinanceApi.GetCashValidationAsync(accessToken, xeroTenantId, null, null, null);
+            // Call get cash validation endpoint
+            var response = await _financeApi.GetCashValidationAsync(xeroToken.AccessToken, xeroTenantId);
 
             ViewBag.jsonResponse = JsonConvert.SerializeObject(response);
-
             return View(response);
-        }
-
-
-        // GET: /CashValidationSync#Create
-        [HttpGet]
-        public IActionResult Create()
-        {
-            return View();
         }
     }
 }
