@@ -1,78 +1,57 @@
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Threading.Tasks;
-using System.Linq;
-using System.Collections.Generic;
-using Xero.NetStandard.OAuth2.Model.Identity;
-using Xero.NetStandard.OAuth2.Token;
 using Xero.NetStandard.OAuth2.Api;
 using Xero.NetStandard.OAuth2.Config;
-using Xero.NetStandard.OAuth2.Client;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using System.Net.Http;
 
 namespace XeroNetStandardApp.Controllers
 {
+    /// <summary>
+    /// Controller implementing methods demonstrating following Identity endpoints:
+    /// <para>- GET: /IdentityInfo/</para>
+    /// <para>- GET: /Contacts#Delete</para>
+    /// </summary>
     public class IdentityInfo : Controller
     {
-        private readonly ILogger<AuthorizationController> _logger;
-        private readonly IOptions<XeroConfiguration> XeroConfig;
+        private readonly IOptions<XeroConfiguration> _xeroConfig;
+        private readonly IdentityApi _identityApi;
 
-        public IdentityInfo(IOptions<XeroConfiguration> XeroConfig, ILogger<AuthorizationController> logger)
+        public IdentityInfo(IOptions<XeroConfiguration> xeroConfig)
         {
-            _logger = logger;
-            this.XeroConfig = XeroConfig;
+            _xeroConfig = xeroConfig;
+            _identityApi = new IdentityApi();
         }
 
-        // GET: /IdentityInfo/
+        /// <summary>
+        /// GET: /IdentityInfo/
+        /// </summary>
+        /// <returns>Returns a list of connections</returns>
         public async Task<ActionResult> Index()
         {
-            var xeroToken = TokenUtilities.GetStoredToken();
-            var utcTimeNow = DateTime.UtcNow;
+            // Token setup
+            var xeroToken = await TokenUtilities.GetXeroOAuth2Token(_xeroConfig.Value);
+            
+            // Call get connections endpoint
+            var response = await _identityApi.GetConnectionsAsync(xeroToken.AccessToken);
 
-            if (utcTimeNow > xeroToken.ExpiresAtUtc)
-            {
-                var client = new XeroClient(XeroConfig.Value);
-                xeroToken = (XeroOAuth2Token)await client.RefreshAccessTokenAsync(xeroToken);
-                TokenUtilities.StoreToken(xeroToken);
-            }
-
-            string accessToken = xeroToken.AccessToken;
-
-            var IdentityApi = new IdentityApi();
-            var response = await IdentityApi.GetConnectionsAsync(accessToken);
-
-            foreach (var connection in response)
-            {
-                ViewBag.jsonResponse += connection.ToJson();
-            }
-
-            var connections = response;
-
-            return View(connections);
+            response.ForEach(connection => ViewBag.jsonResponse += connection.ToJson());
+            return View(response);
         }
 
-        // GET: /Contacts#Delete
+        /// <summary>
+        /// GET: /Contacts#Delete
+        /// </summary>
+        /// <param name="connectionId">Id of connection to delete</param>
+        /// <returns>Returns action result to redirect user to get connections page</returns>
         [HttpGet]
         public async Task<ActionResult> Delete(string connectionId)
         {
-            var xeroToken = TokenUtilities.GetStoredToken();
-            var utcTimeNow = DateTime.UtcNow;
+            // Token setup
+            var xeroToken = await TokenUtilities.GetXeroOAuth2Token(_xeroConfig.Value);
 
-            if (utcTimeNow > xeroToken.ExpiresAtUtc)
-            {
-                var client = new XeroClient(XeroConfig.Value);
-                xeroToken = (XeroOAuth2Token)await client.RefreshAccessTokenAsync(xeroToken);
-                TokenUtilities.StoreToken(xeroToken);
-            }
-
-            string accessToken = xeroToken.AccessToken;
-
-            Guid connectionIdGuid = Guid.Parse(connectionId);
-
-            var IdentityApi = new IdentityApi();
-            await IdentityApi.DeleteConnectionAsync(accessToken, connectionIdGuid);
+            // Call delete connection endpoint
+            await _identityApi.DeleteConnectionAsync(xeroToken.AccessToken, Guid.Parse(connectionId));
 
             return RedirectToAction("Index", "IdentityInfo");
         }
