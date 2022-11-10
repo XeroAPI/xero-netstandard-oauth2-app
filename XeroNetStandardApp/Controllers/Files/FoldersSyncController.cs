@@ -1,131 +1,78 @@
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Threading.Tasks;
-using System.Collections.Generic;
-using Xero.NetStandard.OAuth2.Model.Bankfeeds;
-using Xero.NetStandard.OAuth2.Token;
 using Xero.NetStandard.OAuth2.Api;
 using Xero.NetStandard.OAuth2.Config;
-using Xero.NetStandard.OAuth2.Client;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using System.Net.Http;
-using System.Linq;
 using Xero.NetStandard.OAuth2.Model.Files;
 
 namespace XeroNetStandardApp.Controllers
 {
+    /// <summary>
+    /// Controller implementing methods demonstrating following Files endpoints:
+    /// <para>- GET: /FoldersSync/</para>
+    /// <para>- Get: /FoldersSync#Delete</para>
+    /// <para>- GET: /FoldersSync#Modify</para>
+    /// <para>- POST: /FoldersSync#Create</para>
+    /// <para>- Post: /FoldersSync#Rename</para>
+    /// </summary>
     public class FoldersSync : Controller
     {
-        private readonly ILogger<AuthorizationController> _logger;
-        private readonly IOptions<XeroConfiguration> XeroConfig;
-        private readonly IHttpClientFactory httpClientFactory;
+        private readonly IOptions<XeroConfiguration> _xeroConfig;
+        private readonly FilesApi _filesApi;
 
-        public FoldersSync(IOptions<XeroConfiguration> XeroConfig, IHttpClientFactory httpClientFactory, ILogger<AuthorizationController> logger)
+        public FoldersSync(IOptions<XeroConfiguration> xeroConfig)
         {
-            _logger = logger;
-            this.XeroConfig = XeroConfig;
-            this.httpClientFactory = httpClientFactory;
+            _xeroConfig = xeroConfig;
+            _filesApi = new FilesApi();
         }
 
-        // GET: /FilesSync/
+        #region GET Endpoints
+
+        /// <summary>
+        /// GET: /FoldersSync/
+        /// </summary>
+        /// <returns>Returns a list of folders</returns>
         public async Task<ActionResult> Index()
         {
-            var xeroToken = TokenUtilities.GetStoredToken();
-            var utcTimeNow = DateTime.UtcNow;
+            // Token and TenantId setup
+            var xeroToken = await TokenUtilities.GetXeroOAuth2Token(_xeroConfig.Value);
+            var xeroTenantId = TokenUtilities.GetXeroTenantId(xeroToken);
 
-            if (utcTimeNow > xeroToken.ExpiresAtUtc)
-            {
-                var client = new XeroClient(XeroConfig.Value);
-                xeroToken = (XeroOAuth2Token)await client.RefreshAccessTokenAsync(xeroToken);
-                TokenUtilities.StoreToken(xeroToken);
-            }
+            // Call get folders endpoint
+            var response = await _filesApi.GetFoldersAsync(xeroToken.AccessToken, xeroTenantId);
 
-            string accessToken = xeroToken.AccessToken;
-            string xeroTenantId = xeroToken.Tenants[0].TenantId.ToString();
+            var formattedResponse = "";
+            response.ForEach(folder => formattedResponse += folder.ToJson() + "\n");
 
-            var FilesApi = new FilesApi();
-            var response = await FilesApi.GetFoldersAsync(accessToken, xeroTenantId);
-
-            var jsonString = "";
-            foreach (Folder folder in response)
-            {
-                jsonString += folder.ToJson();
-            }
-
-            ViewBag.jsonResponse = jsonString;
-
-
+            ViewBag.jsonResponse = formattedResponse;
             return View(response);
         }
 
-
-        // GET: /Folders#Create
+        /// <summary>
+        /// Get: /FoldersSync#Delete
+        /// </summary>
+        /// <param name="folderId">Id of folder to delete</param>
+        /// <returns>Returns an action result to redirect user to get folders page</returns>
         [HttpGet]
-        public IActionResult Create()
+        public async Task<ActionResult> Delete(string folderId)
         {
-            return View();
-        }
+            // Token and TenantId setup
+            var xeroToken = await TokenUtilities.GetXeroOAuth2Token(_xeroConfig.Value);
+            var xeroTenantId = TokenUtilities.GetXeroTenantId(xeroToken);
 
-        // POST: /FoldersSync#Create
-        [HttpPost]
-        public async Task<ActionResult> Create(string name, string email)
-        {
-
-            var xeroToken = TokenUtilities.GetStoredToken();
-            var utcTimeNow = DateTime.UtcNow;
-
-            if (utcTimeNow > xeroToken.ExpiresAtUtc)
-            {
-                var client = new XeroClient(XeroConfig.Value);
-                xeroToken = (XeroOAuth2Token)await client.RefreshAccessTokenAsync(xeroToken);
-                TokenUtilities.StoreToken(xeroToken);
-            }
-
-            string accessToken = xeroToken.AccessToken;
-            string xeroTenantId = xeroToken.Tenants[0].TenantId.ToString();
-
-            var FilesApi = new FilesApi();
-
-            Folder folder = new Folder
-            {
-                Name = name,
-                Email = email,
-                Id = Guid.NewGuid()
-            };
-
-            await FilesApi.CreateFolderAsync(accessToken, xeroTenantId, folder);
-
+            // Call delete folder endpoint
+            await _filesApi.DeleteFolderAsync(xeroToken.AccessToken, xeroTenantId, Guid.Parse(folderId));
+            
             return RedirectToAction("Index", "FoldersSync");
         }
 
-        // Get: /FoldersSync#Delete
-        [HttpGet]
-        public async Task<ActionResult> Delete(string FolderId)
-        {
-            var xeroToken = TokenUtilities.GetStoredToken();
-            var utcTimeNow = DateTime.UtcNow;
-
-            if (utcTimeNow > xeroToken.ExpiresAtUtc)
-            {
-                var client = new XeroClient(XeroConfig.Value);
-                xeroToken = (XeroOAuth2Token)await client.RefreshAccessTokenAsync(xeroToken);
-                TokenUtilities.StoreToken(xeroToken);
-            }
-
-            string accessToken = xeroToken.AccessToken;
-            string xeroTenantId = xeroToken.Tenants[0].TenantId.ToString();
-
-            Guid folderIdGuid = Guid.Parse(FolderId);
-
-            var filesApi = new FilesApi();
-
-            await filesApi.DeleteFolderAsync(accessToken, xeroTenantId, folderIdGuid);
-            return RedirectToAction("Index", "FoldersSync");
-        }
-
-
-        // GET: /FoldersSync#Modify
+        /// <summary>
+        /// GET: /FoldersSync#Modify
+        /// </summary>
+        /// <param name="folderId">Folder id of folder to modify</param>
+        /// <param name="folderName">Folder name of folder to modify</param>
+        /// <returns></returns>
         [HttpGet("/FoldersSync/{folderId}")]
         public IActionResult Modify(string folderId, string folderName)
         {
@@ -134,34 +81,70 @@ namespace XeroNetStandardApp.Controllers
             return View();
         }
 
-        // Put: /FoldersSync#Rename
-        [HttpPost]
-        public async Task<ActionResult> Rename(string folderId, string newName)
+        /// <summary>
+        /// GET: /Folders#Create
+        /// <para>Helper method to return a view for the create folder page</para>
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet]
+        public IActionResult Create()
         {
-            var xeroToken = TokenUtilities.GetStoredToken();
-            var utcTimeNow = DateTime.UtcNow;
+            return View();
+        }
 
-            if (utcTimeNow > xeroToken.ExpiresAtUtc)
+        #endregion
+
+        #region POST Endpoints
+
+        /// <summary>
+        /// POST: /FoldersSync#Create
+        /// </summary>
+        /// <param name="name">Name of folder to create</param>
+        /// <param name="email">Email associated with folder to create</param>
+        /// <returns>Returns an action result to redirect user to get folders page</returns>
+        [HttpPost]
+        public async Task<ActionResult> Create(string name, string email)
+        {
+            // Token and TenantId setup
+            var xeroToken = await TokenUtilities.GetXeroOAuth2Token(_xeroConfig.Value);
+            var xeroTenantId = TokenUtilities.GetXeroTenantId(xeroToken);
+
+            var newFolder = new Folder
             {
-                var client = new XeroClient(XeroConfig.Value);
-                xeroToken = (XeroOAuth2Token)await client.RefreshAccessTokenAsync(xeroToken);
-                TokenUtilities.StoreToken(xeroToken);
-            }
+                Name = name,
+                Email = email,
+                Id = Guid.NewGuid()
+            };
 
-            string accessToken = xeroToken.AccessToken;
-            string xeroTenantId = xeroToken.Tenants[0].TenantId.ToString();
-
-            Guid folderIdGuid = Guid.Parse(folderId);
-
-            var filesApi = new FilesApi();
-            Folder folder = await filesApi.GetFolderAsync(accessToken, xeroTenantId, folderIdGuid);
-            folder.Name = newName;
-
-            var response = await filesApi.UpdateFolderAsync(accessToken, xeroTenantId, folderIdGuid, folder);
+            // Call create folder endpoint
+            await _filesApi.CreateFolderAsync(xeroToken.AccessToken, xeroTenantId, newFolder);
 
             return RedirectToAction("Index", "FoldersSync");
         }
 
+        /// <summary>
+        /// Post: /FoldersSync#Rename
+        /// </summary>
+        /// <param name="folderId">Folder id of folder to rename</param>
+        /// <param name="newName">New name for folder</param>
+        /// <returns>Returns an action result to redirect user to get folders page</returns>
+        [HttpPost]
+        public async Task<ActionResult> Rename(string folderId, string newName)
+        {
+            // Token and TenantId setup
+            var xeroToken = await TokenUtilities.GetXeroOAuth2Token(_xeroConfig.Value);
+            var xeroTenantId = TokenUtilities.GetXeroTenantId(xeroToken);
 
+            // Rename folder
+            var folder = await _filesApi.GetFolderAsync(xeroToken.AccessToken, xeroTenantId, Guid.Parse(folderId));
+            folder.Name = newName;
+
+            // Call update folder endpoint
+            await _filesApi.UpdateFolderAsync(xeroToken.AccessToken, xeroTenantId, Guid.Parse(folderId), folder);
+
+            return RedirectToAction("Index", "FoldersSync");
+        }
+
+        #endregion
     }
 }
