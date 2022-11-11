@@ -3,132 +3,112 @@ using System;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using Xero.NetStandard.OAuth2.Model.Files;
-using Xero.NetStandard.OAuth2.Token;
 using Xero.NetStandard.OAuth2.Api;
 using Xero.NetStandard.OAuth2.Config;
-using Xero.NetStandard.OAuth2.Client;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using System.Net.Http;
-using System.Linq;
 using System.IO;
 using Microsoft.AspNetCore.Http;
-using System.Text;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Serialization;
-
 
 namespace XeroNetStandardApp.Controllers
 {
+    /// <summary>
+    /// Controller implementing methods demonstrating following Files endpoints:
+    /// <para>- GET: /FilesSync/</para>
+    /// <para>- POST: /FilesSync/FileUpload#Upload</para>
+    /// <para>- POST: /FilesSync#Rename</para>
+    /// </summary>
     public class FilesSync : Controller
     {
-        private readonly ILogger<AuthorizationController> _logger;
-        private readonly IOptions<XeroConfiguration> XeroConfig;
-        private readonly IHttpClientFactory httpClientFactory;
+        private readonly IOptions<XeroConfiguration> _xeroConfig;
+        private readonly FilesApi _filesApi;
 
-        public FilesSync(IOptions<XeroConfiguration> XeroConfig, IHttpClientFactory httpClientFactory, ILogger<AuthorizationController> logger)
+        public FilesSync(IOptions<XeroConfiguration> xeroConfig)
         {
-            _logger = logger;
-            this.XeroConfig = XeroConfig;
-            this.httpClientFactory = httpClientFactory;
+            _xeroConfig = xeroConfig;
+            _filesApi = new FilesApi();
         }
 
-        // GET: /FilesSync/
+        #region GET Endpoints
+
+        /// <summary>
+        /// GET: /FilesSync/
+        /// </summary>
+        /// <returns>Returns a list of files</returns>
         public async Task<ActionResult> Index()
         {
-            var xeroToken = TokenUtilities.GetStoredToken();
-            var utcTimeNow = DateTime.UtcNow;
+            // Token and TenantId setup
+            var xeroToken = await TokenUtilities.GetXeroOAuth2Token(_xeroConfig.Value);
+            var xeroTenantId = TokenUtilities.GetXeroTenantId(xeroToken);
 
-            if (utcTimeNow > xeroToken.ExpiresAtUtc)
-            {
-                var client = new XeroClient(XeroConfig.Value);
-                xeroToken = (XeroOAuth2Token)await client.RefreshAccessTokenAsync(xeroToken);
-                TokenUtilities.StoreToken(xeroToken);
-            }
+            // Call get files endpoint
+            var response = await _filesApi.GetFilesAsync(xeroToken.AccessToken, xeroTenantId);
 
-            string accessToken = xeroToken.AccessToken;
-            string xeroTenantId = xeroToken.Tenants[0].TenantId.ToString();
-
-            var FilesApi = new FilesApi();
-
-            var response = await FilesApi.GetFilesAsync(accessToken, xeroTenantId);
-
-            var filesItems = response.Items;
-
-            var jsonString = "";
-
-            foreach (FileObject file in filesItems)
-            {
-                jsonString += file.ToJson();
-            }
-            ViewBag.jsonResponse = jsonString;
-
-            return View(filesItems);
+            ViewBag.jsonResponse = response.ToJson();
+            return View(response.Items);
         }
 
-        // Get: /Files#Delete
+        /// <summary>
+        /// Get: /Files#Delete
+        /// </summary>
+        /// <param name="fileID">File id of file to delete</param>
+        /// <returns>Returns action result to redirect user to get files page</returns>
         [HttpGet]
         public async Task<ActionResult> Delete(string fileID)
         {
-            var xeroToken = TokenUtilities.GetStoredToken();
-            var utcTimeNow = DateTime.UtcNow;
+            // Token and TenantId setup
+            var xeroToken = await TokenUtilities.GetXeroOAuth2Token(_xeroConfig.Value);
+            var xeroTenantId = TokenUtilities.GetXeroTenantId(xeroToken);
 
-            if (utcTimeNow > xeroToken.ExpiresAtUtc)
-            {
-                var client = new XeroClient(XeroConfig.Value);
-                xeroToken = (XeroOAuth2Token)await client.RefreshAccessTokenAsync(xeroToken);
-                TokenUtilities.StoreToken(xeroToken);
-            }
-
-            string accessToken = xeroToken.AccessToken;
-            string xeroTenantId = xeroToken.Tenants[0].TenantId.ToString();
-
-            Guid fileIDGuid = Guid.Parse(fileID);
-
-
-            var filesApi = new FilesApi();
-            await filesApi.DeleteFileAsync(accessToken, xeroTenantId, fileIDGuid);
+            // Call delete file endpoint
+            await _filesApi.DeleteFileAsync(xeroToken.AccessToken, xeroTenantId, Guid.Parse(fileID));
 
             return RedirectToAction("Index", "FilesSync");
         }
 
+        /// <summary>
+        /// GET: /FilesSync#Modify
+        /// </summary>
+        /// <param name="fileId">File id of file to modify</param>
+        /// <param name="fileName">File name of file to modify</param>
+        /// <returns></returns>
+        [HttpGet("/FilesSync/{fileId}")]
+        public IActionResult Modify(string fileId, string fileName)
+        {
+            ViewBag.fileID = fileId;
+            ViewBag.fileName = fileName;
+            return View();
+        }
 
-        // POST: /FilesSync/FileUpload#Upload
+        #endregion
+
+        #region POST Endpoints
+
+        /// <summary>
+        /// POST: /FilesSync/FileUpload#Upload
+        /// </summary>
+        /// <param name="files">Files to add to account</param>
+        /// <returns>Returns action result to redirect user to get files page</returns>
         [HttpPost("FilesSyncFileUpload")]
         public async Task<IActionResult> Upload(List<IFormFile> files)
         {
-            var xeroToken = TokenUtilities.GetStoredToken();
-            var utcTimeNow = DateTime.UtcNow;
+            // Token and TenantId setup
+            var xeroToken = await TokenUtilities.GetXeroOAuth2Token(_xeroConfig.Value);
+            var xeroTenantId = TokenUtilities.GetXeroTenantId(xeroToken);
 
-            if (utcTimeNow > xeroToken.ExpiresAtUtc)
-            {
-                var client = new XeroClient(XeroConfig.Value);
-                xeroToken = (XeroOAuth2Token)await client.RefreshAccessTokenAsync(xeroToken);
-                TokenUtilities.StoreToken(xeroToken);
-            }
-
-            string accessToken = xeroToken.AccessToken;
-            string xeroTenantId = xeroToken.Tenants[0].TenantId.ToString();
-
-            var FilesApi = new FilesApi();
-
-            var filePaths = new List<string>();
+            // Loop through all files and upload each one to account
             foreach (var formFile in files)
             {
                 if (formFile.Length > 0)
                 {
-                    var filePath = Path.GetTempFileName(); //we are using Temp file name just for the example. Add your own file path.
-                    filePaths.Add(filePath);
-
                     byte[] byteArray;
-                    using (MemoryStream data = new MemoryStream())
+                    using (var ms = new MemoryStream())
                     {
-                        formFile.CopyTo(data);
-                        byteArray = data.ToArray();
+                        await formFile.CopyToAsync(ms);
+                        byteArray = ms.ToArray();
                     }
 
-                    await FilesApi.UploadFileAsync(
-                        accessToken,
+                    await _filesApi.UploadFileAsync(
+                        xeroToken.AccessToken,
                         xeroTenantId,
                         byteArray,
                         formFile.FileName,
@@ -141,43 +121,30 @@ namespace XeroNetStandardApp.Controllers
             return RedirectToAction("Index", "FilesSync");
         }
 
-
-        // GET: /FilesSync#Modify
-        [HttpGet("/FilesSync/{fileId}")]
-        public IActionResult Modify(string fileId, string fileName)
-        {
-            ViewBag.fileID = fileId;
-            ViewBag.fileName = fileName;
-            return View();
-        }
-
-        // Put: /FilesSync#Rename
+        /// <summary>
+        /// POST: /FilesSync#Rename
+        /// </summary>
+        /// <param name="fileID">File id of file to rename</param>
+        /// <param name="newName">New name value for file</param>
+        /// <returns>Returns action result redirecting user to get files page</returns>
         [HttpPost]
         public async Task<ActionResult> Rename(string fileID, string newName)
         {
-            var xeroToken = TokenUtilities.GetStoredToken();
-            var utcTimeNow = DateTime.UtcNow;
+            // Token and TenantId setup
+            var xeroToken = await TokenUtilities.GetXeroOAuth2Token(_xeroConfig.Value);
+            var xeroTenantId = TokenUtilities.GetXeroTenantId(xeroToken);
 
-            if (utcTimeNow > xeroToken.ExpiresAtUtc)
-            {
-                var client = new XeroClient(XeroConfig.Value);
-                xeroToken = (XeroOAuth2Token)await client.RefreshAccessTokenAsync(xeroToken);
-                TokenUtilities.StoreToken(xeroToken);
-            }
-
-            string accessToken = xeroToken.AccessToken;
-            string xeroTenantId = xeroToken.Tenants[0].TenantId.ToString();
-
-            Guid fileIDGuid = Guid.Parse(fileID);
-
-            var filesApi = new FilesApi();
-            FileObject file = await filesApi.GetFileAsync(accessToken, xeroTenantId, fileIDGuid);
+            // Update file object
+            FileObject file = await _filesApi.GetFileAsync(xeroToken.AccessToken, xeroTenantId, Guid.Parse(fileID));
             file.Name = newName;
 
-            var response = await filesApi.UpdateFileAsync(accessToken, xeroTenantId, fileIDGuid, file);
+            // Call update file endpoint
+            await _filesApi.UpdateFileAsync(xeroToken.AccessToken, xeroTenantId, Guid.Parse(fileID), file);
 
             return RedirectToAction("Index", "FilesSync");
         }
+
+        #endregion
 
     }
 }
