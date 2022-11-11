@@ -1,114 +1,89 @@
 using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Linq;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using Xero.NetStandard.OAuth2.Model.Accounting;
-using Xero.NetStandard.OAuth2.Token;
 using Xero.NetStandard.OAuth2.Api;
 using Xero.NetStandard.OAuth2.Config;
-using Xero.NetStandard.OAuth2.Client;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using System.Net.Http;
 
 namespace XeroNetStandardApp.Controllers
 {
+
+    /// <summary>
+    /// Controller implementing methods demonstrating following accounting endpoints:
+    /// <para>- GET: /Contacts/</para>
+    /// <para>- POST: /Contacts#Create</para>
+    /// </summary>
     public class ContactsInfo : Controller
     {
-        private readonly ILogger<AuthorizationController> _logger;
-        private readonly IOptions<XeroConfiguration> XeroConfig;
+        private readonly IOptions<XeroConfiguration> _xeroConfig;
+        private readonly AccountingApi _accountingApi;
 
-        public ContactsInfo(IOptions<XeroConfiguration> XeroConfig, ILogger<AuthorizationController> logger)
+        public ContactsInfo(IOptions<XeroConfiguration> xeroConfig)
         {
-            _logger = logger;
-            this.XeroConfig = XeroConfig;
+            _xeroConfig = xeroConfig;
+            _accountingApi = new AccountingApi();
         }
 
-        // GET: /Contacts/
+        #region GET Endpoints
+
+        /// <summary>
+        /// GET: /Contacts/
+        /// </summary>
+        /// <returns>Returns a list of contacts</returns>
         public async Task<ActionResult> Index()
         {
-            var xeroToken = TokenUtilities.GetStoredToken();
-            var utcTimeNow = DateTime.UtcNow;
+            // Token and TenantId setup
+            var xeroToken = await TokenUtilities.GetXeroOAuth2Token(_xeroConfig.Value);
+            var xeroTenantId = TokenUtilities.GetXeroTenantId(xeroToken);
 
-            if (utcTimeNow > xeroToken.ExpiresAtUtc)
-            {
-                var client = new XeroClient(XeroConfig.Value);
-                xeroToken = (XeroOAuth2Token)await client.RefreshAccessTokenAsync(xeroToken);
-                TokenUtilities.StoreToken(xeroToken);
-            }
+            // Call get contacts endpoint
+            var response = await _accountingApi.GetContactsAsync(xeroToken.AccessToken, xeroTenantId);
 
-            string accessToken = xeroToken.AccessToken;
-            Guid tenantId = TokenUtilities.GetCurrentTenantId();
-            string xeroTenantId;
-            if (xeroToken.Tenants.Any((t) => t.TenantId == tenantId))
-            {
-                xeroTenantId = tenantId.ToString();
-            }
-            else
-            {
-                var id = xeroToken.Tenants.First().TenantId;
-                xeroTenantId = id.ToString();
-                TokenUtilities.StoreTenantId(id);
-            }
-
-            var AccountingApi = new AccountingApi();
-            var response = await AccountingApi.GetContactsAsync(accessToken, xeroTenantId);
             ViewBag.jsonResponse = response.ToJson();
-
-            var contacts = response._Contacts;
-
-            return View(contacts);
+            return View(response._Contacts);
         }
 
-        // GET: /Contacts#Create
+        /// <summary>
+        /// GET: /Contacts#Create
+        /// <para>Helper method to return View</para>
+        /// </summary>
+        /// <returns></returns>
         [HttpGet]
         public IActionResult Create()
         {
             return View();
         }
 
-        // POST: /Contacts#Create
+        #endregion
+
+        #region POST Endpoints
+
+        /// <summary>
+        /// POST: /Contacts#Create
+        /// </summary>
+        /// <param name="name">Name of contact to create</param>
+        /// <param name="emailAddress">Email address of contact to create</param>
+        /// <returns>Returns action result to redirect user to get contacts page</returns>
         [HttpPost]
         public async Task<ActionResult> Create(string name, string emailAddress)
         {
-            var xeroToken = TokenUtilities.GetStoredToken();
-            var utcTimeNow = DateTime.UtcNow;
-
-            if (utcTimeNow > xeroToken.ExpiresAtUtc)
-            {
-                var client = new XeroClient(XeroConfig.Value);
-                xeroToken = (XeroOAuth2Token)await client.RefreshAccessTokenAsync(xeroToken);
-                TokenUtilities.StoreToken(xeroToken);
-            }
-
-            string accessToken = xeroToken.AccessToken;
-            Guid tenantId = TokenUtilities.GetCurrentTenantId();
-            string xeroTenantId;
-            if (xeroToken.Tenants.Any((t) => t.TenantId == tenantId))
-            {
-                xeroTenantId = tenantId.ToString();
-            }
-            else
-            {
-                var id = xeroToken.Tenants.First().TenantId;
-                xeroTenantId = id.ToString();
-                TokenUtilities.StoreTenantId(id);
-            }
+            // Token and TenantId setup
+            var xeroToken = await TokenUtilities.GetXeroOAuth2Token(_xeroConfig.Value);
+            var xeroTenantId = TokenUtilities.GetXeroTenantId(xeroToken);
 
             var contact = new Contact
             {
                 Name = name,
                 EmailAddress = emailAddress
             };
+            var contacts = new Contacts { _Contacts = new List<Contact> { contact } };
 
-            var contacts = new Contacts();
-            contacts._Contacts = new List<Contact>() { contact };
-
-            var AccountingApi = new AccountingApi();
-            var response = await AccountingApi.CreateContactsAsync(accessToken, xeroTenantId, contacts);
+            await _accountingApi.CreateContactsAsync(xeroToken.AccessToken, xeroTenantId, contacts);
 
             return RedirectToAction("Index", "ContactsInfo");
         }
+
+        #endregion
     }
 }
