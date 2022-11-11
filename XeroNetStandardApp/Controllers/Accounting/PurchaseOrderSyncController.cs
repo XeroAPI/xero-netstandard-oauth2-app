@@ -4,239 +4,157 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using Xero.NetStandard.OAuth2.Model.Accounting;
-using Xero.NetStandard.OAuth2.Token;
 using Xero.NetStandard.OAuth2.Api;
 using Xero.NetStandard.OAuth2.Config;
-using Xero.NetStandard.OAuth2.Client;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using System.Net.Http;
 using System.IO;
 using Microsoft.AspNetCore.Http;
-using System.Text;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Serialization;
-
 
 namespace XeroNetStandardApp.Controllers
 {
+    /// <summary>
+    /// Controller implementing methods demonstrating following account endpoints:
+    /// <para>- GET: /PurchaseOrderSync/</para>
+    /// <para>- POST: /PurchaseOrderSync#Create</para>
+    /// <para>- POST: /PurchaseOrderSync/FileUpload#Upload</para>
+    /// </summary>
     public class PurchaseOrderSync : Controller
     {
-        private readonly ILogger<AuthorizationController> _logger;
-        private readonly IOptions<XeroConfiguration> XeroConfig;
-        private readonly IHttpClientFactory httpClientFactory;
+        private readonly IOptions<XeroConfiguration> _xeroConfig;
+        private readonly AccountingApi _accountingApi;
 
-        public PurchaseOrderSync(IOptions<XeroConfiguration> XeroConfig, IHttpClientFactory httpClientFactory, ILogger<AuthorizationController> logger)
+        public PurchaseOrderSync(IOptions<XeroConfiguration> xeroConfig)
         {
-            _logger = logger;
-            this.XeroConfig = XeroConfig;
-            this.httpClientFactory = httpClientFactory;
+            _xeroConfig = xeroConfig;
         }
 
-        // GET: /PurchaseOrderSync/
+        #region GET Endpoints
+
+        /// <summary>
+        /// GET: /PurchaseOrderSync/
+        /// </summary>
+        /// <returns>Returns a list of purchase orders</returns>
         public async Task<ActionResult> Index()
         {
-            var xeroToken = TokenUtilities.GetStoredToken();
-            var utcTimeNow = DateTime.UtcNow;
+            // Token and TenantId setup
+            var xeroToken = await TokenUtilities.GetXeroOAuth2Token(_xeroConfig.Value);
+            var xeroTenantId = TokenUtilities.GetXeroTenantId(xeroToken);
 
-            if (utcTimeNow > xeroToken.ExpiresAtUtc)
-            {
-                var client = new XeroClient(XeroConfig.Value);
-                xeroToken = (XeroOAuth2Token)await client.RefreshAccessTokenAsync(xeroToken);
-                TokenUtilities.StoreToken(xeroToken);
-            }
+            // Call get purchase orders endpoint
+            var response = await _accountingApi.GetPurchaseOrdersAsync(xeroToken.AccessToken, xeroTenantId);
 
-            string accessToken = xeroToken.AccessToken;
-            Guid tenantId = TokenUtilities.GetCurrentTenantId();
-            string xeroTenantId;
-            if (xeroToken.Tenants.Any((t) => t.TenantId == tenantId))
-            {
-                xeroTenantId = tenantId.ToString();
-            }
-            else
-            {
-                var id = xeroToken.Tenants.First().TenantId;
-                xeroTenantId = id.ToString();
-                TokenUtilities.StoreTenantId(id);
-            }
-
-            var AccountingApi = new AccountingApi();
-
-            var response = await AccountingApi.GetPurchaseOrdersAsync(accessToken, xeroTenantId);
-            var purchaseOrders = response._PurchaseOrders;
             ViewBag.jsonResponse = response.ToJson();
-
-            return View(purchaseOrders);
+            return View(response._PurchaseOrders);
         }
 
-        // GET: /PurchaseOrderSync#Create
+        /// <summary>
+        /// GET: /PurchaseOrderSync#Create
+        /// <para>Helper method to populate create page for purchase orders</para>
+        /// </summary>
+        /// <returns></returns>
         [HttpGet]
         public async Task<IActionResult> Create()
         {
-            var xeroToken = TokenUtilities.GetStoredToken();
-            var utcTimeNow = DateTime.UtcNow;
+            // Token and TenantId setup
+            var xeroToken = await TokenUtilities.GetXeroOAuth2Token(_xeroConfig.Value);
+            var xeroTenantId = TokenUtilities.GetXeroTenantId(xeroToken);
 
-            if (utcTimeNow > xeroToken.ExpiresAtUtc)
-            {
-                var client = new XeroClient(XeroConfig.Value);
-                xeroToken = (XeroOAuth2Token)await client.RefreshAccessTokenAsync(xeroToken);
-                TokenUtilities.StoreToken(xeroToken);
-            }
-
-            string accessToken = xeroToken.AccessToken;
-            Guid tenantId = TokenUtilities.GetCurrentTenantId();
-            string xeroTenantId;
-            if (xeroToken.Tenants.Any((t) => t.TenantId == tenantId))
-            {
-                xeroTenantId = tenantId.ToString();
-            }
-            else
-            {
-                var id = xeroToken.Tenants.First().TenantId;
-                xeroTenantId = id.ToString();
-                TokenUtilities.StoreTenantId(id);
-            }
-
-
-            var accountingApi = new AccountingApi();
-            var contacts = await accountingApi.GetContactsAsync(accessToken, xeroTenantId);
+            var contacts = await _accountingApi.GetContactsAsync(xeroToken.AccessToken, xeroTenantId);
             return View(contacts._Contacts.Select(contact => contact.ContactID.ToString()));
         }
 
-        // POST: /PurchaseOrderSync#Create
+        #endregion
+
+        #region POST Endpoints
+
+        /// <summary>
+        /// POST: /PurchaseOrderSync#Create
+        /// </summary>
+        /// <param name="contactId">Contact id of contact in purchase order to create</param>
+        /// <param name="lineDescription">Line description of line item in purchase order to create</param>
+        /// <param name="lineQuantity">Line quantity of line item in purchase order to create</param>
+        /// <param name="lineUnitAmount">Line unit amount of line item in purchase order to create</param>
+        /// <param name="lineAccountCode">Line account code of line item in purchase order to create</param>
+        /// <returns>Return action result to redirect user to get purchase orders page</returns>
         [HttpPost]
-        public async Task<ActionResult> Create(string contactId, string LineDescription, string LineQuantity, string LineUnitAmount, string LineAccountCode)
+        public async Task<ActionResult> Create(string contactId, string lineDescription, string lineQuantity, string lineUnitAmount, string lineAccountCode)
         {
-            var xeroToken = TokenUtilities.GetStoredToken();
-            var utcTimeNow = DateTime.UtcNow;
+            // Token and TenantId setup
+            var xeroToken = await TokenUtilities.GetXeroOAuth2Token(_xeroConfig.Value);
+            var xeroTenantId = TokenUtilities.GetXeroTenantId(xeroToken);
 
-            if (utcTimeNow > xeroToken.ExpiresAtUtc)
+            // Construct purchase orders object
+            var lines = new List<LineItem>
             {
-                var client = new XeroClient(XeroConfig.Value);
-                xeroToken = (XeroOAuth2Token)await client.RefreshAccessTokenAsync(xeroToken);
-                TokenUtilities.StoreToken(xeroToken);
-            }
-
-            string accessToken = xeroToken.AccessToken;
-            Guid tenantId = TokenUtilities.GetCurrentTenantId();
-            string xeroTenantId;
-            if (xeroToken.Tenants.Any((t) => t.TenantId == tenantId))
-            {
-                xeroTenantId = tenantId.ToString();
-            }
-            else
-            {
-                var id = xeroToken.Tenants.First().TenantId;
-                xeroTenantId = id.ToString();
-                TokenUtilities.StoreTenantId(id);
-            }
-
-            var contact = new Contact();
-            contact.ContactID = Guid.Parse(contactId);
-
-            var line = new LineItem()
-            {
-                Description = LineDescription,
-                Quantity = decimal.Parse(LineQuantity),
-                UnitAmount = decimal.Parse(LineUnitAmount),
-                AccountCode = LineAccountCode
+                new LineItem
+                {
+                    Description = lineDescription,
+                    Quantity = decimal.Parse(lineQuantity),
+                    UnitAmount = decimal.Parse(lineUnitAmount),
+                    AccountCode = lineAccountCode
+                }
             };
 
-            var lines = new List<LineItem>() {
-        line
-      };
-
-            var purchaseOrder = new PurchaseOrder()
+            var purchaseOrder = new PurchaseOrder
             {
-                Contact = contact,
+                Contact = new Contact { ContactID = Guid.Parse(contactId) },
                 Date = DateTime.Today,
                 DeliveryDate = DateTime.Today.AddDays(30),
                 LineAmountTypes = LineAmountTypes.Exclusive,
                 LineItems = lines
             };
 
-            var purchaseOrderList = new List<PurchaseOrder>();
-            purchaseOrderList.Add(purchaseOrder);
+            var purchaseOrders = new PurchaseOrders
+            {
+                _PurchaseOrders = new List<PurchaseOrder> { purchaseOrder }
+            };
 
-            var purchaseOrders = new PurchaseOrders();
-            purchaseOrders._PurchaseOrders = purchaseOrderList;
-
-            var objectFullName = purchaseOrders.GetType().FullName;
-            string result = JsonConvert.SerializeObject(purchaseOrders);
-
-            var AccountingApi = new AccountingApi();
-            var response = await AccountingApi.CreatePurchaseOrdersAsync(accessToken, xeroTenantId, purchaseOrders);
-
-            var updatedUTC = response._PurchaseOrders[0].UpdatedDateUTC;
+            // Call create purchase order endpoint
+            await _accountingApi.CreatePurchaseOrdersAsync(xeroToken.AccessToken, xeroTenantId, purchaseOrders);
 
             return RedirectToAction("Index", "PurchaseOrderSync");
         }
 
 
-        // POST: /PurchaseOrderSync/FileUpload#Upload
+        /// <summary>
+        /// POST: /PurchaseOrderSync/FileUpload#Upload
+        /// </summary>
+        /// <param name="files"></param>
+        /// <param name="purchaseOrderId"></param>
+        /// <returns></returns>
         [HttpPost("PurchaseOrderSyncFileUpload")]
         public async Task<IActionResult> Upload(List<IFormFile> files, string purchaseOrderId)
         {
-            var xeroToken = TokenUtilities.GetStoredToken();
-            var utcTimeNow = DateTime.UtcNow;
+            // Token and TenantId setup
+            var xeroToken = await TokenUtilities.GetXeroOAuth2Token(_xeroConfig.Value);
+            var xeroTenantId = TokenUtilities.GetXeroTenantId(xeroToken);
 
-            if (utcTimeNow > xeroToken.ExpiresAtUtc)
-            {
-                var client = new XeroClient(XeroConfig.Value);
-                xeroToken = (XeroOAuth2Token)await client.RefreshAccessTokenAsync(xeroToken);
-                TokenUtilities.StoreToken(xeroToken);
-            }
-
-            string accessToken = xeroToken.AccessToken;
-            Guid tenantId = TokenUtilities.GetCurrentTenantId();
-            string xeroTenantId;
-            if (xeroToken.Tenants.Any((t) => t.TenantId == tenantId))
-            {
-                xeroTenantId = tenantId.ToString();
-            }
-            else
-            {
-                var id = xeroToken.Tenants.First().TenantId;
-                xeroTenantId = id.ToString();
-                TokenUtilities.StoreTenantId(id);
-            }
-
-            var invoiceID = Guid.Parse(purchaseOrderId);
+            // Read files and attach them to a new purchase order
             long size = files.Sum(f => f.Length);
-
             var filePaths = new List<string>();
+
             foreach (var formFile in files)
             {
                 if (formFile.Length > 0)
                 {
-                    // full path to file in temp location
-                    var filePath = Path.GetTempFileName(); //we are using Temp file name just for the example. Add your own file path.
+                    var filePath = Path.GetTempFileName();
                     filePaths.Add(filePath);
 
                     byte[] byteArray;
-
-                    // using (var stream = new FileStream(filePath, FileMode.Create))
-                    // {
-                    //     await formFile.CopyToAsync(stream);
-                    // }
-
-                    using (MemoryStream data = new MemoryStream())
+                    using (var ms = new MemoryStream())
                     {
-                        formFile.CopyTo(data);
-                        byteArray = data.ToArray();
+                        await formFile.CopyToAsync(ms);
+                        byteArray = ms.ToArray();
                     }
 
-                    var AccountingApi = new AccountingApi();
-                    var response = await AccountingApi.CreatePurchaseOrderAttachmentByFileNameAsync(accessToken, xeroTenantId, invoiceID, formFile.FileName, byteArray);
+                    await _accountingApi.CreatePurchaseOrderAttachmentByFileNameAsync(xeroToken.AccessToken, xeroTenantId, Guid.Parse(purchaseOrderId), formFile.FileName, byteArray);
                 }
             }
-
-
-
-            // process uploaded files
-            // Don't rely on or trust the FileName property without validation.
-
+            
             return Ok(new { count = files.Count, size, filePaths });
         }
+
+        #endregion
+
     }
 }
