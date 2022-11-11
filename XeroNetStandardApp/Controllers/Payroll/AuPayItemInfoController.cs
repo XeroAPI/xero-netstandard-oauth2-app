@@ -1,59 +1,39 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using System;
 using System.Linq;
-using System.Net.Http;
 using System.Threading.Tasks;
 using Xero.NetStandard.OAuth2.Api;
-using Xero.NetStandard.OAuth2.Client;
 using Xero.NetStandard.OAuth2.Config;
-using Xero.NetStandard.OAuth2.Token;
 
 namespace XeroNetStandardApp.Controllers
 {
+    /// <summary>
+    /// Controller implementing methods demonstrating following PayrollAU endpoints:
+    /// <para>- GET: /AuPayItem/</para>
+    /// </summary>
     public class AuPayItemInfoController : Controller
     {
-        private readonly ILogger<AuPayItemInfoController> _logger;
-        private readonly IOptions<XeroConfiguration> XeroConfig;
-        private readonly IHttpClientFactory httpClientFactory;
+        private readonly IOptions<XeroConfiguration> _xeroConfig;
+        private readonly PayrollAuApi _payrollAuApi;
 
-        public AuPayItemInfoController(IOptions<XeroConfiguration> XeroConfig, IHttpClientFactory httpClientFactory, ILogger<AuPayItemInfoController> logger)
+        public AuPayItemInfoController(IOptions<XeroConfiguration> xeroConfig)
         {
-            _logger = logger;
-            this.XeroConfig = XeroConfig;
-            this.httpClientFactory = httpClientFactory;
+            _xeroConfig = xeroConfig;
+            _payrollAuApi = new PayrollAuApi();
         }
 
-        // GET: /AuPayItem/
+        /// <summary>
+        /// GET: /AuPayItem/
+        /// </summary>
+        /// <returns>Returns a list of pay items</returns>
         public async Task<ActionResult> Index()
         {
-            var xeroToken = TokenUtilities.GetStoredToken();
-            var utcTimeNow = DateTime.UtcNow;
+            // Token and TenantId setup
+            var xeroToken = await TokenUtilities.GetXeroOAuth2Token(_xeroConfig.Value);
+            var xeroTenantId = TokenUtilities.GetXeroTenantId(xeroToken);
 
-            if (utcTimeNow > xeroToken.ExpiresAtUtc)
-            {
-                var client = new XeroClient(XeroConfig.Value);
-                xeroToken = (XeroOAuth2Token)await client.RefreshAccessTokenAsync(xeroToken);
-                TokenUtilities.StoreToken(xeroToken);
-            }
-
-            string accessToken = xeroToken.AccessToken;
-            Guid tenantId = TokenUtilities.GetCurrentTenantId();
-            string xeroTenantId;
-            if (xeroToken.Tenants.Any((t) => t.TenantId == tenantId))
-            {
-                xeroTenantId = tenantId.ToString();
-            }
-            else
-            {
-                var id = xeroToken.Tenants.First().TenantId;
-                xeroTenantId = id.ToString();
-                TokenUtilities.StoreTenantId(id);
-            }
-
-            var PayrollAUApi = new PayrollAuApi();
-            var response = await PayrollAUApi.GetPayItemsAsync(accessToken, xeroTenantId);
+            // Call get pay items async
+            var response = await _payrollAuApi.GetPayItemsAsync(xeroToken.AccessToken, xeroTenantId);
 
             // Extracts the name from the different pay item types
             var earnings = response._PayItems.EarningsRates
@@ -72,7 +52,6 @@ namespace XeroNetStandardApp.Controllers
               .Concat(leave)
               .Concat(reimbursements);
 
-            // Sends the Pay item information to View
             ViewBag.jsonResponse = response.ToJson();
             return View(payItemList);
 
