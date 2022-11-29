@@ -28,6 +28,9 @@ namespace XeroNetStandardApp.Controllers
         private readonly ILogger<AuthorizationController> _logger;
         private readonly IOptions<XeroConfiguration> XeroConfig;
 
+        private readonly ProjectApi _projectApi;
+        private readonly AccountingApi _accountingApi;
+
         public ProjectInfo(IOptions<XeroConfiguration> XeroConfig, ILogger<AuthorizationController> logger)
         {
             _logger = logger;
@@ -43,32 +46,10 @@ namespace XeroNetStandardApp.Controllers
         // GET: /Project/
         public async Task<ActionResult> ProjectIndex()
         {
-            var xeroToken = TokenUtilities.GetStoredToken();
-            var utcTimeNow = DateTime.UtcNow;
+            var xeroToken = await TokenUtilities.GetXeroOAuth2Token(XeroConfig.Value);
+            var xeroTenantId = TokenUtilities.GetXeroTenantId(xeroToken);
 
-            if (utcTimeNow > xeroToken.ExpiresAtUtc)
-            {
-                var client = new XeroClient(XeroConfig.Value);
-                xeroToken = (XeroOAuth2Token)await client.RefreshAccessTokenAsync(xeroToken);
-                TokenUtilities.StoreToken(xeroToken);
-            }
-
-            string accessToken = xeroToken.AccessToken;
-            Guid tenantId = TokenUtilities.GetCurrentTenantId();
-            string xeroTenantId;
-            if (xeroToken.Tenants.Any((t) => t.TenantId == tenantId))
-            {
-                xeroTenantId = tenantId.ToString();
-            }
-            else
-            {
-                var id = xeroToken.Tenants.First().TenantId;
-                xeroTenantId = id.ToString();
-                TokenUtilities.StoreTenantId(id);
-            }
-
-            var ProjectApi = new ProjectApi();
-            var response = await ProjectApi.GetProjectsAsync(accessToken, xeroTenantId);
+            var response = await _projectApi.GetProjectsAsync(xeroToken.AccessToken, xeroTenantId);
 
             var projects = response.Items;
             ViewBag.jsonResponse = response.ToJson();
@@ -80,32 +61,10 @@ namespace XeroNetStandardApp.Controllers
         [HttpGet]
         public async Task<IActionResult> ProjectCreate()
         {
-            var xeroToken = TokenUtilities.GetStoredToken();
-            var utcTimeNow = DateTime.UtcNow;
+            var xeroToken = await TokenUtilities.GetXeroOAuth2Token(XeroConfig.Value);
+            var xeroTenantId = TokenUtilities.GetXeroTenantId(xeroToken);
 
-            if (utcTimeNow > xeroToken.ExpiresAtUtc)
-            {
-                var client = new XeroClient(XeroConfig.Value);
-                xeroToken = (XeroOAuth2Token)await client.RefreshAccessTokenAsync(xeroToken);
-                TokenUtilities.StoreToken(xeroToken);
-            }
-
-            string accessToken = xeroToken.AccessToken;
-            Guid tenantId = TokenUtilities.GetCurrentTenantId();
-            string xeroTenantId;
-            if (xeroToken.Tenants.Any((t) => t.TenantId == tenantId))
-            {
-                xeroTenantId = tenantId.ToString();
-            }
-            else
-            {
-                var id = xeroToken.Tenants.First().TenantId;
-                xeroTenantId = id.ToString();
-                TokenUtilities.StoreTenantId(id);
-            }
-
-            var accountingApi = new AccountingApi();
-            var contacts = await accountingApi.GetContactsAsync(accessToken, xeroTenantId);
+            var contacts = await _accountingApi.GetContactsAsync(xeroToken.AccessToken, xeroTenantId);
 
             List<string> contactIds = new List<string>();
             foreach (Xero.NetStandard.OAuth2.Model.Accounting.Contact contact in contacts._Contacts)
@@ -119,30 +78,8 @@ namespace XeroNetStandardApp.Controllers
         [HttpPost]
         public async Task<ActionResult> ProjectCreate(string contactId, string name, string estimateAmount)
         {
-            var xeroToken = TokenUtilities.GetStoredToken();
-            var utcTimeNow = DateTime.UtcNow;
-
-            if (utcTimeNow > xeroToken.ExpiresAtUtc)
-            {
-                var client = new XeroClient(XeroConfig.Value);
-                xeroToken = (XeroOAuth2Token)await client.RefreshAccessTokenAsync(xeroToken);
-                TokenUtilities.StoreToken(xeroToken);
-            }
-
-            string accessToken = xeroToken.AccessToken;
-            Guid tenantId = TokenUtilities.GetCurrentTenantId();
-            string xeroTenantId;
-
-            if (xeroToken.Tenants.Any((t) => t.TenantId == tenantId))
-            {
-                xeroTenantId = tenantId.ToString();
-            }
-            else
-            {
-                var id = xeroToken.Tenants.First().TenantId;
-                xeroTenantId = id.ToString();
-                TokenUtilities.StoreTenantId(id);
-            }
+            var xeroToken = await TokenUtilities.GetXeroOAuth2Token(XeroConfig.Value);
+            var xeroTenantId = TokenUtilities.GetXeroTenantId(xeroToken);
 
             DateTime deadlineUtc = DateTime.Today.AddDays(10);
 
@@ -160,8 +97,7 @@ namespace XeroNetStandardApp.Controllers
                 DeadlineUtc = deadlineUtc
             };
 
-            var ProjectApi = new ProjectApi();
-            var response = await ProjectApi.CreateProjectAsync(accessToken, xeroTenantId, project);
+            var response = await _projectApi.CreateProjectAsync(xeroToken.AccessToken, xeroTenantId, project);
 
             return RedirectToAction("ProjectIndex", "ProjectInfo");
         }
@@ -171,32 +107,10 @@ namespace XeroNetStandardApp.Controllers
         [HttpGet]
         public async Task<IActionResult> ProjectUpdate()
         {
-            var xeroToken = TokenUtilities.GetStoredToken();
-            var utcTimeNow = DateTime.UtcNow;
+            var xeroToken = await TokenUtilities.GetXeroOAuth2Token(XeroConfig.Value);
+            var xeroTenantId = TokenUtilities.GetXeroTenantId(xeroToken);
 
-            if (utcTimeNow > xeroToken.ExpiresAtUtc)
-            {
-                var client = new XeroClient(XeroConfig.Value);
-                xeroToken = (XeroOAuth2Token)await client.RefreshAccessTokenAsync(xeroToken);
-                TokenUtilities.StoreToken(xeroToken);
-            }
-
-            string accessToken = xeroToken.AccessToken;
-            Guid tenantId = TokenUtilities.GetCurrentTenantId();
-            string xeroTenantId;
-            if (xeroToken.Tenants.Any((t) => t.TenantId == tenantId))
-            {
-                xeroTenantId = tenantId.ToString();
-            }
-            else
-            {
-                var id = xeroToken.Tenants.First().TenantId;
-                xeroTenantId = id.ToString();
-                TokenUtilities.StoreTenantId(id);
-            }
-
-            var ProjectApi = new ProjectApi();
-            var projects = await ProjectApi.GetProjectsAsync(accessToken, xeroTenantId);
+            var projects = await _projectApi.GetProjectsAsync(xeroToken.AccessToken, xeroTenantId);
 
             List<string> projectNames = new List<string>();
             foreach (Project project in projects.Items)
@@ -210,29 +124,8 @@ namespace XeroNetStandardApp.Controllers
         [HttpPost]
         public async Task<ActionResult> ProjectUpdate(string projectOldName, string newName, DateTime newDeadline, string newEstimateAmount)
         {
-            var xeroToken = TokenUtilities.GetStoredToken();
-            var utcTimeNow = DateTime.UtcNow;
-
-            if (utcTimeNow > xeroToken.ExpiresAtUtc)
-            {
-                var client = new XeroClient(XeroConfig.Value);
-                xeroToken = (XeroOAuth2Token)await client.RefreshAccessTokenAsync(xeroToken);
-                TokenUtilities.StoreToken(xeroToken);
-            }
-
-            string accessToken = xeroToken.AccessToken;
-            Guid tenantId = TokenUtilities.GetCurrentTenantId();
-            string xeroTenantId;
-            if (xeroToken.Tenants.Any((t) => t.TenantId == tenantId))
-            {
-                xeroTenantId = tenantId.ToString();
-            }
-            else
-            {
-                var id = xeroToken.Tenants.First().TenantId;
-                xeroTenantId = id.ToString();
-                TokenUtilities.StoreTenantId(id);
-            }
+            var xeroToken = await TokenUtilities.GetXeroOAuth2Token(XeroConfig.Value);
+            var xeroTenantId = TokenUtilities.GetXeroTenantId(xeroToken);
 
             Amount projectAmount = new Amount()
             {
@@ -241,8 +134,7 @@ namespace XeroNetStandardApp.Controllers
             };
 
             // First find which project was selected and retrieve its Guid
-            var ProjectApi = new ProjectApi();
-            var projectsList = await ProjectApi.GetProjectsAsync(accessToken, xeroTenantId);
+            var projectsList = await _projectApi.GetProjectsAsync(xeroToken.AccessToken, xeroTenantId);
 
             Project projectToBeUpdate = new Project();
             Guid oldProjectId = new Guid();
@@ -265,7 +157,7 @@ namespace XeroNetStandardApp.Controllers
                 DeadlineUtc = newDeadline
             };
 
-            await ProjectApi.UpdateProjectAsync(accessToken, xeroTenantId, oldProjectId, project);
+            await _projectApi.UpdateProjectAsync(xeroToken.AccessToken, xeroTenantId, oldProjectId, project);
 
             // Wait a second for the update made to be registered
             System.Threading.Tasks.Task taskA = System.Threading.Tasks.Task.Run(() => System.Threading.Thread.Sleep(1000));
@@ -278,32 +170,11 @@ namespace XeroNetStandardApp.Controllers
         [HttpGet]
         public async Task<IActionResult> ProjectPatch()
         {
-            var xeroToken = TokenUtilities.GetStoredToken();
-            var utcTimeNow = DateTime.UtcNow;
+            var xeroToken = await TokenUtilities.GetXeroOAuth2Token(XeroConfig.Value);
+            var xeroTenantId = TokenUtilities.GetXeroTenantId(xeroToken);
 
-            if (utcTimeNow > xeroToken.ExpiresAtUtc)
-            {
-                var client = new XeroClient(XeroConfig.Value);
-                xeroToken = (XeroOAuth2Token)await client.RefreshAccessTokenAsync(xeroToken);
-                TokenUtilities.StoreToken(xeroToken);
-            }
-
-            string accessToken = xeroToken.AccessToken;
-            Guid tenantId = TokenUtilities.GetCurrentTenantId();
-            string xeroTenantId;
-            if (xeroToken.Tenants.Any((t) => t.TenantId == tenantId))
-            {
-                xeroTenantId = tenantId.ToString();
-            }
-            else
-            {
-                var id = xeroToken.Tenants.First().TenantId;
-                xeroTenantId = id.ToString();
-                TokenUtilities.StoreTenantId(id);
-            }
-
-            var ProjectApi = new ProjectApi();
-            var projects = await ProjectApi.GetProjectsAsync(accessToken, xeroTenantId);
+            var projects = await _projectApi.GetProjectsAsync(xeroToken.AccessToken, xeroTenantId);
+            
             List<string> projectNames = new List<string>();
             foreach (Project project in projects.Items)
             {
@@ -317,32 +188,10 @@ namespace XeroNetStandardApp.Controllers
         [HttpPost]
         public async Task<ActionResult> ProjectPatch(string projectName, string projectStatusChoice)
         {
-            var xeroToken = TokenUtilities.GetStoredToken();
-            var utcTimeNow = DateTime.UtcNow;
+            var xeroToken = await TokenUtilities.GetXeroOAuth2Token(XeroConfig.Value);
+            var xeroTenantId = TokenUtilities.GetXeroTenantId(xeroToken);
 
-            if (utcTimeNow > xeroToken.ExpiresAtUtc)
-            {
-                var client = new XeroClient(XeroConfig.Value);
-                xeroToken = (XeroOAuth2Token)await client.RefreshAccessTokenAsync(xeroToken);
-                TokenUtilities.StoreToken(xeroToken);
-            }
-
-            string accessToken = xeroToken.AccessToken;
-            Guid tenantId = TokenUtilities.GetCurrentTenantId();
-            string xeroTenantId;
-            if (xeroToken.Tenants.Any((t) => t.TenantId == tenantId))
-            {
-                xeroTenantId = tenantId.ToString();
-            }
-            else
-            {
-                var id = xeroToken.Tenants.First().TenantId;
-                xeroTenantId = id.ToString();
-                TokenUtilities.StoreTenantId(id);
-            }
-
-            var ProjectApi = new ProjectApi();
-            var projectsList = await ProjectApi.GetProjectsAsync(accessToken, xeroTenantId);
+            var projectsList = await _projectApi.GetProjectsAsync(xeroToken.AccessToken, xeroTenantId);
 
             Project projectToBeUpdate = new Project();
             Guid projectId = new Guid();
@@ -393,7 +242,7 @@ namespace XeroNetStandardApp.Controllers
 
             if (stateChanged)
             {
-                await ProjectApi.PatchProjectAsync(accessToken, xeroTenantId, projectId, projectPatch);
+                await _projectApi.PatchProjectAsync(xeroToken.AccessToken, xeroTenantId, projectId, projectPatch);
                 // Wait 3 seconds for the update made to be registered
                 System.Threading.Tasks.Task taskA = System.Threading.Tasks.Task.Run(() => System.Threading.Thread.Sleep(3000));
                 stateChanged = false;
@@ -411,32 +260,10 @@ namespace XeroNetStandardApp.Controllers
         [HttpGet]
         public async Task<ActionResult> TaskIndex()
         {
-            var xeroToken = TokenUtilities.GetStoredToken();
-            var utcTimeNow = DateTime.UtcNow;
+            var xeroToken = await TokenUtilities.GetXeroOAuth2Token(XeroConfig.Value);
+            var xeroTenantId = TokenUtilities.GetXeroTenantId(xeroToken);
 
-            if (utcTimeNow > xeroToken.ExpiresAtUtc)
-            {
-                var client = new XeroClient(XeroConfig.Value);
-                xeroToken = (XeroOAuth2Token)await client.RefreshAccessTokenAsync(xeroToken);
-                TokenUtilities.StoreToken(xeroToken);
-            }
-
-            string accessToken = xeroToken.AccessToken;
-            Guid tenantId = TokenUtilities.GetCurrentTenantId();
-            string xeroTenantId;
-            if (xeroToken.Tenants.Any((t) => t.TenantId == tenantId))
-            {
-                xeroTenantId = tenantId.ToString();
-            }
-            else
-            {
-                var id = xeroToken.Tenants.First().TenantId;
-                xeroTenantId = id.ToString();
-                TokenUtilities.StoreTenantId(id);
-            }
-
-            var ProjectApi = new ProjectApi();
-            var projects = await ProjectApi.GetProjectsAsync(accessToken, xeroTenantId);
+            var projects = await _projectApi.GetProjectsAsync(xeroToken.AccessToken, xeroTenantId);
 
             List<string> projectNames = new List<string>();
             foreach (Project project in projects.Items)
@@ -449,33 +276,11 @@ namespace XeroNetStandardApp.Controllers
         [HttpPost]
         public async Task<ActionResult> TaskIndex(string projectName)
         {
-            var xeroToken = TokenUtilities.GetStoredToken();
-            var utcTimeNow = DateTime.UtcNow;
-
-            if (utcTimeNow > xeroToken.ExpiresAtUtc)
-            {
-                var client = new XeroClient(XeroConfig.Value);
-                xeroToken = (XeroOAuth2Token)await client.RefreshAccessTokenAsync(xeroToken);
-                TokenUtilities.StoreToken(xeroToken);
-            }
-
-            string accessToken = xeroToken.AccessToken;
-            Guid tenantId = TokenUtilities.GetCurrentTenantId();
-            string xeroTenantId;
-            if (xeroToken.Tenants.Any((t) => t.TenantId == tenantId))
-            {
-                xeroTenantId = tenantId.ToString();
-            }
-            else
-            {
-                var id = xeroToken.Tenants.First().TenantId;
-                xeroTenantId = id.ToString();
-                TokenUtilities.StoreTenantId(id);
-            }
+            var xeroToken = await TokenUtilities.GetXeroOAuth2Token(XeroConfig.Value);
+            var xeroTenantId = TokenUtilities.GetXeroTenantId(xeroToken);
 
             // First find which project was selected and retrieve its Guid
-            var ProjectApi = new ProjectApi();
-            var projectsList = await ProjectApi.GetProjectsAsync(accessToken, xeroTenantId);
+            var projectsList = await _projectApi.GetProjectsAsync(xeroToken.AccessToken, xeroTenantId);
 
             Project projectToShowTask = new Project();
             Guid examinedProjectId = new Guid();
@@ -493,7 +298,7 @@ namespace XeroNetStandardApp.Controllers
                 }
             }
 
-            var response = await ProjectApi.GetTasksAsync(accessToken, xeroTenantId, examinedProjectId);
+            var response = await _projectApi.GetTasksAsync(xeroToken.AccessToken, xeroTenantId, examinedProjectId);
 
             var tasks = response.Items;
             ViewBag.jsonResponse = response.ToJson();
@@ -506,32 +311,10 @@ namespace XeroNetStandardApp.Controllers
         [HttpGet]
         public async Task<IActionResult> TaskCreate()
         {
-            var xeroToken = TokenUtilities.GetStoredToken();
-            var utcTimeNow = DateTime.UtcNow;
+            var xeroToken = await TokenUtilities.GetXeroOAuth2Token(XeroConfig.Value);
+            var xeroTenantId = TokenUtilities.GetXeroTenantId(xeroToken);
 
-            if (utcTimeNow > xeroToken.ExpiresAtUtc)
-            {
-                var client = new XeroClient(XeroConfig.Value);
-                xeroToken = (XeroOAuth2Token)await client.RefreshAccessTokenAsync(xeroToken);
-                TokenUtilities.StoreToken(xeroToken);
-            }
-
-            string accessToken = xeroToken.AccessToken;
-            Guid tenantId = TokenUtilities.GetCurrentTenantId();
-            string xeroTenantId;
-            if (xeroToken.Tenants.Any((t) => t.TenantId == tenantId))
-            {
-                xeroTenantId = tenantId.ToString();
-            }
-            else
-            {
-                var id = xeroToken.Tenants.First().TenantId;
-                xeroTenantId = id.ToString();
-                TokenUtilities.StoreTenantId(id);
-            }
-
-            var ProjectApi = new ProjectApi();
-            var projects = await ProjectApi.GetProjectsAsync(accessToken, xeroTenantId);
+            var projects = await _projectApi.GetProjectsAsync(xeroToken.AccessToken, xeroTenantId);
 
             List<string> projectNames = new List<string>();
             foreach (Project project in projects.Items)
@@ -546,33 +329,11 @@ namespace XeroNetStandardApp.Controllers
         [HttpPost]
         public async Task<ActionResult> TaskCreate(string projectName, string taskName, string taskRate, string estimateMinute, string taskChargeType)
         {
-            var xeroToken = TokenUtilities.GetStoredToken();
-            var utcTimeNow = DateTime.UtcNow;
-
-            if (utcTimeNow > xeroToken.ExpiresAtUtc)
-            {
-                var client = new XeroClient(XeroConfig.Value);
-                xeroToken = (XeroOAuth2Token)await client.RefreshAccessTokenAsync(xeroToken);
-                TokenUtilities.StoreToken(xeroToken);
-            }
-
-            string accessToken = xeroToken.AccessToken;
-            Guid tenantId = TokenUtilities.GetCurrentTenantId();
-            string xeroTenantId;
-            if (xeroToken.Tenants.Any((t) => t.TenantId == tenantId))
-            {
-                xeroTenantId = tenantId.ToString();
-            }
-            else
-            {
-                var id = xeroToken.Tenants.First().TenantId;
-                xeroTenantId = id.ToString();
-                TokenUtilities.StoreTenantId(id);
-            }
+            var xeroToken = await TokenUtilities.GetXeroOAuth2Token(XeroConfig.Value);
+            var xeroTenantId = TokenUtilities.GetXeroTenantId(xeroToken);
 
             // First find which project was selected and retrieve its Guid
-            var ProjectApi = new ProjectApi();
-            var projectsList = await ProjectApi.GetProjectsAsync(accessToken, xeroTenantId);
+            var projectsList = await _projectApi.GetProjectsAsync(xeroToken.AccessToken, xeroTenantId);
             List<string> projectNames = new List<string>();
 
             Guid projectId = new Guid();
@@ -601,7 +362,7 @@ namespace XeroNetStandardApp.Controllers
                 ChargeType = (ChargeType)Enum.Parse(typeof(ChargeType), taskChargeType)
             };
 
-            await ProjectApi.CreateTaskAsync(accessToken, xeroTenantId, projectId, task);
+            await _projectApi.CreateTaskAsync(xeroToken.AccessToken, xeroTenantId, projectId, task);
 
             return RedirectToAction("TaskIndex", "ProjectInfo");
         }
@@ -611,32 +372,10 @@ namespace XeroNetStandardApp.Controllers
         [HttpGet]
         public async Task<IActionResult> TaskDelete()
         {
-            var xeroToken = TokenUtilities.GetStoredToken();
-            var utcTimeNow = DateTime.UtcNow;
+            var xeroToken = await TokenUtilities.GetXeroOAuth2Token(XeroConfig.Value);
+            var xeroTenantId = TokenUtilities.GetXeroTenantId(xeroToken);
 
-            if (utcTimeNow > xeroToken.ExpiresAtUtc)
-            {
-                var client = new XeroClient(XeroConfig.Value);
-                xeroToken = (XeroOAuth2Token)await client.RefreshAccessTokenAsync(xeroToken);
-                TokenUtilities.StoreToken(xeroToken);
-            }
-
-            string accessToken = xeroToken.AccessToken;
-            Guid tenantId = TokenUtilities.GetCurrentTenantId();
-            string xeroTenantId;
-            if (xeroToken.Tenants.Any((t) => t.TenantId == tenantId))
-            {
-                xeroTenantId = tenantId.ToString();
-            }
-            else
-            {
-                var id = xeroToken.Tenants.First().TenantId;
-                xeroTenantId = id.ToString();
-                TokenUtilities.StoreTenantId(id);
-            }
-
-            var ProjectApi = new ProjectApi();
-            var projects = await ProjectApi.GetProjectsAsync(accessToken, xeroTenantId);
+            var projects = await _projectApi.GetProjectsAsync(xeroToken.AccessToken, xeroTenantId);
 
             // Reset the saved static values
             projectTaskExampleObject.projectNames.Clear();
@@ -663,7 +402,7 @@ namespace XeroNetStandardApp.Controllers
             projectTaskExampleObject.lastSelectedProjectId = projectTaskExampleObject.projectIds[0];
 
             // Get tasks for this initial project
-            var tasks = await ProjectApi.GetTasksAsync(accessToken, xeroTenantId, projectTaskExampleObject.lastSelectedProjectId);
+            var tasks = await _projectApi.GetTasksAsync(xeroToken.AccessToken, xeroTenantId, projectTaskExampleObject.lastSelectedProjectId);
 
             // Populate the list of projects retrieved
             foreach (Xero.NetStandard.OAuth2.Model.Project.Task task in tasks.Items)
@@ -680,33 +419,10 @@ namespace XeroNetStandardApp.Controllers
         [HttpPost]
         public async Task<ActionResult> TaskDelete(string projectName, string taskName)
         {
-            var xeroToken = TokenUtilities.GetStoredToken();
-            var utcTimeNow = DateTime.UtcNow;
+            var xeroToken = await TokenUtilities.GetXeroOAuth2Token(XeroConfig.Value);
+            var xeroTenantId = TokenUtilities.GetXeroTenantId(xeroToken);
 
-            if (utcTimeNow > xeroToken.ExpiresAtUtc)
-            {
-                var client = new XeroClient(XeroConfig.Value);
-                xeroToken = (XeroOAuth2Token)await client.RefreshAccessTokenAsync(xeroToken);
-                TokenUtilities.StoreToken(xeroToken);
-            }
-
-            string accessToken = xeroToken.AccessToken;
-            Guid tenantId = TokenUtilities.GetCurrentTenantId();
-            string xeroTenantId;
-            if (xeroToken.Tenants.Any((t) => t.TenantId == tenantId))
-            {
-                xeroTenantId = tenantId.ToString();
-            }
-            else
-            {
-                var id = xeroToken.Tenants.First().TenantId;
-                xeroTenantId = id.ToString();
-                TokenUtilities.StoreTenantId(id);
-            }
-
-
-            var ProjectApi = new ProjectApi();
-            var projects = await ProjectApi.GetProjectsAsync(accessToken, xeroTenantId);
+            var projects = await _projectApi.GetProjectsAsync(xeroToken.AccessToken, xeroTenantId);
 
             int numberOfProjects = 0;
             int selectedProjectPosition = 0;
@@ -730,7 +446,7 @@ namespace XeroNetStandardApp.Controllers
                         // Save this selected project ID
                         projectTaskExampleObject.lastSelectedProjectId = project.ProjectId.Value;
 
-                        var tasks = await ProjectApi.GetTasksAsync(accessToken, xeroTenantId, project.ProjectId.Value);
+                        var tasks = await _projectApi.GetTasksAsync(xeroToken.AccessToken, xeroTenantId, project.ProjectId.Value);
 
                         // Reset the UI dropdown list for task
                         projectTaskExampleObject.taskNames.Clear();
@@ -766,13 +482,13 @@ namespace XeroNetStandardApp.Controllers
                 // Reset the UI dropdown list for task
                 projectTaskExampleObject.taskNames.Clear();
 
-                var tasks = await ProjectApi.GetTasksAsync(accessToken, xeroTenantId, projectTaskExampleObject.lastSelectedProjectId);
+                var tasks = await _projectApi.GetTasksAsync(xeroToken.AccessToken, xeroTenantId, projectTaskExampleObject.lastSelectedProjectId);
 
                 foreach (Xero.NetStandard.OAuth2.Model.Project.Task task in tasks.Items)
                 {
                     if (Equals(taskName, task.Name))
                     {
-                        await ProjectApi.DeleteTaskAsync(accessToken, xeroTenantId, projectTaskExampleObject.lastSelectedProjectId, task.TaskId.Value);
+                        await _projectApi.DeleteTaskAsync(xeroToken.AccessToken, xeroTenantId, projectTaskExampleObject.lastSelectedProjectId, task.TaskId.Value);
 
                         // After deleting task, reset the saved static list
                         projectTaskExampleObject.taskNames.Clear();
@@ -784,7 +500,7 @@ namespace XeroNetStandardApp.Controllers
                 System.Threading.Tasks.Task taskA = System.Threading.Tasks.Task.Run(() => System.Threading.Thread.Sleep(3000));
 
                 // Retrieve new list of tasks
-                tasks = await ProjectApi.GetTasksAsync(accessToken, xeroTenantId, projectTaskExampleObject.lastSelectedProjectId);
+                tasks = await _projectApi.GetTasksAsync(xeroToken.AccessToken, xeroTenantId, projectTaskExampleObject.lastSelectedProjectId);
 
                 // Populate new list of tasks retrieved
                 foreach (Xero.NetStandard.OAuth2.Model.Project.Task task in tasks.Items)
@@ -797,47 +513,15 @@ namespace XeroNetStandardApp.Controllers
         }
 
 
-
-
-
-
-
-
-
-
-
-
-
         // GET: /Project Task #Update
         [HttpGet]
         public async Task<IActionResult> TaskUpdate()
         {
-            var xeroToken = TokenUtilities.GetStoredToken();
-            var utcTimeNow = DateTime.UtcNow;
-
-            if (utcTimeNow > xeroToken.ExpiresAtUtc)
-            {
-                var client = new XeroClient(XeroConfig.Value);
-                xeroToken = (XeroOAuth2Token)await client.RefreshAccessTokenAsync(xeroToken);
-                TokenUtilities.StoreToken(xeroToken);
-            }
-
-            string accessToken = xeroToken.AccessToken;
-            Guid tenantId = TokenUtilities.GetCurrentTenantId();
-            string xeroTenantId;
-            if (xeroToken.Tenants.Any((t) => t.TenantId == tenantId))
-            {
-                xeroTenantId = tenantId.ToString();
-            }
-            else
-            {
-                var id = xeroToken.Tenants.First().TenantId;
-                xeroTenantId = id.ToString();
-                TokenUtilities.StoreTenantId(id);
-            }
+            var xeroToken = await TokenUtilities.GetXeroOAuth2Token(XeroConfig.Value);
+            var xeroTenantId = TokenUtilities.GetXeroTenantId(xeroToken);
 
             var ProjectApi = new ProjectApi();
-            var projects = await ProjectApi.GetProjectsAsync(accessToken, xeroTenantId);
+            var projects = await ProjectApi.GetProjectsAsync(xeroToken.AccessToken, xeroTenantId);
 
             // Reset the saved static values
             projectTaskExampleObject.projectNames.Clear();
@@ -864,7 +548,7 @@ namespace XeroNetStandardApp.Controllers
             projectTaskExampleObject.lastSelectedProjectId = projectTaskExampleObject.projectIds[0];
 
             // Get tasks for this initial project
-            var tasks = await ProjectApi.GetTasksAsync(accessToken, xeroTenantId, projectTaskExampleObject.lastSelectedProjectId);
+            var tasks = await ProjectApi.GetTasksAsync(xeroToken.AccessToken, xeroTenantId, projectTaskExampleObject.lastSelectedProjectId);
 
             // Populate the list of projects retrieved
             foreach (Xero.NetStandard.OAuth2.Model.Project.Task task in tasks.Items)
@@ -881,33 +565,12 @@ namespace XeroNetStandardApp.Controllers
         [HttpPost]
         public async Task<ActionResult> TaskUpdate(string projectName, string taskName, string newTaskName, string taskRate, string estimateMinute, string taskChargeType)
         {
-            var xeroToken = TokenUtilities.GetStoredToken();
-            var utcTimeNow = DateTime.UtcNow;
-
-            if (utcTimeNow > xeroToken.ExpiresAtUtc)
-            {
-                var client = new XeroClient(XeroConfig.Value);
-                xeroToken = (XeroOAuth2Token)await client.RefreshAccessTokenAsync(xeroToken);
-                TokenUtilities.StoreToken(xeroToken);
-            }
-
-            string accessToken = xeroToken.AccessToken;
-            Guid tenantId = TokenUtilities.GetCurrentTenantId();
-            string xeroTenantId;
-            if (xeroToken.Tenants.Any((t) => t.TenantId == tenantId))
-            {
-                xeroTenantId = tenantId.ToString();
-            }
-            else
-            {
-                var id = xeroToken.Tenants.First().TenantId;
-                xeroTenantId = id.ToString();
-                TokenUtilities.StoreTenantId(id);
-            }
+            var xeroToken = await TokenUtilities.GetXeroOAuth2Token(XeroConfig.Value);
+            var xeroTenantId = TokenUtilities.GetXeroTenantId(xeroToken);
 
 
             var ProjectApi = new ProjectApi();
-            var projects = await ProjectApi.GetProjectsAsync(accessToken, xeroTenantId);
+            var projects = await ProjectApi.GetProjectsAsync(xeroToken.AccessToken, xeroTenantId);
 
             int numberOfProjects = 0;
             int selectedProjectPosition = 0;
@@ -931,7 +594,7 @@ namespace XeroNetStandardApp.Controllers
                         // Save this selected project ID
                         projectTaskExampleObject.lastSelectedProjectId = project.ProjectId.Value;
 
-                        var tasks = await ProjectApi.GetTasksAsync(accessToken, xeroTenantId, project.ProjectId.Value);
+                        var tasks = await ProjectApi.GetTasksAsync(xeroToken.AccessToken, xeroTenantId, project.ProjectId.Value);
 
                         // Reset the UI dropdown list for task
                         projectTaskExampleObject.taskNames.Clear();
@@ -967,7 +630,7 @@ namespace XeroNetStandardApp.Controllers
                 // Reset the UI dropdown list for task
                 projectTaskExampleObject.taskNames.Clear();
 
-                var tasks = await ProjectApi.GetTasksAsync(accessToken, xeroTenantId, projectTaskExampleObject.lastSelectedProjectId);
+                var tasks = await ProjectApi.GetTasksAsync(xeroToken.AccessToken, xeroTenantId, projectTaskExampleObject.lastSelectedProjectId);
 
                 foreach (Xero.NetStandard.OAuth2.Model.Project.Task task in tasks.Items)
                 {
@@ -987,7 +650,7 @@ namespace XeroNetStandardApp.Controllers
                             ChargeType = (ChargeType)Enum.Parse(typeof(ChargeType), taskChargeType)
                         };
 
-                        await ProjectApi.UpdateTaskAsync(accessToken, xeroTenantId, projectTaskExampleObject.lastSelectedProjectId, task.TaskId.Value, newTask);
+                        await ProjectApi.UpdateTaskAsync(xeroToken.AccessToken, xeroTenantId, projectTaskExampleObject.lastSelectedProjectId, task.TaskId.Value, newTask);
 
                         // After deleting task, reset the saved static list
                         projectTaskExampleObject.taskNames.Clear();
@@ -999,7 +662,7 @@ namespace XeroNetStandardApp.Controllers
                 System.Threading.Tasks.Task taskA = System.Threading.Tasks.Task.Run(() => System.Threading.Thread.Sleep(3000));
 
                 // Retrieve new list of tasks
-                tasks = await ProjectApi.GetTasksAsync(accessToken, xeroTenantId, projectTaskExampleObject.lastSelectedProjectId);
+                tasks = await ProjectApi.GetTasksAsync(xeroToken.AccessToken, xeroTenantId, projectTaskExampleObject.lastSelectedProjectId);
 
                 // Populate new list of tasks retrieved
                 foreach (Xero.NetStandard.OAuth2.Model.Project.Task task in tasks.Items)
