@@ -11,16 +11,9 @@ namespace XeroNetStandardApp.Controllers
     /// Controller implementing methods demonstrating following PayrollAU endpoints:
     /// <para>- GET: /AuPayItem/</para>
     /// </summary>
-    public class AuPayItemInfoController : Controller
+    public class AuPayItemInfoController : ApiAccessorController<PayrollAuApi>
     {
-        private readonly IOptions<XeroConfiguration> _xeroConfig;
-        private readonly PayrollAuApi _payrollAuApi;
-
-        public AuPayItemInfoController(IOptions<XeroConfiguration> xeroConfig)
-        {
-            _xeroConfig = xeroConfig;
-            _payrollAuApi = new PayrollAuApi();
-        }
+        public AuPayItemInfoController(IOptions<XeroConfiguration> xeroConfig):base(xeroConfig){}
 
         /// <summary>
         /// GET: /AuPayItem/
@@ -28,12 +21,8 @@ namespace XeroNetStandardApp.Controllers
         /// <returns>Returns a list of pay items</returns>
         public async Task<ActionResult> Index()
         {
-            // Token and TenantId setup
-            var xeroToken = await TokenUtilities.GetXeroOAuth2Token(_xeroConfig.Value);
-            var xeroTenantId = TokenUtilities.GetXeroTenantId(xeroToken);
-
             // Call get pay items async
-            var response = await _payrollAuApi.GetPayItemsAsync(xeroToken.AccessToken, xeroTenantId);
+            var response = await Api.GetPayItemsAsync(XeroToken.AccessToken, TenantId);
 
             // Extracts the name from the different pay item types
             var earnings = response._PayItems.EarningsRates

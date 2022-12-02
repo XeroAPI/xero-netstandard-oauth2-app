@@ -18,16 +18,9 @@ namespace XeroNetStandardApp.Controllers
     /// <para>- POST: /InvoiceSync#Create/</para>
     /// <para>- POST: /InvoiceSync/FileUpload#Upload</para>
     /// </summary>
-    public class InvoiceSync : Controller
+    public class InvoiceSync : ApiAccessorController<AccountingApi>
     {
-        private readonly IOptions<XeroConfiguration> _xeroConfig;
-        private readonly AccountingApi _accountingApi;
-
-        public InvoiceSync(IOptions<XeroConfiguration> xeroConfig)
-        {
-            _xeroConfig = xeroConfig;
-            _accountingApi = new AccountingApi();
-        }
+        public InvoiceSync(IOptions<XeroConfiguration> xeroConfig):base(xeroConfig){}
 
         #region GET Endpoints
         /// <summary>
@@ -36,12 +29,8 @@ namespace XeroNetStandardApp.Controllers
         /// <returns>Returns list of invoices for last 7 days</returns>
         public async Task<ActionResult> Index()
         {
-            // Token and TenantId setup
-            var xeroToken = await TokenUtilities.GetXeroOAuth2Token(_xeroConfig.Value);
-            var xeroTenantId = TokenUtilities.GetXeroTenantId(xeroToken);
-
             // Call get invoices endpoint
-            var response = await _accountingApi.GetInvoicesAsync(xeroToken.AccessToken, xeroTenantId, null, GetSevenDayInvoiceFilter());
+            var response = await Api.GetInvoicesAsync(XeroToken.AccessToken, TenantId, where: GetSevenDayInvoiceFilter());
 
             ViewBag.jsonResponse = response.ToJson();
             return View(response._Invoices);
@@ -73,11 +62,6 @@ namespace XeroNetStandardApp.Controllers
         public async Task<ActionResult> Create(string name, string lineDescription, string lineQuantity,
             string lineUnitAmount, string lineAccountCode)
         {
-            // Token and TenantId setup
-            var xeroToken = await TokenUtilities.GetXeroOAuth2Token(_xeroConfig.Value);
-            var xeroTenantId = TokenUtilities.GetXeroTenantId(xeroToken);
-
-
             // Construct invoice
             var invoice = ConstructInvoice(name, lineDescription, lineQuantity, lineUnitAmount, lineAccountCode);
             var invoices = new Invoices
@@ -86,7 +70,7 @@ namespace XeroNetStandardApp.Controllers
             };
 
             // Call create invoice endpoint
-            await _accountingApi.CreateInvoicesAsync(xeroToken.AccessToken, xeroTenantId, invoices);
+            await Api.CreateInvoicesAsync(XeroToken.AccessToken, TenantId, invoices);
 
             return RedirectToAction("Index", "InvoiceSync");
         }
@@ -100,10 +84,6 @@ namespace XeroNetStandardApp.Controllers
         [HttpPost("InvoiceFileUpload")]
         public async Task<IActionResult> Upload(List<IFormFile> files, Guid invoiceId)
         {
-            // Token and TenantId setup
-            var xeroToken = await TokenUtilities.GetXeroOAuth2Token(_xeroConfig.Value);
-            var xeroTenantId = TokenUtilities.GetXeroTenantId(xeroToken);
-
             // Setup
             var size = files.Sum(f => f.Length);
             var filePaths = new List<string>();
@@ -123,7 +103,7 @@ namespace XeroNetStandardApp.Controllers
                     }
 
                     // Call attach file to invoice endpoint
-                    await _accountingApi.CreateInvoiceAttachmentByFileNameAsync(xeroToken.AccessToken, xeroTenantId, invoiceId, formFile.FileName, byteArray);
+                    await Api.CreateInvoiceAttachmentByFileNameAsync(XeroToken.AccessToken, TenantId, invoiceId, formFile.FileName, byteArray);
                 }
             }
 

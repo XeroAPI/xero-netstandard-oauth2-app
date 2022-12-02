@@ -1,0 +1,31 @@
+﻿@model dynamic
+
+<h2>Editing Task: @Model.Name</h2>
+
+<form method="POST">
+    <br />
+    <label name="projectId" value="@Model.ProjectId"></label>
+    <label name="taskId" value="@Model.TaskId"></label>
+
+    <label>Task Name:</label>
+    <input class="form-control" type="text" id="taskName" value="@Model.Name" name="taskName" required />
+    <br />
+    <label>Task Rate:</label>
+    <input class="form-control" type="number" step="any" id="taskRate" value="@Model.Rate.Value" name="taskRate" required />
+    <br />
+    <label>Estimate Minute:</label>
+    <input class="form-control" type="number" step="any" id="estimateMinute" value="@Model.EstimateMinutes" name="estimateMinute" required />
+    <br />
+    <label>Task Charge Type</label>
+    <select id="taskChargeType" name="taskChargeType" value="@Model.ChargeType.ToString()" required>
+        <option value="TIME">Per Hour</option>
+        <option value="FIXED">Fixed</option>
+        <option value="NONCHARGEABLE">Non-Chargeable</option>
+    </select>
+    <br />
+    <input class="btn btn-primary" type="submit" />
+</form>
+
+<br />
+
+<button class="btn btn-link" onclick="location.href='@Url.Action("GetTasks", values: new { @Model.ProjectId })'">Back</button>

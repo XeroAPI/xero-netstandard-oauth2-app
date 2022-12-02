@@ -25,7 +25,11 @@ public static class TokenUtilities
     }
   }
 
-
+  /// <summary>
+  /// 
+  /// </summary>
+  /// <param name="xeroConfig"></param>
+  /// <returns></returns>
   public async static Task<XeroOAuth2Token> GetXeroOAuth2Token(XeroConfiguration xeroConfig)
   {
       var xeroToken = GetStoredToken();

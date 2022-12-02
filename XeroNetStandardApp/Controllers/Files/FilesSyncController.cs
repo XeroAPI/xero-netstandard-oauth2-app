@@ -17,16 +17,9 @@ namespace XeroNetStandardApp.Controllers
     /// <para>- POST: /FilesSync/FileUpload#Upload</para>
     /// <para>- POST: /FilesSync#Rename</para>
     /// </summary>
-    public class FilesSync : Controller
+    public class FilesSync : ApiAccessorController<FilesApi>
     {
-        private readonly IOptions<XeroConfiguration> _xeroConfig;
-        private readonly FilesApi _filesApi;
-
-        public FilesSync(IOptions<XeroConfiguration> xeroConfig)
-        {
-            _xeroConfig = xeroConfig;
-            _filesApi = new FilesApi();
-        }
+        public FilesSync(IOptions<XeroConfiguration> xeroConfig):base(xeroConfig){}
 
         #region GET Endpoints
 
@@ -36,12 +29,8 @@ namespace XeroNetStandardApp.Controllers
         /// <returns>Returns a list of files</returns>
         public async Task<ActionResult> Index()
         {
-            // Token and TenantId setup
-            var xeroToken = await TokenUtilities.GetXeroOAuth2Token(_xeroConfig.Value);
-            var xeroTenantId = TokenUtilities.GetXeroTenantId(xeroToken);
-
             // Call get files endpoint
-            var response = await _filesApi.GetFilesAsync(xeroToken.AccessToken, xeroTenantId);
+            var response = await Api.GetFilesAsync(XeroToken.AccessToken, TenantId);
 
             ViewBag.jsonResponse = response.ToJson();
             return View(response.Items);
@@ -50,17 +39,13 @@ namespace XeroNetStandardApp.Controllers
         /// <summary>
         /// Get: /Files#Delete
         /// </summary>
-        /// <param name="fileID">File id of file to delete</param>
+        /// <param name="fileId">File id of file to delete</param>
         /// <returns>Returns action result to redirect user to get files page</returns>
         [HttpGet]
-        public async Task<ActionResult> Delete(string fileID)
+        public async Task<ActionResult> Delete(string fileId)
         {
-            // Token and TenantId setup
-            var xeroToken = await TokenUtilities.GetXeroOAuth2Token(_xeroConfig.Value);
-            var xeroTenantId = TokenUtilities.GetXeroTenantId(xeroToken);
-
             // Call delete file endpoint
-            await _filesApi.DeleteFileAsync(xeroToken.AccessToken, xeroTenantId, Guid.Parse(fileID));
+            await Api.DeleteFileAsync(XeroToken.AccessToken, TenantId, Guid.Parse(fileId));
 
             return RedirectToAction("Index", "FilesSync");
         }
@@ -91,10 +76,6 @@ namespace XeroNetStandardApp.Controllers
         [HttpPost("FilesSyncFileUpload")]
         public async Task<IActionResult> Upload(List<IFormFile> files)
         {
-            // Token and TenantId setup
-            var xeroToken = await TokenUtilities.GetXeroOAuth2Token(_xeroConfig.Value);
-            var xeroTenantId = TokenUtilities.GetXeroTenantId(xeroToken);
-
             // Loop through all files and upload each one to account
             foreach (var formFile in files)
             {
@@ -107,9 +88,9 @@ namespace XeroNetStandardApp.Controllers
                         byteArray = ms.ToArray();
                     }
 
-                    await _filesApi.UploadFileAsync(
-                        xeroToken.AccessToken,
-                        xeroTenantId,
+                    await Api.UploadFileAsync(
+                        XeroToken.AccessToken,
+                        TenantId,
                         byteArray,
                         formFile.FileName,
                         formFile.FileName,
@@ -130,16 +111,12 @@ namespace XeroNetStandardApp.Controllers
         [HttpPost]
         public async Task<ActionResult> Rename(string fileID, string newName)
         {
-            // Token and TenantId setup
-            var xeroToken = await TokenUtilities.GetXeroOAuth2Token(_xeroConfig.Value);
-            var xeroTenantId = TokenUtilities.GetXeroTenantId(xeroToken);
-
             // Update file object
-            FileObject file = await _filesApi.GetFileAsync(xeroToken.AccessToken, xeroTenantId, Guid.Parse(fileID));
+            FileObject file = await Api.GetFileAsync(XeroToken.AccessToken, TenantId, Guid.Parse(fileID));
             file.Name = newName;
 
             // Call update file endpoint
-            await _filesApi.UpdateFileAsync(xeroToken.AccessToken, xeroTenantId, Guid.Parse(fileID), file);
+            await Api.UpdateFileAsync(XeroToken.AccessToken, TenantId, Guid.Parse(fileID), file);
 
             return RedirectToAction("Index", "FilesSync");
         }

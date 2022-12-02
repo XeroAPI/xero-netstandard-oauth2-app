@@ -4,11 +4,11 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using Xero.NetStandard.OAuth2.Model.Accounting;
-using Xero.NetStandard.OAuth2.Api;
 using Xero.NetStandard.OAuth2.Config;
 using Microsoft.Extensions.Options;
 using System.IO;
 using Microsoft.AspNetCore.Http;
+using Xero.NetStandard.OAuth2.Api;
 
 namespace XeroNetStandardApp.Controllers
 {
@@ -18,15 +18,9 @@ namespace XeroNetStandardApp.Controllers
     /// <para>- POST: /PurchaseOrderSync#Create</para>
     /// <para>- POST: /PurchaseOrderSync/FileUpload#Upload</para>
     /// </summary>
-    public class PurchaseOrderSync : Controller
+    public class PurchaseOrderSync : ApiAccessorController<AccountingApi>
     {
-        private readonly IOptions<XeroConfiguration> _xeroConfig;
-        private readonly AccountingApi _accountingApi;
-
-        public PurchaseOrderSync(IOptions<XeroConfiguration> xeroConfig)
-        {
-            _xeroConfig = xeroConfig;
-        }
+        public PurchaseOrderSync(IOptions<XeroConfiguration> xeroConfig):base(xeroConfig){}
 
         #region GET Endpoints
 
@@ -36,12 +30,8 @@ namespace XeroNetStandardApp.Controllers
         /// <returns>Returns a list of purchase orders</returns>
         public async Task<ActionResult> Index()
         {
-            // Token and TenantId setup
-            var xeroToken = await TokenUtilities.GetXeroOAuth2Token(_xeroConfig.Value);
-            var xeroTenantId = TokenUtilities.GetXeroTenantId(xeroToken);
-
             // Call get purchase orders endpoint
-            var response = await _accountingApi.GetPurchaseOrdersAsync(xeroToken.AccessToken, xeroTenantId);
+            var response = await Api.GetPurchaseOrdersAsync(XeroToken.AccessToken, TenantId);
 
             ViewBag.jsonResponse = response.ToJson();
             return View(response._PurchaseOrders);
@@ -55,11 +45,7 @@ namespace XeroNetStandardApp.Controllers
         [HttpGet]
         public async Task<IActionResult> Create()
         {
-            // Token and TenantId setup
-            var xeroToken = await TokenUtilities.GetXeroOAuth2Token(_xeroConfig.Value);
-            var xeroTenantId = TokenUtilities.GetXeroTenantId(xeroToken);
-
-            var contacts = await _accountingApi.GetContactsAsync(xeroToken.AccessToken, xeroTenantId);
+            var contacts = await Api.GetContactsAsync(XeroToken.AccessToken, TenantId);
             return View(contacts._Contacts.Select(contact => contact.ContactID.ToString()));
         }
 
@@ -79,10 +65,6 @@ namespace XeroNetStandardApp.Controllers
         [HttpPost]
         public async Task<ActionResult> Create(string contactId, string lineDescription, string lineQuantity, string lineUnitAmount, string lineAccountCode)
         {
-            // Token and TenantId setup
-            var xeroToken = await TokenUtilities.GetXeroOAuth2Token(_xeroConfig.Value);
-            var xeroTenantId = TokenUtilities.GetXeroTenantId(xeroToken);
-
             // Construct purchase orders object
             var lines = new List<LineItem>
             {
@@ -110,7 +92,7 @@ namespace XeroNetStandardApp.Controllers
             };
 
             // Call create purchase order endpoint
-            await _accountingApi.CreatePurchaseOrdersAsync(xeroToken.AccessToken, xeroTenantId, purchaseOrders);
+            await Api.CreatePurchaseOrdersAsync(XeroToken.AccessToken, TenantId, purchaseOrders);
 
             return RedirectToAction("Index", "PurchaseOrderSync");
         }
@@ -125,10 +107,6 @@ namespace XeroNetStandardApp.Controllers
         [HttpPost("PurchaseOrderSyncFileUpload")]
         public async Task<IActionResult> Upload(List<IFormFile> files, string purchaseOrderId)
         {
-            // Token and TenantId setup
-            var xeroToken = await TokenUtilities.GetXeroOAuth2Token(_xeroConfig.Value);
-            var xeroTenantId = TokenUtilities.GetXeroTenantId(xeroToken);
-
             // Read files and attach them to a new purchase order
             long size = files.Sum(f => f.Length);
             var filePaths = new List<string>();
@@ -147,7 +125,7 @@ namespace XeroNetStandardApp.Controllers
                         byteArray = ms.ToArray();
                     }
 
-                    await _accountingApi.CreatePurchaseOrderAttachmentByFileNameAsync(xeroToken.AccessToken, xeroTenantId, Guid.Parse(purchaseOrderId), formFile.FileName, byteArray);
+                    await Api.CreatePurchaseOrderAttachmentByFileNameAsync(XeroToken.AccessToken, TenantId, Guid.Parse(purchaseOrderId), formFile.FileName, byteArray);
                 }
             }
             

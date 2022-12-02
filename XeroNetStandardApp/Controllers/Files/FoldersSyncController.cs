@@ -16,16 +16,9 @@ namespace XeroNetStandardApp.Controllers
     /// <para>- POST: /FoldersSync#Create</para>
     /// <para>- Post: /FoldersSync#Rename</para>
     /// </summary>
-    public class FoldersSync : Controller
+    public class FoldersSync : ApiAccessorController<FilesApi>
     {
-        private readonly IOptions<XeroConfiguration> _xeroConfig;
-        private readonly FilesApi _filesApi;
-
-        public FoldersSync(IOptions<XeroConfiguration> xeroConfig)
-        {
-            _xeroConfig = xeroConfig;
-            _filesApi = new FilesApi();
-        }
+        public FoldersSync(IOptions<XeroConfiguration> xeroConfig):base(xeroConfig){}
 
         #region GET Endpoints
 
@@ -35,12 +28,8 @@ namespace XeroNetStandardApp.Controllers
         /// <returns>Returns a list of folders</returns>
         public async Task<ActionResult> Index()
         {
-            // Token and TenantId setup
-            var xeroToken = await TokenUtilities.GetXeroOAuth2Token(_xeroConfig.Value);
-            var xeroTenantId = TokenUtilities.GetXeroTenantId(xeroToken);
-
             // Call get folders endpoint
-            var response = await _filesApi.GetFoldersAsync(xeroToken.AccessToken, xeroTenantId);
+            var response = await Api.GetFoldersAsync(XeroToken.AccessToken, TenantId);
 
             var formattedResponse = "";
             response.ForEach(folder => formattedResponse += folder.ToJson() + "\n");
@@ -57,12 +46,8 @@ namespace XeroNetStandardApp.Controllers
         [HttpGet]
         public async Task<ActionResult> Delete(string folderId)
         {
-            // Token and TenantId setup
-            var xeroToken = await TokenUtilities.GetXeroOAuth2Token(_xeroConfig.Value);
-            var xeroTenantId = TokenUtilities.GetXeroTenantId(xeroToken);
-
             // Call delete folder endpoint
-            await _filesApi.DeleteFolderAsync(xeroToken.AccessToken, xeroTenantId, Guid.Parse(folderId));
+            await Api.DeleteFolderAsync(XeroToken.AccessToken, TenantId, Guid.Parse(folderId));
             
             return RedirectToAction("Index", "FoldersSync");
         }
@@ -105,10 +90,6 @@ namespace XeroNetStandardApp.Controllers
         [HttpPost]
         public async Task<ActionResult> Create(string name, string email)
         {
-            // Token and TenantId setup
-            var xeroToken = await TokenUtilities.GetXeroOAuth2Token(_xeroConfig.Value);
-            var xeroTenantId = TokenUtilities.GetXeroTenantId(xeroToken);
-
             var newFolder = new Folder
             {
                 Name = name,
@@ -117,7 +98,7 @@ namespace XeroNetStandardApp.Controllers
             };
 
             // Call create folder endpoint
-            await _filesApi.CreateFolderAsync(xeroToken.AccessToken, xeroTenantId, newFolder);
+            await Api.CreateFolderAsync(XeroToken.AccessToken, TenantId, newFolder);
 
             return RedirectToAction("Index", "FoldersSync");
         }
@@ -131,16 +112,12 @@ namespace XeroNetStandardApp.Controllers
         [HttpPost]
         public async Task<ActionResult> Rename(string folderId, string newName)
         {
-            // Token and TenantId setup
-            var xeroToken = await TokenUtilities.GetXeroOAuth2Token(_xeroConfig.Value);
-            var xeroTenantId = TokenUtilities.GetXeroTenantId(xeroToken);
-
             // Rename folder
-            var folder = await _filesApi.GetFolderAsync(xeroToken.AccessToken, xeroTenantId, Guid.Parse(folderId));
+            var folder = await Api.GetFolderAsync(XeroToken.AccessToken, TenantId, Guid.Parse(folderId));
             folder.Name = newName;
 
             // Call update folder endpoint
-            await _filesApi.UpdateFolderAsync(xeroToken.AccessToken, xeroTenantId, Guid.Parse(folderId), folder);
+            await Api.UpdateFolderAsync(XeroToken.AccessToken, TenantId, Guid.Parse(folderId), folder);
 
             return RedirectToAction("Index", "FoldersSync");
         }

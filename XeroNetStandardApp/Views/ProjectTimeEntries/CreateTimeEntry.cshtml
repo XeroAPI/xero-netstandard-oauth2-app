@@ -1,0 +1,48 @@
+﻿@model dynamic
+
+<h2>Create a Xero Time Entry</h2>
+
+<br/>
+
+@*
+    Create Time Entry Form
+*@
+
+<form method="POST">
+    <hidden name="ProjectId" value="@Model.ProjectId"></hidden>
+    
+    <label>Staff Member:</label>
+    <br/>
+    <select id="userId" name="userId" required>
+        @foreach (var user in Model.Users)
+        {
+            <option value=@user.UserId>@user.Name</option>
+        }
+    </select>
+    
+    <br/>
+
+    <label>Task Name:</label>
+    <br/>
+    <select id="taskId" name="taskId" required>
+        @foreach (var task in Model.Tasks)
+        {
+            <option value=@task.TaskId>@task.Name</option>
+        }
+    </select>
+    
+    <br/>
+
+    <label>Duration (logged minutes):</label>
+    <br/>
+    <input class="form-control" type="number" step="1" id="duration" name="duration" required/>
+
+
+    <br/>
+    <br/>
+    <input class="btn btn-primary" type="submit"/>
+</form>
+
+
+<br />
+<button class="btn btn-link" onclick="location.href='@Url.Action("GetProjects", "ProjectInfo")'">Back</button>

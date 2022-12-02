@@ -19,16 +19,10 @@ namespace XeroNetStandardApp.Controllers
     /// <para>- GET: /AssociationsSync#Delete</para>
     /// <para>- POST: /Associations#Create</para>
     /// </summary>
-    public class AssociationsSync : Controller
+    public class AssociationsSync : ApiAccessorController<FilesApi>
     {
-        private readonly IOptions<XeroConfiguration> _xeroConfig;
-        private readonly FilesApi _filesApi;
-
-        public AssociationsSync(IOptions<XeroConfiguration> xeroConfig)
-        {
-            _xeroConfig = xeroConfig;
-            _filesApi = new FilesApi();
-        }
+       
+        public AssociationsSync(IOptions<XeroConfiguration> xeroConfig):base(xeroConfig){}
 
         #region GET Endpoints
 
@@ -38,12 +32,8 @@ namespace XeroNetStandardApp.Controllers
         /// <returns>Returns a list of files</returns>
         public async Task<ActionResult> Index()
         {
-            // Token and TenantId setup
-            var xeroToken = await TokenUtilities.GetXeroOAuth2Token(_xeroConfig.Value);
-            var xeroTenantId = TokenUtilities.GetXeroTenantId(xeroToken);
-
             // Call get files endpoint
-            var response = await _filesApi.GetFilesAsync(xeroToken.AccessToken, xeroTenantId);
+            var response = await Api.GetFilesAsync(XeroToken.AccessToken, TenantId);
             var filesItems = response.Items;
 
             ViewBag.jsonResponse = response.ToJson();
@@ -58,15 +48,8 @@ namespace XeroNetStandardApp.Controllers
         [HttpGet("/AssociationsSync/{fileId}")]
         public async Task<IActionResult> LoadAssociations(string fileId)
         {
-            // Token and TenantId setup
-            var xeroToken = await TokenUtilities.GetXeroOAuth2Token(_xeroConfig.Value);
-            var xeroTenantId = TokenUtilities.GetXeroTenantId(xeroToken);
-
-            Console.WriteLine(fileId);
-            Console.WriteLine(new Guid(fileId).ToString());
-
             // Call get file associations endpoint
-            var response = await _filesApi.GetFileAssociationsAsync(xeroToken.AccessToken, xeroTenantId, new Guid(fileId));
+            var response = await Api.GetFileAssociationsAsync(XeroToken.AccessToken, TenantId, new Guid(fileId));
             return View(response);
         }
 
@@ -78,12 +61,8 @@ namespace XeroNetStandardApp.Controllers
         [HttpGet]
         public async Task<IActionResult> Create()
         {
-            // Token and TenantId setup
-            var xeroToken = await TokenUtilities.GetXeroOAuth2Token(_xeroConfig.Value);
-            var xeroTenantId = TokenUtilities.GetXeroTenantId(xeroToken);
-
             // Call get files endpoint
-            var files = await _filesApi.GetFilesAsync(xeroToken.AccessToken, xeroTenantId);
+            var files = await Api.GetFilesAsync(XeroToken.AccessToken, TenantId);
 
             ViewBag.invoiceIds = await GetInvoiceIds();
             return View(files.Items.Select(item => item.Id.ToString()));
@@ -98,12 +77,8 @@ namespace XeroNetStandardApp.Controllers
         [HttpGet]
         public async Task<ActionResult> Delete(string fileId, string objectId)
         {
-            // Token and TenantId setup
-            var xeroToken = await TokenUtilities.GetXeroOAuth2Token(_xeroConfig.Value);
-            var xeroTenantId = TokenUtilities.GetXeroTenantId(xeroToken);
-
             // Call delete file association endpoint
-            await _filesApi.DeleteFileAssociationAsync(xeroToken.AccessToken, xeroTenantId, new Guid(fileId), new Guid(objectId));
+            await Api.DeleteFileAssociationAsync(XeroToken.AccessToken, TenantId, new Guid(fileId), new Guid(objectId));
             return RedirectToAction("LoadAssociations", new RouteValueDictionary(new { fileId }));
         }
 
@@ -121,10 +96,6 @@ namespace XeroNetStandardApp.Controllers
         [HttpPost]
         public async Task<ActionResult> Create(string fileId, string invoiceId, string objectType)
         {
-            // Token and TenantId setup
-            var xeroToken = await TokenUtilities.GetXeroOAuth2Token(_xeroConfig.Value);
-            var xeroTenantId = TokenUtilities.GetXeroTenantId(xeroToken);
-
             // Construct association object
             var fileIdGuid = new Guid(fileId);
             var invoiceIdGuid = new Guid(invoiceId);
@@ -139,7 +110,7 @@ namespace XeroNetStandardApp.Controllers
             };
 
             // Call create file association endpoint
-            await _filesApi.CreateFileAssociationAsync(xeroToken.AccessToken, xeroTenantId, fileIdGuid, association);
+            await Api.CreateFileAssociationAsync(XeroToken.AccessToken, TenantId, fileIdGuid, association);
             return RedirectToAction("LoadAssociations", new RouteValueDictionary(new { fileId }));
         }
 
@@ -152,12 +123,8 @@ namespace XeroNetStandardApp.Controllers
         /// <returns>Returns a list of invoice ids</returns>
         private async Task<IEnumerable<string>> GetInvoiceIds()
         {
-            // Token and TenantId setup
-            var xeroToken = await TokenUtilities.GetXeroOAuth2Token(_xeroConfig.Value);
-            var xeroTenantId = TokenUtilities.GetXeroTenantId(xeroToken);
-
             var accountingApi = new AccountingApi();
-            var invoices = await accountingApi.GetInvoicesAsync(xeroToken.AccessToken, xeroTenantId);
+            var invoices = await accountingApi.GetInvoicesAsync(XeroToken.AccessToken, TenantId);
             return invoices._Invoices.Select(invoice => invoice.InvoiceID.ToString());
         }
         #endregion

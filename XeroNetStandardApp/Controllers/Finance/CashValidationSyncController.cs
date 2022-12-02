@@ -11,16 +11,9 @@ namespace XeroNetStandardApp.Controllers
     /// Controller implementing methods demonstrating following Finance endpoints:
     /// <para>- GET: /CashValidationSync/</para>
     /// </summary>
-    public class CashValidationSync : Controller
+    public class CashValidationSync : ApiAccessorController<FinanceApi>
     {
-        private readonly IOptions<XeroConfiguration> _xeroConfig;
-        private readonly FinanceApi _financeApi;
-
-        public CashValidationSync(IOptions<XeroConfiguration> xeroConfig)
-        {
-            _xeroConfig = xeroConfig;
-            _financeApi = new FinanceApi();
-        }
+        public CashValidationSync(IOptions<XeroConfiguration> xeroConfig):base(xeroConfig){}
 
         /// <summary>
         /// GET: /CashValidationSync/
@@ -28,12 +21,8 @@ namespace XeroNetStandardApp.Controllers
         /// <returns>Returns a list of cash validations</returns>
         public async Task<ActionResult> Index()
         {
-            // Token and TenantId setup
-            var xeroToken = await TokenUtilities.GetXeroOAuth2Token(_xeroConfig.Value);
-            var xeroTenantId = TokenUtilities.GetXeroTenantId(xeroToken);
-
             // Call get cash validation endpoint
-            var response = await _financeApi.GetCashValidationAsync(xeroToken.AccessToken, xeroTenantId);
+            var response = await Api.GetCashValidationAsync(XeroToken.AccessToken, TenantId);
 
             ViewBag.jsonResponse = JsonConvert.SerializeObject(response);
             return View(response);

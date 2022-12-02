@@ -14,16 +14,9 @@ namespace XeroNetStandardApp.Controllers
     /// <para>- GET: /AuEmployeesInfo#Index</para>
     /// <para>- POST: /AuEmployeesInfo#Create</para>
     /// </summary>
-    public class AuEmployeesInfo : Controller
+    public class AuEmployeesInfo : ApiAccessorController<PayrollAuApi>
     {
-        private readonly IOptions<XeroConfiguration> _xeroConfig;
-        private readonly PayrollAuApi _payrollAuApi;
-
-        public AuEmployeesInfo(IOptions<XeroConfiguration> xeroConfig)
-        {
-            _xeroConfig = xeroConfig;
-            _payrollAuApi = new PayrollAuApi();
-        }
+        public AuEmployeesInfo(IOptions<XeroConfiguration> xeroConfig):base(xeroConfig){}
 
         #region GET Endpoints
 
@@ -33,12 +26,8 @@ namespace XeroNetStandardApp.Controllers
         /// <returns>Returns a list of AU employees</returns>
         public async Task<ActionResult> Index()
         {
-            // Token and TenantId setup
-            var xeroToken = await TokenUtilities.GetXeroOAuth2Token(_xeroConfig.Value);
-            var xeroTenantId = TokenUtilities.GetXeroTenantId(xeroToken);
-
             // Call get employees AU endpoint
-            var response = await _payrollAuApi.GetEmployeesAsync(xeroToken.AccessToken, xeroTenantId);
+            var response = await Api.GetEmployeesAsync(XeroToken.AccessToken, TenantId);
 
             ViewBag.jsonResponse = response.ToJson();
             return View(response._Employees);
@@ -68,15 +57,11 @@ namespace XeroNetStandardApp.Controllers
         [HttpPost]
         public async Task<ActionResult> Create(string firstName, string lastName)
         {
-            // Token and TenantId setup
-            var xeroToken = await TokenUtilities.GetXeroOAuth2Token(_xeroConfig.Value);
-            var xeroTenantId = TokenUtilities.GetXeroTenantId(xeroToken);
-
             // Construct employee object
             var employees = new List<Employee> { ConstructEmployee(firstName, lastName) };
 
             // Call create employee endpoint
-            await _payrollAuApi.CreateEmployeeAsync(xeroToken.AccessToken, xeroTenantId, employees);
+            await Api.CreateEmployeeAsync(XeroToken.AccessToken, TenantId, employees);
 
             return RedirectToAction("Index", "AuEmployeesInfo");
         }

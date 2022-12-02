@@ -3,10 +3,10 @@ using System;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using Xero.NetStandard.OAuth2.Model.Bankfeeds;
-using Xero.NetStandard.OAuth2.Api;
 using Xero.NetStandard.OAuth2.Config;
 using Microsoft.Extensions.Options;
 using System.Linq;
+using Xero.NetStandard.OAuth2.Api;
 
 namespace XeroNetStandardApp.Controllers
 {
@@ -15,16 +15,9 @@ namespace XeroNetStandardApp.Controllers
     /// <para>- GET: /BankfeedStatements/</para>
     /// <para>- POST: /BankfeedStatements#Create</para>
     /// </summary>
-    public class BankfeedStatements : Controller
+    public class BankfeedStatements : ApiAccessorController<BankFeedsApi>
     {
-        private readonly IOptions<XeroConfiguration> _xeroConfig;
-        private readonly BankFeedsApi _bankFeedsApi;
-
-        public BankfeedStatements(IOptions<XeroConfiguration> xeroConfig)
-        {
-            _xeroConfig = xeroConfig;
-            _bankFeedsApi = new BankFeedsApi();
-        }
+        public BankfeedStatements(IOptions<XeroConfiguration> xeroConfig):base(xeroConfig){}
 
         #region GET Endpoints
 
@@ -35,12 +28,8 @@ namespace XeroNetStandardApp.Controllers
         [HttpGet]
         public async Task<ActionResult> Index()
         {
-            // Token and TenantId setup
-            var xeroToken = await TokenUtilities.GetXeroOAuth2Token(_xeroConfig.Value);
-            var xeroTenantId = TokenUtilities.GetXeroTenantId(xeroToken);
-
             // Call get statements endpoint
-            var response = await _bankFeedsApi.GetStatementsAsync(xeroToken.AccessToken, xeroTenantId);
+            var response = await Api.GetStatementsAsync(XeroToken.AccessToken, TenantId);
 
             var statements = response.Items;
             ViewBag.jsonResponse = response.ToJson();
@@ -55,12 +44,8 @@ namespace XeroNetStandardApp.Controllers
         [HttpGet]
         public async Task<IActionResult> Create()
         {
-            // Token and TenantId setup
-            var xeroToken = await TokenUtilities.GetXeroOAuth2Token(_xeroConfig.Value);
-            var xeroTenantId = TokenUtilities.GetXeroTenantId(xeroToken);
-
             // Call get feed connection endpoint
-            var connections = await _bankFeedsApi.GetFeedConnectionsAsync(xeroToken.AccessToken, xeroTenantId);
+            var connections = await Api.GetFeedConnectionsAsync(XeroToken.AccessToken, TenantId);
 
             return View(connections.Items.Select(item => item.Id.ToString()));
         }
@@ -83,10 +68,6 @@ namespace XeroNetStandardApp.Controllers
             string startBalanceIndicator
         )
         {
-            // Token and TenantId setup
-            var xeroToken = await TokenUtilities.GetXeroOAuth2Token(_xeroConfig.Value);
-            var xeroTenantId = TokenUtilities.GetXeroTenantId(xeroToken);
-
             // Construct statement object
             Enum.TryParse<CreditDebitIndicator>(startBalanceIndicator, out var startBalanceIndicatorEnum);
             var statements = ConstructStatements(
@@ -96,7 +77,7 @@ namespace XeroNetStandardApp.Controllers
             );
 
             // Call create statement endpoint
-            await _bankFeedsApi.CreateStatementsAsync(xeroToken.AccessToken, xeroTenantId, statements);
+            await Api.CreateStatementsAsync(XeroToken.AccessToken, TenantId, statements);
 
             return RedirectToAction("Index", "BankfeedStatements");
         }

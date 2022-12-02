@@ -1,116 +1,128 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 using Xero.NetStandard.OAuth2.Client;
 using Xero.NetStandard.OAuth2.Config;
 using Xero.NetStandard.OAuth2.Token;
 using Microsoft.Extensions.Options;
 using System;
-using System.Net.Http;
 using System.Threading.Tasks;
-using Xero.NetStandard.OAuth2.Models;
-using System.Collections.Generic;
-using System.Linq;
+using System.Text.Json;
 
 namespace XeroNetStandardApp.Controllers
 {
-  public class AuthorizationController : Controller
-  {
-    private readonly ILogger<AuthorizationController> _logger;
-    private readonly IOptions<XeroConfiguration> XeroConfig;
-    
-    // GET /Authorization/
-    public AuthorizationController(IOptions<XeroConfiguration> XeroConfig, ILogger<AuthorizationController> logger)
+    /// <summary>
+    /// Authorize organisation with sample app
+    /// </summary>
+    public class AuthorizationController : BaseXeroOAuth2Controller
     {
-      _logger = logger;
-      this.XeroConfig = XeroConfig;
+        private const string StateFilePath = "./state.json";
+
+        private readonly XeroClient _client;
+
+        public AuthorizationController(IOptions<XeroConfiguration> xeroConfig) : base(xeroConfig)
+        {
+            _client = new XeroClient(xeroConfig.Value);
+        }
+
+        /// <summary>
+        /// Generate random guid for site security
+        /// </summary>
+        /// <returns></returns>
+        public IActionResult Index()
+        {
+            var clientState = Guid.NewGuid().ToString();
+            StoreState(clientState);
+
+            return Redirect(_client.BuildLoginUri(clientState));
+        }
+
+        // GET /Authorization/Callback
+        /// <summary>
+        /// Callback validating returned data to prevent cross site forgey attacks
+        /// </summary>
+        /// <param name="code">Returned code</param>
+        /// <param name="state">Returned state</param>
+        /// <returns>Redirect to organisations page</returns>
+        public async Task<ActionResult> Callback(string code, string state)
+        {
+            var clientState = GetCurrentState();
+            if (state != clientState)
+            {
+                return Content("Cross site forgery attack detected!");
+            }
+
+            var xeroToken = (XeroOAuth2Token) await _client.RequestAccessTokenAsync(code);
+
+            if (xeroToken.IdToken != null && !JwtUtils.validateIdToken(xeroToken.IdToken, xeroConfig.Value.ClientId))
+            {
+                return Content("ID token is not valid");
+            }
+
+            if (xeroToken.AccessToken != null && !JwtUtils.validateAccessToken(xeroToken.AccessToken))
+            {
+                return Content("Access token is not valid");
+            }
+
+            tokenIO.StoreToken(xeroToken);
+            return RedirectToAction("Index", "OrganisationInfo");
+        }
+
+        /// <summary>
+        /// Disconnect org connections to sample app. Destroys token
+        /// <para>GET /Authorization/Disconnect</para>
+        /// </summary>
+        /// <returns></returns>
+        public async Task<ActionResult> Disconnect()
+        {
+            await _client.DeleteConnectionAsync(XeroToken, XeroToken.Tenants[0]);
+            tokenIO.DestroyToken();
+
+            return RedirectToAction("Index", "Home");
+        }
+
+        /// <summary>
+        /// Revoke Xero OAuth2 token
+        ///<para>GET: /Authorization/Revoke</para>
+        /// </summary>
+        /// <returns>Redirect to home page</returns>
+        public async Task<ActionResult> Revoke()
+        {
+            await _client.RevokeAccessTokenAsync(XeroToken);
+            tokenIO.DestroyToken();
+
+            return RedirectToAction("Index", "Home");
+        }
+
+        /// <summary>
+        /// Save state value to disk
+        /// </summary>
+        /// <param name="state">State data to save</param>
+        private void StoreState(string state)
+        {
+            var serializedState = JsonSerializer.Serialize(new State{state = state});
+            System.IO.File.WriteAllText(StateFilePath, serializedState);
+        }
+
+        /// <summary>
+        /// Get current state from disk
+        /// </summary>
+        /// <returns>Returns state from disk if exists, otherwise returns null</returns>
+        private string GetCurrentState()
+        {
+            if (System.IO.File.Exists(StateFilePath))
+            {
+                var serializeState = System.IO.File.ReadAllText(StateFilePath);
+                return JsonSerializer.Deserialize<State>(serializeState)?.state;
+            }
+
+            return null;
+        }
     }
 
-    public IActionResult Index()
+    /// <summary>
+    /// Holds file structure for saving state to disk
+    /// </summary>
+    internal class State
     {
-      var client = new XeroClient(XeroConfig.Value);
-      
-      var clientState = Guid.NewGuid().ToString(); 
-      TokenUtilities.StoreState(clientState);
-
-      return Redirect(client.BuildLoginUri(clientState));
+        public string state { get; set; }
     }
-
-    // GET /Authorization/Callback
-    public async Task<ActionResult> Callback(string code, string state)
-    {
-      var clientState = TokenUtilities.GetCurrentState();
-      
-      if (state != clientState) {
-        return Content("Cross site forgery attack detected!");
-      }    
-
-      var client = new XeroClient(XeroConfig.Value);
-      var xeroToken = (XeroOAuth2Token)await client.RequestAccessTokenAsync(code);
-
-      if ((xeroToken.IdToken != null) && !JwtUtils.validateIdToken(xeroToken.IdToken, XeroConfig.Value.ClientId) )
-      {
-        return Content("ID token is not valid");
-      }
-
-      if ((xeroToken.AccessToken != null) && !JwtUtils.validateAccessToken(xeroToken.AccessToken) )
-      {
-        return Content("Access token is not valid");
-      }
-
-      List<Tenant> tenants = await client.GetConnectionsAsync(xeroToken);
-
-      Tenant firstTenant = tenants[0];
-
-      TokenUtilities.StoreToken(xeroToken);
-
-      return RedirectToAction("Index", "OrganisationInfo");
-    }
-
-    // GET /Authorization/Disconnect
-    public async Task<ActionResult> Disconnect()
-    {      
-      var client = new XeroClient(XeroConfig.Value);
-
-      var xeroToken = TokenUtilities.GetStoredToken();
-      var utcTimeNow = DateTime.UtcNow;
-
-      if (utcTimeNow > xeroToken.ExpiresAtUtc)
-      {
-        xeroToken = (XeroOAuth2Token)await client.RefreshAccessTokenAsync(xeroToken);
-        TokenUtilities.StoreToken(xeroToken);
-      }
-
-      string accessToken = xeroToken.AccessToken;
-      Tenant xeroTenant = xeroToken.Tenants[0];
-
-      await client.DeleteConnectionAsync(xeroToken, xeroTenant);
-
-      TokenUtilities.DestroyToken();
-
-      return RedirectToAction("Index", "Home");
-    }
-
-    //GET /Authorization/Revoke
-    public async Task<ActionResult> Revoke()
-    {      
-      var client = new XeroClient(XeroConfig.Value);
-
-      var xeroToken = TokenUtilities.GetStoredToken();
-      var utcTimeNow = DateTime.UtcNow;
-
-      if (utcTimeNow > xeroToken.ExpiresAtUtc)
-      {
-        xeroToken = (XeroOAuth2Token)await client.RefreshAccessTokenAsync(xeroToken);
-        TokenUtilities.StoreToken(xeroToken);
-      }
-
-      string accessToken = xeroToken.AccessToken;
-
-      await client.RevokeAccessTokenAsync(xeroToken);
-
-      TokenUtilities.DestroyToken();
-
-      return RedirectToAction("Index", "Home");
-    }
-  }
 }

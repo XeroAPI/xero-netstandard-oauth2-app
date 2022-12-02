@@ -3,9 +3,9 @@ using System;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using Xero.NetStandard.OAuth2.Model.Bankfeeds;
-using Xero.NetStandard.OAuth2.Api;
 using Xero.NetStandard.OAuth2.Config;
 using Microsoft.Extensions.Options;
+using Xero.NetStandard.OAuth2.Api;
 
 namespace XeroNetStandardApp.Controllers
 {
@@ -15,16 +15,9 @@ namespace XeroNetStandardApp.Controllers
     /// <para>- POST: /BankfeedConnections#Create</para>
     /// <para>- Get: /Bankfeeds#Delete</para>
     /// </summary>
-    public class BankfeedConnections : Controller
+    public class BankfeedConnections : ApiAccessorController<BankFeedsApi>
     {
-        private readonly IOptions<XeroConfiguration> _xeroConfig;
-        private readonly BankFeedsApi _bankFeedsApi;
-
-        public BankfeedConnections(IOptions<XeroConfiguration> xeroConfig)
-        {
-            _xeroConfig = xeroConfig;
-            _bankFeedsApi = new BankFeedsApi();
-        }
+        public BankfeedConnections(IOptions<XeroConfiguration> xeroConfig):base(xeroConfig){}
 
         #region GET Endpoint
         
@@ -35,12 +28,8 @@ namespace XeroNetStandardApp.Controllers
         [HttpGet]
         public async Task<ActionResult> Index()
         {
-            // Token and TenantId setup
-            var xeroToken = await TokenUtilities.GetXeroOAuth2Token(_xeroConfig.Value);
-            var xeroTenantId = TokenUtilities.GetXeroTenantId(xeroToken);
-
             // Call get feed connections endpoint
-            var response = await _bankFeedsApi.GetFeedConnectionsAsync(xeroToken.AccessToken, xeroTenantId);
+            var response = await Api.GetFeedConnectionsAsync(XeroToken.AccessToken, TenantId);
 
             ViewBag.jsonResponse = response.ToJson();
             return View(response.Items);
@@ -80,11 +69,6 @@ namespace XeroNetStandardApp.Controllers
           string country
         )
         {
-
-            // Token and TenantId setup
-            var xeroToken = await TokenUtilities.GetXeroOAuth2Token(_xeroConfig.Value);
-            var xeroTenantId = TokenUtilities.GetXeroTenantId(xeroToken);
-
             // Construct feed connections object
             Enum.TryParse<FeedConnection.AccountTypeEnum>(accountType, out var accountTypeEnum);
             Enum.TryParse<CurrencyCode>(currency, out var currencyCode);
@@ -108,7 +92,7 @@ namespace XeroNetStandardApp.Controllers
             };
 
             // Call create feed connection endpoint
-            await _bankFeedsApi.CreateFeedConnectionsAsync(xeroToken.AccessToken, xeroTenantId, feedConnections);
+            await Api.CreateFeedConnectionsAsync(XeroToken.AccessToken, TenantId, feedConnections);
 
             return RedirectToAction("Index", "BankfeedConnections");
         }
@@ -122,10 +106,6 @@ namespace XeroNetStandardApp.Controllers
         [HttpGet]
         public async Task<ActionResult> Delete(string bankfeedConnectionId)
         {
-            // Token and TenantId setup
-            var xeroToken = await TokenUtilities.GetXeroOAuth2Token(_xeroConfig.Value);
-            var xeroTenantId = TokenUtilities.GetXeroTenantId(xeroToken);
-
             // Construct feedConnections object
             var feedConnections = new FeedConnections
             {
@@ -136,7 +116,7 @@ namespace XeroNetStandardApp.Controllers
             };
 
             // Call delete feed connection endpoint
-            await _bankFeedsApi.DeleteFeedConnectionsAsync(xeroToken.AccessToken, xeroTenantId, feedConnections);
+            await Api.DeleteFeedConnectionsAsync(XeroToken.AccessToken, TenantId, feedConnections);
 
             return RedirectToAction("Index", "BankfeedConnections");
         }
