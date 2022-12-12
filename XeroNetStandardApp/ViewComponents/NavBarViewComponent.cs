@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using XeroNetStandardApp.IO;
 
 namespace XeroNetStandardApp.ViewComponents
 {
@@ -13,24 +14,20 @@ namespace XeroNetStandardApp.ViewComponents
             public Guid TenantId { get; set; }
         }
 
-        public async Task<IViewComponentResult> InvokeAsync(int maxPriority, bool isDone)
+        public Task<IViewComponentResult> InvokeAsync()
         {
-            var xeroToken = TokenUtilities.GetStoredToken();
+            var tokenIO = LocalStorageTokenIO.Instance;
 
-            var tenantId = TokenUtilities.GetCurrentTenantId();
-            try
-            {
-                ViewBag.OrgPickerCurrentTenantId = tenantId;
-                ViewBag.OrgPickerTenantList = xeroToken.Tenants.Select(
-                    (t) => new TenantDetails { TenantName = t.TenantName, TenantId = t.TenantId }
-                ).ToList();
-            }
-            catch (Exception)
-            {
+            var xeroToken = tokenIO.GetToken();
+            var tenantId = Guid.Parse(tokenIO.GetTenantId());
 
-            }
+            ViewBag.OrgPickerCurrentTenantId = tenantId;
+            ViewBag.OrgPickerTenantList = xeroToken?.Tenants.Select(
+                t => new TenantDetails { TenantName = t.TenantName, TenantId = t.TenantId })
+                .ToList();
+            
 
-            return View(TokenUtilities.TokenExists());
+            return Task.FromResult<IViewComponentResult>(View(tokenIO.TokenExists()));
         }
 
     }

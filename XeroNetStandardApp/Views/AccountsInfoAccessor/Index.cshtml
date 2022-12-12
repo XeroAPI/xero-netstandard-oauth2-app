@@ -20,24 +20,10 @@
     </tr>
   }
 </table>
+
 <br>
-<p><b>Raw JSON Response:</b></p>
+
+<p class="h5">Raw JSON Response:</p>
 <textarea class="form-control" readonly style="height: 350px">
-@ViewBag.jsonResponse;
+    @ViewBag.jsonResponse;
 </textarea>
-<br>
-<p><b>Code Example:</b></p>
-<p>Get all accounts</p>
-<pre>
-// Assuming accessToken and xeroTenantId has been provided
-var AccountingApi = new AccountingApi();
-var response = await AccountingApi.GetAccountsAsync(accessToken, xeroTenantId);
-return response._Accounts;
-</pre>
-<br>
-<p>
-  <button class="btn btn-link" onclick="location.href='@Url.Action("Index", "Home")'">Home</button>
-</p>
-<br>
-<br>
-<br>

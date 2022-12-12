@@ -23,7 +23,7 @@ namespace XeroNetStandardApp.Controllers
         /// GET: /BalanceSheet/
         /// </summary>
         /// <returns>Returns a list of financial statement balance sheets</returns>
-        public async Task<ActionResult> BalanceSheet()
+        public async Task<IActionResult> BalanceSheet()
         {
             // Call get financial statement balance sheets endpoint
             var response = await Api.GetFinancialStatementBalanceSheetAsync(XeroToken.AccessToken, TenantId);
@@ -37,7 +37,7 @@ namespace XeroNetStandardApp.Controllers
         /// GET: /Cashflow/
         /// </summary>
         /// <returns>Returns list of financial statement cash flows</returns>
-        public async Task<ActionResult> Cashflow()
+        public async Task<IActionResult> Cashflow()
         {
             // Call get financial statement cash flow endpoint
             var response = await Api.GetFinancialStatementCashflowAsync(XeroToken.AccessToken, TenantId);
@@ -51,7 +51,7 @@ namespace XeroNetStandardApp.Controllers
         /// GET: /ContactExpense/
         /// </summary>
         /// <returns>Returns a list of financial statement contacts expenses</returns>
-        public async Task<ActionResult> ContactExpense()
+        public async Task<IActionResult> ContactExpense()
         {
             // Call get financial statement contacts expenses endpoint
             var response = await Api.GetFinancialStatementContactsExpenseAsync(XeroToken.AccessToken, TenantId);
@@ -65,7 +65,7 @@ namespace XeroNetStandardApp.Controllers
         /// GET: /ContactRevenue/
         /// </summary>
         /// <returns>Returns a list of financial statement contacts revenue</returns>
-        public async Task<ActionResult> ContactRevenue()
+        public async Task<IActionResult> ContactRevenue()
         {
             // Call get financial statement contacts revenue endpoint
             var response = await Api.GetFinancialStatementContactsRevenueAsync(XeroToken.AccessToken, TenantId);
@@ -79,27 +79,26 @@ namespace XeroNetStandardApp.Controllers
         /// GET: /ProfitAndLoss/
         /// </summary>
         /// <returns></returns>
-        public async Task<ActionResult> ProfitAndLoss()
+        public async Task<IActionResult> ProfitAndLoss()
         {
-            // Call get finanical statement profit and loss endpoint
+            // Call get financial statement profit and loss endpoint
             var response = await Api.GetFinancialStatementProfitAndLossAsync(XeroToken.AccessToken, TenantId);
 
             ViewBag.jsonResponse = response.ToJson();
             return View(response);
         }
-
-
+        
         /// <summary>
         /// GET: /TrialBalance/
         /// </summary>
         /// <returns></returns>
-        public async Task<ActionResult> TrialBalance()
+        public async Task<IActionResult> TrialBalance()
         {
             // Call get financial statement trial balance endpoint
-            var response = await Api.GetFinancialStatementTrialBalanceAsync(XeroToken.AccessToken, TenantId);
+            var trialBalanceResponse = await Api.GetFinancialStatementTrialBalanceAsync(XeroToken.AccessToken, TenantId);
 
-            ViewBag.jsonResponse = response.ToJson();
-            return View(response);
+            ViewBag.jsonResponse = trialBalanceResponse.ToJson();
+            return View(trialBalanceResponse);
         }
     }
 }

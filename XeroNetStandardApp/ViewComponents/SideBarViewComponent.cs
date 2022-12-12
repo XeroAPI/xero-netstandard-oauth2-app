@@ -1,13 +1,13 @@
-using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
+using XeroNetStandardApp.IO;
 
 namespace XeroNetStandardApp.ViewComponents{
     public class SideBarViewComponent : ViewComponent
     {
-        public async Task<IViewComponentResult> InvokeAsync(int maxPriority, bool isDone)
+        public Task<IViewComponentResult> InvokeAsync()
         {
-
-            return View(TokenUtilities.TokenExists());
+            return Task.FromResult<IViewComponentResult>(View(LocalStorageTokenIO.Instance.TokenExists()));
         }
     }
 }

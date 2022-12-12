@@ -23,7 +23,7 @@ namespace XeroNetStandardApp.Controllers
         /// GET: /NzEmployeesInfo#Index
         /// </summary>
         /// <returns>Returns list of NZ employees</returns>
-        public async Task<ActionResult> Index()
+        public async Task<IActionResult> Index()
         {
             // Call get employees endpoint
             var employees = await Api.GetEmployeesAsync(XeroToken.AccessToken, TenantId);
@@ -53,7 +53,7 @@ namespace XeroNetStandardApp.Controllers
         /// <param name="lastName">Lastname of employee to create</param>
         /// <returns>Return action result to redirect user to get employees page</returns>
         [HttpPost]
-        public async Task<ActionResult> Create(string firstName, string lastName)
+        public async Task<IActionResult> Create(string firstName, string lastName)
         {
             // Call create employee endpoint
             await Api.CreateEmployeeAsync(XeroToken.AccessToken, TenantId, ConstructEmployee(firstName, lastName));
@@ -71,21 +71,21 @@ namespace XeroNetStandardApp.Controllers
         /// <returns></returns>
         private Employee ConstructEmployee(string firstName, string lastName)
         {
-            Address homeAddress = new Address
+            var homeAddress = new Address
             {
                 AddressLine1 = "123 Mock Address",
                 City = "Mock City",
                 PostCode = "1234"
             };
 
-            Employee employee = new Employee
+            var employee = new Employee
             {
                 FirstName = firstName,
                 LastName = lastName,
                 DateOfBirth = DateTime.Today.AddYears(-20),
                 Address = homeAddress,
                 Gender = Employee.GenderEnum.M,
-                Title = "worker"
+
             };
 
             return employee;

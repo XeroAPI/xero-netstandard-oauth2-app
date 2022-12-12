@@ -15,7 +15,7 @@ namespace XeroNetStandardApp.Controllers
     /// Controller implementing methods demonstrating following Files endpoints:
     /// <para>- GET: /FilesSync/</para>
     /// <para>- POST: /FilesSync/FileUpload#Upload</para>
-    /// <para>- POST: /FilesSync#Rename</para>
+    /// <para>- POST: /FilesSync#Modify</para>
     /// </summary>
     public class FilesSync : ApiAccessorController<FilesApi>
     {
@@ -103,7 +103,7 @@ namespace XeroNetStandardApp.Controllers
         }
 
         /// <summary>
-        /// POST: /FilesSync#Rename
+        /// POST: /FilesSync#Modify
         /// </summary>
         /// <param name="fileID">File id of file to rename</param>
         /// <param name="newName">New name value for file</param>

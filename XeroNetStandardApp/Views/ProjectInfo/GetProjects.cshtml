@@ -45,21 +45,4 @@
 *@
 
 <p class ="h5">Raw JSON Response:</p>
-<textarea class="form-control" readonly style="height: 350px">
-  @ViewBag.jsonResponse;
-</textarea>
-
-<br />
-
-@*
-    Code Snippet
-*@
-
-<p class="h5">Code Example:</p>
-<pre>
-// Assuming xeroAccessToken and xeroTenantId has been provided
-var projectApi = new ProjectApi();
-var response = await projectApi.GetProjectsAsync(xeroAccessToken, xeroTenantId);
-
-return response.Items;
-</pre>
+<textarea class="form-control" readonly style="height: 350px">@ViewBag.jsonResponse</textarea>

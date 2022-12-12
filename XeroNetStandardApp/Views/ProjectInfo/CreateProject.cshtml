@@ -27,24 +27,3 @@
     <input class="btn btn-primary" type="submit"/>
 </form>
 
-<hr/>
-
-@*
-    Code example
-*@
-
-<p><b>Code Example:</b></p>
-<pre>
-    public async void CreateProject(string name, Guid contactId){
-        var newProject = new CreateProjectOrUpdate() {
-            Name = name,
-            EstimateAmount = 100,
-            ContactId = contactId,
-            DeadlineUtc = DateTime.Today.AddDays(10)
-        };
-
-        var projectApi = new ProjectApi();
-        await projectApi.CreateProjectAsync(xeroAccessToken, xeroTenantId, newProject);
-    }
-    </pre>
-<br>

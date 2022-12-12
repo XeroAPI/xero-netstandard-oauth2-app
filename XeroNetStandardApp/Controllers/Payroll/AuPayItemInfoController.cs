@@ -25,23 +25,23 @@ namespace XeroNetStandardApp.Controllers
             var response = await Api.GetPayItemsAsync(XeroToken.AccessToken, TenantId);
 
             // Extracts the name from the different pay item types
-            var earnings = response._PayItems.EarningsRates
+            var earnings = response?._PayItems.EarningsRates
               .Select(x => x.Name)
               .ToList();
-            var leave = response._PayItems.LeaveTypes
+            var leave = response?._PayItems.LeaveTypes
               .Select(x => x.Name)
               .ToList();
-            var reimbursements = response._PayItems.ReimbursementTypes
+            var reimbursements = response?._PayItems.ReimbursementTypes
               .Select(x => x.Name)
               .ToList();
-            var payItemList = response._PayItems.DeductionTypes
+            var payItemList = response?._PayItems.DeductionTypes
               .Select(x => x.Name)
               .ToArray()
               .Concat(earnings)
               .Concat(leave)
               .Concat(reimbursements);
 
-            ViewBag.jsonResponse = response.ToJson();
+            ViewBag.jsonResponse = response?.ToJson();
             return View(payItemList);
 
         }

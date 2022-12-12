@@ -24,8 +24,6 @@ namespace XeroNetStandardApp.Controllers
 
             ViewBag.jsonResponse = response.ToJson();
 
-            
-
             // Limit response to max of 10 accounts in display
             return View(response._Accounts.Take(10));
         }

@@ -1,46 +1,35 @@
 ﻿@model dynamic
 
 <h2>Manual Journals</h2>
-<table class="table table-responsive fixed-table-body">
-  <tr>
-    <th>ManualJournalID</th>
-    <th>Narration</th>
-    <th>Date</th>
-    <th>Status</th>
-    <th>LineAmountTypes</th>
-  </tr>
-  @foreach (var item in Model)
-  {
+<table class="table table-responsive-lg">
     <tr>
-      <td>@item.ManualJournalID.ToString()</td>
-      <td>@item.Narration</td>
-      <td>@item.Date</td>
-      <td>@item.Status</td>
-      <td>@item.LineAmountTypes</td>
-      <td>
-        <button class="btn btn-primary" onclick="location.href='@Url.Action("FindJournal", "ManualJournalInfo", new { manualJournalId = (Guid) @item.ManualJournalID } )'">View details</button>
-      </td>
+        <th>ManualJournalID</th>
+        <th>Narration</th>
+        <th>Date</th>
+        <th>Status</th>
+        <th>LineAmountTypes</th>
     </tr>
-  }
+    @foreach (var item in Model)
+    {
+        <tr>
+            <td>@item.ManualJournalID.ToString()</td>
+            <td>@item.Narration</td>
+            <td>@item.Date</td>
+            <td>@item.Status</td>
+            <td>@item.LineAmountTypes</td>
+            <td>
+                <button class="btn btn-primary" onclick="location.href='@Url.Action("FindJournal", "ManualJournalInfo", new { manualJournalId = (Guid) @item.ManualJournalID } )'">View details</button>
+            </td>
+        </tr>
+    }
 </table>
-<hr>
 
-<br>
-<p><b>Raw JSON Response:</b></p>
-<textarea class="form-control" readonly style="height: 350px">
-  @ViewBag.jsonResponse;
-</textarea>
-<br>
-<p><b>Code Example:</b></p>
-<p>Get all Manual Journals</p>
-<pre>
-// Assuming accessToken and xeroTenantId has been provided
-var AccountingApi = new AccountingApi();
-var response = await AccountingApi.GetManualJournalsAsync(accessToken, xeroTenantId, null, null);
-var manualJournals = response._ManualJournals;
-</pre>
-<button class="btn btn-link" onclick="location.href='@Url.Action("Index", "Home")'">Home</button>
+<hr />
+<br />
 
-<br>
-<br>
-<br>
+@*
+    Raw JSON Response
+*@
+
+<p class="h5">Raw JSON Response:</p>
+<textarea class="form-control" readonly style="height: 350px">@ViewBag.jsonResponse</textarea>

@@ -14,7 +14,7 @@ namespace XeroNetStandardApp.Controllers
     /// <para>- Get: /FoldersSync#Delete</para>
     /// <para>- GET: /FoldersSync#Modify</para>
     /// <para>- POST: /FoldersSync#Create</para>
-    /// <para>- Post: /FoldersSync#Rename</para>
+    /// <para>- Post: /FoldersSync#Modify</para>
     /// </summary>
     public class FoldersSync : ApiAccessorController<FilesApi>
     {
@@ -26,7 +26,7 @@ namespace XeroNetStandardApp.Controllers
         /// GET: /FoldersSync/
         /// </summary>
         /// <returns>Returns a list of folders</returns>
-        public async Task<ActionResult> Index()
+        public async Task<IActionResult> Index()
         {
             // Call get folders endpoint
             var response = await Api.GetFoldersAsync(XeroToken.AccessToken, TenantId);
@@ -44,26 +44,12 @@ namespace XeroNetStandardApp.Controllers
         /// <param name="folderId">Id of folder to delete</param>
         /// <returns>Returns an action result to redirect user to get folders page</returns>
         [HttpGet]
-        public async Task<ActionResult> Delete(string folderId)
+        public async Task<IActionResult> Delete(string folderId)
         {
             // Call delete folder endpoint
             await Api.DeleteFolderAsync(XeroToken.AccessToken, TenantId, Guid.Parse(folderId));
             
             return RedirectToAction("Index", "FoldersSync");
-        }
-
-        /// <summary>
-        /// GET: /FoldersSync#Modify
-        /// </summary>
-        /// <param name="folderId">Folder id of folder to modify</param>
-        /// <param name="folderName">Folder name of folder to modify</param>
-        /// <returns></returns>
-        [HttpGet("/FoldersSync/{folderId}")]
-        public IActionResult Modify(string folderId, string folderName)
-        {
-            ViewBag.folderId = folderId;
-            ViewBag.folderName = folderName;
-            return View();
         }
 
         /// <summary>
@@ -88,7 +74,7 @@ namespace XeroNetStandardApp.Controllers
         /// <param name="email">Email associated with folder to create</param>
         /// <returns>Returns an action result to redirect user to get folders page</returns>
         [HttpPost]
-        public async Task<ActionResult> Create(string name, string email)
+        public async Task<IActionResult> Create(string name, string email)
         {
             var newFolder = new Folder
             {
@@ -104,17 +90,30 @@ namespace XeroNetStandardApp.Controllers
         }
 
         /// <summary>
-        /// Post: /FoldersSync#Rename
+        /// GET: /FoldersSync#Modify
+        /// </summary>
+        /// <param name="folderId">Folder id of folder to modify</param>
+        /// <returns></returns>
+        [HttpGet]
+        public async Task<IActionResult> Modify(Guid folderId)
+        {
+            var folder = await Api.GetFolderAsync(XeroToken.AccessToken, TenantId, folderId);
+
+            return View(folder);
+        }
+
+        /// <summary>
+        /// Post: /FoldersSync#Modify
         /// </summary>
         /// <param name="folderId">Folder id of folder to rename</param>
-        /// <param name="newName">New name for folder</param>
+        /// <param name="name">New name for folder</param>
         /// <returns>Returns an action result to redirect user to get folders page</returns>
         [HttpPost]
-        public async Task<ActionResult> Rename(string folderId, string newName)
+        public async Task<IActionResult> Modify(string folderId, string name)
         {
-            // Rename folder
+            // Modify folder
             var folder = await Api.GetFolderAsync(XeroToken.AccessToken, TenantId, Guid.Parse(folderId));
-            folder.Name = newName;
+            folder.Name = name;
 
             // Call update folder endpoint
             await Api.UpdateFolderAsync(XeroToken.AccessToken, TenantId, Guid.Parse(folderId), folder);

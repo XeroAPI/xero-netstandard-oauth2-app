@@ -2,27 +2,55 @@
 
 <h2>Xero Trial Balance Statement</h2>
 
-<p><b>Raw JSON Response:</b></p>
-<textarea class="form-control" readonly style="height: 350px">
-@ViewBag.jsonResponse;
-</textarea>
-<br>
-<p><b>Code Example:</b></p>
-<p>Requesting for today's trial balance</p>
-<pre>
-// Assuming accessToken and xeroTenantId has been provided
+@*
+    Trial Balance Response Details
+*@
 
-var FinanceApi = new FinanceApi();
+<p class="h5">Trial Balance Details:</p>
 
-var response = await FinanceApi.GetFinancialStatementTrialBalanceAsync(
-  accessToken,
-  xeroTenantId,
-  null
-  );
+<table class="table table-responsive-lg">
+    <tr>
+        <th>Start Date</th>
+        <th>End Date</th>
+    </tr>
+    <tr>
+        <td>@Model.StartDate.ToString("d/MM/yy")</td>
+        <td>@Model.EndDate.ToString("d/MM/yy")</td>
+    </tr>
+</table>
 
-return response;
-</pre>
-<br>
-<p>
-  <button class="btn btn-link" onclick="location.href='@Url.Action("Index", "Home")'">Home</button>
-</p>
+<br/>
+
+@*
+    Trial Balance Accounts
+*@
+
+<p class="h5">Trial Balance Accounts:</p>
+
+<table class="table table-responsive-lg">
+    <tr>
+        <th>Folder Name</th>
+        <th>AccountType</th>
+        <th>Balance</th>
+        <th>Status</th>
+    </tr>
+    @foreach (var trialBalanceAccount in Model.Accounts)
+    {
+        <tr>
+            <td>@trialBalanceAccount.AccountName</td>
+            <td>@trialBalanceAccount.AccountType</td>
+            <td>@trialBalanceAccount.Balance.Value</td>
+            <td>@trialBalanceAccount.Status</td>
+        </tr>
+    }
+</table>
+
+<hr/>
+<br/>
+
+@*
+    Raw JSON Response
+*@
+
+<p class="h5">Raw JSON Response:</p>
+<textarea class="form-control" readonly style="height: 350px">@ViewBag.jsonResponse</textarea>

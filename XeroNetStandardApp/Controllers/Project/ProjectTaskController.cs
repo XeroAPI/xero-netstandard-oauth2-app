@@ -30,6 +30,8 @@ namespace XeroNetStandardApp.Controllers.Project
             var selectedProject = await Api.GetProjectAsync(XeroToken.AccessToken, TenantId, projectId);
             var tasks = await Api.GetTasksAsync(XeroToken.AccessToken, TenantId, projectId);
 
+            ViewBag.jsonResponse = tasks.ToJson();
+
             return View((selectedProject.Name, tasks)); 
         }
 

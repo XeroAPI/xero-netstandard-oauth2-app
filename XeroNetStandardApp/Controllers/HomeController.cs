@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
+using XeroNetStandardApp.IO;
 using XeroNetStandardApp.Models;
 
 namespace XeroNetStandardApp.Controllers
@@ -9,19 +10,10 @@ namespace XeroNetStandardApp.Controllers
     {
         public IActionResult Index([FromQuery] Guid? tenantId)
         {
-            bool firstTimeConnection = false;
-
-            if (TokenUtilities.TokenExists())
-            {
-                firstTimeConnection = true;
-            }
-
-            if (tenantId is Guid tenantIdValue)
-            {
-                TokenUtilities.StoreTenantId(tenantIdValue);
-            }
-
-            return View(firstTimeConnection);
+            var tokenIO = LocalStorageTokenIO.Instance;
+            if (tenantId != null) tokenIO.StoreTenantId(tenantId.ToString());
+            
+            return View(tokenIO.TokenExists());
         }
 
         public IActionResult Privacy()

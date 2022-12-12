@@ -28,5 +28,18 @@
     }
 </table>
 
+<hr/>
+
+@*
+    Raw JSON Response
+*@
+
+<p class="h5">Raw JSON Response:</p>
+<textarea class="form-control" readonly style="height: 350px">
+@ViewBag.jsonResponse
+</textarea>
+
+<br />
 <br/>
+
 <button class="btn btn-link" onclick="location.href='@Url.Action("GetProjects", "ProjectInfo")'">Back</button>

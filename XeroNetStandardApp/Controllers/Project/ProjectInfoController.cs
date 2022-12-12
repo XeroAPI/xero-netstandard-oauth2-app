@@ -25,7 +25,7 @@ namespace XeroNetStandardApp.Controllers
         /// <para>GET: /Projects/</para>
         /// </summary>
         /// <returns>Returns a list of projects</returns>
-        public async Task<ActionResult> GetProjects()
+        public async Task<IActionResult> GetProjects()
         {
             var response = await Api.GetProjectsAsync(XeroToken.AccessToken, TenantId);
 
@@ -77,7 +77,7 @@ namespace XeroNetStandardApp.Controllers
         /// <param name="estimateAmount">Estimated cost of project</param>
         /// <returns>Redirects user to get projects page</returns>
         [HttpPost]
-        public async Task<ActionResult> CreateProject(string contactId, string name, string estimateAmount)
+        public async Task<IActionResult> CreateProject(string contactId, string name, string estimateAmount)
         {
             var newProject = new ProjectCreateOrUpdate
             {
@@ -103,7 +103,7 @@ namespace XeroNetStandardApp.Controllers
         /// <param name="estimateAmount">New estimate amount for project</param>
         /// <returns></returns>
         [HttpPost]
-        public async Task<ActionResult> UpdateProject(string projectId, string name, string estimateAmount)
+        public async Task<IActionResult> UpdateProject(string projectId, string name, string estimateAmount)
         {
             var updatedProject = new ProjectCreateOrUpdate
             {
