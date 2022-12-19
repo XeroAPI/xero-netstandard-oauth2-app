@@ -30,7 +30,7 @@ namespace XeroNetStandardApp.Controllers
         /// GET: /FilesSync/
         /// </summary>
         /// <returns>Returns a list of files</returns>
-        public async Task<ActionResult> Index()
+        public async Task<IActionResult> Index()
         {
             // Call get files endpoint
             var response = await Api.GetFilesAsync(XeroToken.AccessToken, TenantId);
@@ -75,7 +75,7 @@ namespace XeroNetStandardApp.Controllers
         /// <param name="objectId">object id in file association to delete</param>
         /// <returns>Returns action result to redirect user to load associations page</returns>
         [HttpGet]
-        public async Task<ActionResult> Delete(string fileId, string objectId)
+        public async Task<IActionResult> Delete(string fileId, string objectId)
         {
             // Call delete file association endpoint
             await Api.DeleteFileAssociationAsync(XeroToken.AccessToken, TenantId, new Guid(fileId), new Guid(objectId));
@@ -94,7 +94,7 @@ namespace XeroNetStandardApp.Controllers
         /// <param name="objectType">Type of object file association is</param>
         /// <returns>Returns action result to redirect user to load associations page for newly created association</returns>
         [HttpPost]
-        public async Task<ActionResult> Create(string fileId, string invoiceId, string objectType)
+        public async Task<IActionResult> Create(string fileId, string invoiceId, string objectType)
         {
             // Construct association object
             var fileIdGuid = new Guid(fileId);

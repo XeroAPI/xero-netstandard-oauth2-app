@@ -2,29 +2,38 @@
 
 <h2>Xero Cash Validation</h2>
 
-<p><b>Raw JSON Response:</b></p>
-<textarea class="form-control" readonly style="height: 350px">
-@ViewBag.jsonResponse;
-</textarea>
-<br>
-<p><b>Code Example:</b></p>
-<p>Requesting cash validation for current date</p>
-<pre>
-// Assuming accessToken and xeroTenantId has been provided
+<table class="table table-responsive-lg">
+    <tr>
+        <th>Account Id</th>
+        <th>Statement Balance</th>
+        <th>Statement Balance Type</th>
+        <th>Statement Balance Date</th>
+        <th>Cash Account Starting Balance</th>
+        <th>Cash Account Balance</th>
+        <th>Cash Account Unreconciled Amount Positive</th>
+        <th>Cash Account Unreconciled Amount Negative</th>
+    </tr>
+    @foreach (var item in Model)
+    {
+        <tr>
+            <td>@item.AccountId.ToString().Substring(0, 8)</td>
+            <td>@(string.Format("{0:0.00}", item.StatementBalance.Value)) @item.CashAccount.BalanceCurrency</td>
+            <td>@item.StatementBalance.Type</td>
+            <td>@item.StatementBalanceDate.ToString("d/MM/yy")</td>
+            <td>@(string.Format("{0:0.00}", item.CashAccount.StartingBalance)) @item.CashAccount.BalanceCurrency</td>
+            <td>@(string.Format("{0:0.00}", item.CashAccount.AccountBalance)) @item.CashAccount.BalanceCurrency</td>
+            <td>@(string.Format("{0:0.00}", item.CashAccount.UnreconciledAmountPos)) @item.CashAccount.BalanceCurrency</td>
+            <td>@(string.Format("{0:0.00}", item.CashAccount.UnreconciledAmountNeg)) @item.CashAccount.BalanceCurrency</td>
+        </tr>
+    }
+</table>
 
-var FinanceApi = new FinanceApi();
+<hr/>
+<br/>
 
-var response = await FinanceApi.GetCashValidationAsync (
-  accessToken,
-  xeroTenantId,
-  null,
-  null,
-  null
-  );
+@*
+    Raw JSON Response
+*@
 
-return response;
-</pre>
-<br>
-<p>
-  <button class="btn btn-link" onclick="location.href='@Url.Action("Index", "Home")'">Home</button>
-</p>
+<p class="h5">Raw JSON Response:</p>
+<textarea class="form-control" readonly style="height: 350px">@ViewBag.jsonResponse</textarea>

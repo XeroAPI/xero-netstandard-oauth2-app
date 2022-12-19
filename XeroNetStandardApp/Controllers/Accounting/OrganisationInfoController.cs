@@ -17,7 +17,7 @@ namespace XeroNetStandardApp.Controllers
         /// GET: /Organisation/
         /// </summary>
         /// <returns>Returns first organisation object associated with account</returns>
-        public async Task<ActionResult> Index()
+        public async Task<IActionResult> Index()
         {
             // Call get organisation endpoint
             var response = await Api.GetOrganisationsAsync(XeroToken.AccessToken, TenantId);

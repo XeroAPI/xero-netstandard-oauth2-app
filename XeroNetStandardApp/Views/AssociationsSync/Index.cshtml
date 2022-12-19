@@ -1,44 +1,31 @@
 @model dynamic
 
 <h2>Select File</h2>
-</br>
-<table class="table table-responsive fixed-table-body">
-  <tr>
-    <th>File Name</th>
-    <th>File Id</th>
-    <th>Load</th>
-  </tr>
-  @foreach (var file in Model)
-  {
-      <tr>
-        <td>@file.Name</td>
-        <td>@file.Id.ToString()</td>
-        <td>
-          <button class= "btn btn-primary" onclick="location.href='@Url.Action("LoadAssociations", "AssociationsSync", new { fileId = @file.Id })'">Load Associations</button>
-        </td>
+
+<table class="table table-responsive-lg">
+    <tr>
+        <th>File Name</th>
+        <th>File Id</th>
+        <th>Load</th>
     </tr>
-  }
+    @foreach (var file in Model)
+    {
+        <tr>
+            <td>@file.Name</td>
+            <td>@file.Id.ToString()</td>
+            <td>
+                <button class= "btn btn-primary" onclick="location.href='@Url.Action("LoadAssociations", new { fileId = @file.Id })'">Load Associations</button>
+            </td>
+        </tr>
+    }
 </table>
 
-<br>
-<p><b>Raw JSON Response:</b></p>
-<textarea class="form-control" readonly style="height: 350px">
-@ViewBag.jsonResponse;
-</textarea>
-<br>
-<p><b>Code Example:</b></p>
-<p>Get all Associations</p>
-<pre>
-// Assuming accessToken and xeroTenantId has been provided
-var FilesApi = new FilesApi();
+<hr/>
+<br/>
 
-var response = await FilesApi.GetFilesAsync(accessToken, xeroTenantId);
-var filesItems = response.Items;
-</pre>
-<br>
-<p>
-  <button class="btn btn-link" onclick="location.href='@Url.Action("Index", "Home")'">Home</button>
-</p>
-<br>
-<br>
-<br>
+@*
+    Raw JSON Response
+*@
+
+<p class="h5">Raw JSON Response:</p>
+<textarea class="form-control" readonly style="height: 350px">@ViewBag.jsonResponse</textarea>

@@ -1,43 +1,33 @@
 ﻿@model dynamic
 
 <h2>Tax Rates</h2>
-<table class="table table-responsive fixed-table-body">
-  <tr>
-    <th>Name</th>
-    <th>Tax Type</th>
-    <th>Status</th>
-    <th>Display Rate</th>
-    <th>Effective Rate</th>
-  </tr>
-  @foreach (var item in Model)
-  {
+
+<table class="table table-responsive-lg">
     <tr>
-      <td>@item.Name</td>
-      <td>@item.TaxType.ToString()</td>
-      <td>@item.Status.ToString()</td>
-      <td>@item.DisplayTaxRate</td>
-      <td>@item.EffectiveRate</td>
+        <th>Name</th>
+        <th>Tax Type</th>
+        <th>Status</th>
+        <th>Display Rate</th>
+        <th>Effective Rate</th>
     </tr>
-  }
+    @foreach (var item in Model)
+    {
+        <tr>
+            <td>@item.Name</td>
+            <td>@item.TaxType.ToString()</td>
+            <td>@item.Status.ToString()</td>
+            <td>@item.DisplayTaxRate</td>
+            <td>@item.EffectiveRate</td>
+        </tr>
+    }
 </table>
-<hr>
 
-<br>
-<p><b>Raw JSON Response:</b></p>
-<textarea class="form-control" readonly style="height: 350px">
-  @ViewBag.jsonResponse;
-</textarea>
-<br>
-<p><b>Code Example:</b></p>
-<p>Get all tax rates</p>
-<pre>
-// Assuming accessToken and xeroTenantId has been provided
-var AccountingApi = new AccountingApi();
-var response = await AccountingApi.GetTaxRatesAsync(accessToken, xeroTenantId);
-var manualJournals = response._TaxRates;
-</pre>
-<button class="btn btn-link" onclick="location.href='@Url.Action("Index", "Home")'">Home</button>
+<hr />
+<br />
 
-<br>
-<br>
-<br>
+@*
+    Raw JSON Response
+*@
+
+<p class="h5">Raw JSON Response:</p>
+<textarea class="form-control" readonly style="height: 350px">@ViewBag.jsonResponse</textarea>

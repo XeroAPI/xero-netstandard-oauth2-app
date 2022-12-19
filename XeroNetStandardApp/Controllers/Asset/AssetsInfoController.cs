@@ -21,7 +21,7 @@ namespace XeroNetStandardApp.Controllers
         /// GET: /Assets/
         /// </summary>
         /// <returns>Returns list of assets</returns>
-        public async Task<ActionResult> Index()
+        public async Task<IActionResult> Index()
         {
             // Call get assets endpoint
             var response = await Api.GetAssetsAsync(XeroToken.AccessToken, TenantId, AssetStatusQueryParam.DRAFT);
@@ -52,7 +52,7 @@ namespace XeroNetStandardApp.Controllers
         /// <param name="number"></param>
         /// <returns>Returns action result redirecting user to get assets page</returns>
         [HttpPost]
-        public async Task<ActionResult> Create(string name, string number)
+        public async Task<IActionResult> Create(string name, string number)
         {
             // Construct asset object
             var asset = new Asset

@@ -2,7 +2,6 @@ using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Threading.Tasks;
 using System.Collections.Generic;
-using Xero.NetStandard.OAuth2.Model.Files;
 using Xero.NetStandard.OAuth2.Api;
 using Xero.NetStandard.OAuth2.Config;
 using Microsoft.Extensions.Options;
@@ -27,7 +26,7 @@ namespace XeroNetStandardApp.Controllers
         /// GET: /FilesSync/
         /// </summary>
         /// <returns>Returns a list of files</returns>
-        public async Task<ActionResult> Index()
+        public async Task<IActionResult> Index()
         {
             // Call get files endpoint
             var response = await Api.GetFilesAsync(XeroToken.AccessToken, TenantId);
@@ -42,26 +41,24 @@ namespace XeroNetStandardApp.Controllers
         /// <param name="fileId">File id of file to delete</param>
         /// <returns>Returns action result to redirect user to get files page</returns>
         [HttpGet]
-        public async Task<ActionResult> Delete(string fileId)
+        public async Task<IActionResult> Delete(string fileId)
         {
             // Call delete file endpoint
             await Api.DeleteFileAsync(XeroToken.AccessToken, TenantId, Guid.Parse(fileId));
 
-            return RedirectToAction("Index", "FilesSync");
+            return RedirectToAction("Index");
         }
 
         /// <summary>
         /// GET: /FilesSync#Modify
         /// </summary>
         /// <param name="fileId">File id of file to modify</param>
-        /// <param name="fileName">File name of file to modify</param>
         /// <returns></returns>
-        [HttpGet("/FilesSync/{fileId}")]
-        public IActionResult Modify(string fileId, string fileName)
+        [HttpGet]
+        public async Task<IActionResult> Modify(Guid fileId)
         {
-            ViewBag.fileID = fileId;
-            ViewBag.fileName = fileName;
-            return View();
+            var file = await Api.GetFileAsync(XeroToken.AccessToken, TenantId, fileId);
+            return View(file);
         }
 
         #endregion
@@ -99,26 +96,26 @@ namespace XeroNetStandardApp.Controllers
                 }
             }
 
-            return RedirectToAction("Index", "FilesSync");
+            return RedirectToAction("Index");
         }
 
         /// <summary>
         /// POST: /FilesSync#Modify
         /// </summary>
-        /// <param name="fileID">File id of file to rename</param>
-        /// <param name="newName">New name value for file</param>
+        /// <param name="fileId">File id of file to rename</param>
+        /// <param name="name">New name value for file</param>
         /// <returns>Returns action result redirecting user to get files page</returns>
         [HttpPost]
-        public async Task<ActionResult> Rename(string fileID, string newName)
+        public async Task<IActionResult> Modify(Guid fileId, string name)
         {
             // Update file object
-            FileObject file = await Api.GetFileAsync(XeroToken.AccessToken, TenantId, Guid.Parse(fileID));
-            file.Name = newName;
+            var file = await Api.GetFileAsync(XeroToken.AccessToken, TenantId, fileId);
+            file.Name = name;
 
             // Call update file endpoint
-            await Api.UpdateFileAsync(XeroToken.AccessToken, TenantId, Guid.Parse(fileID), file);
+            await Api.UpdateFileAsync(XeroToken.AccessToken, TenantId, fileId, file);
 
-            return RedirectToAction("Index", "FilesSync");
+            return RedirectToAction("Index");
         }
 
         #endregion

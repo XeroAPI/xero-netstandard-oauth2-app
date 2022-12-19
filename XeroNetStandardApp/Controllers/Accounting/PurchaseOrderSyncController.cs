@@ -28,7 +28,7 @@ namespace XeroNetStandardApp.Controllers
         /// GET: /PurchaseOrderSync/
         /// </summary>
         /// <returns>Returns a list of purchase orders</returns>
-        public async Task<ActionResult> Index()
+        public async Task<IActionResult> Index()
         {
             // Call get purchase orders endpoint
             var response = await Api.GetPurchaseOrdersAsync(XeroToken.AccessToken, TenantId);
@@ -63,7 +63,7 @@ namespace XeroNetStandardApp.Controllers
         /// <param name="lineAccountCode">Line account code of line item in purchase order to create</param>
         /// <returns>Return action result to redirect user to get purchase orders page</returns>
         [HttpPost]
-        public async Task<ActionResult> Create(string contactId, string lineDescription, string lineQuantity, string lineUnitAmount, string lineAccountCode)
+        public async Task<IActionResult> Create(string contactId, string lineDescription, string lineQuantity, string lineUnitAmount, string lineAccountCode)
         {
             // Construct purchase orders object
             var lines = new List<LineItem>
@@ -104,7 +104,7 @@ namespace XeroNetStandardApp.Controllers
         /// <param name="files"></param>
         /// <param name="purchaseOrderId"></param>
         /// <returns></returns>
-        [HttpPost("PurchaseOrderSyncFileUpload")]
+        [HttpPost]
         public async Task<IActionResult> Upload(List<IFormFile> files, string purchaseOrderId)
         {
             // Read files and attach them to a new purchase order

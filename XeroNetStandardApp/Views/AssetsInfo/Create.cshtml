@@ -12,22 +12,3 @@
     <br>
     <input type="submit" class= "btn btn-primary" />
 </form>
-<hr>
-
-<p><b>Code Example:</b></p>
-<p>Create Contact</p>
-<pre>
-// Assuming accessToken and xeroTenantId has been provided
-var asset = new Asset() {
-  AssetName = Name,
-  AssetNumber = Number
-};
-
-var AssetApi = new AssetApi();
-var response = await AssetApi.CreateAssetAsync(accessToken, xeroTenantId, asset);
-</pre>
-
-<br>
-<p>
-  <button class="btn btn-link" onclick="location.href='@Url.Action("Index", "Home")'">Home</button>
-</p>

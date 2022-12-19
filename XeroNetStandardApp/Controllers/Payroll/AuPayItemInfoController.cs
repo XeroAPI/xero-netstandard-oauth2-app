@@ -19,7 +19,7 @@ namespace XeroNetStandardApp.Controllers
         /// GET: /AuPayItem/
         /// </summary>
         /// <returns>Returns a list of pay items</returns>
-        public async Task<ActionResult> Index()
+        public async Task<IActionResult> Index()
         {
             // Call get pay items async
             var response = await Api.GetPayItemsAsync(XeroToken.AccessToken, TenantId);

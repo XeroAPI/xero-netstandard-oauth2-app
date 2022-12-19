@@ -1,3 +1,4 @@
+using System;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 using System.Collections.Generic;
@@ -24,7 +25,7 @@ namespace XeroNetStandardApp.Controllers
         /// GET: /Contacts/
         /// </summary>
         /// <returns>Returns a list of contacts</returns>
-        public async Task<ActionResult> Index()
+        public async Task<IActionResult> Index()
         {
             // Call get contacts endpoint
             var response = await Api.GetContactsAsync(XeroToken.AccessToken, TenantId);
@@ -55,7 +56,7 @@ namespace XeroNetStandardApp.Controllers
         /// <param name="emailAddress">Email address of contact to create</param>
         /// <returns>Returns action result to redirect user to get contacts page</returns>
         [HttpPost]
-        public async Task<ActionResult> Create(string name, string emailAddress)
+        public async Task<IActionResult> Create(string name, string emailAddress)
         {
             // Create contact object
             var contact = new Contact

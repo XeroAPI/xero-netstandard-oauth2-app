@@ -26,7 +26,7 @@ namespace XeroNetStandardApp.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpGet]
-        public async Task<ActionResult> Index()
+        public async Task<IActionResult> Index()
         {
             // Call get feed connections endpoint
             var response = await Api.GetFeedConnectionsAsync(XeroToken.AccessToken, TenantId);
@@ -104,7 +104,7 @@ namespace XeroNetStandardApp.Controllers
         /// <param name="bankfeedConnectionId">Bank feed connection id of bank feed to delete</param>
         /// <returns>Returns action result to redirect user to get bank feed connections page</returns>
         [HttpGet]
-        public async Task<ActionResult> Delete(string bankfeedConnectionId)
+        public async Task<IActionResult> Delete(string bankfeedConnectionId)
         {
             // Construct feedConnections object
             var feedConnections = new FeedConnections

@@ -2,27 +2,33 @@
 
 <h2>Xero Balance Sheet Report</h2>
 
-<p><b>Raw JSON Response:</b></p>
-<textarea class="form-control" readonly style="height: 350px">
-@ViewBag.jsonResponse;
-</textarea>
-<br>
-<p><b>Code Example:</b></p>
-<p>Requesting cash validation for current date</p>
-<pre>
-// Assuming accessToken and xeroTenantId has been provided
 
-var FinanceApi = new FinanceApi();
+@*
+   Balance Sheet Details
+*@
 
-var response = await FinanceApi.GetFinancialStatementBalanceSheetAsync(
-  accessToken,
-  xeroTenantId,
-  null
-  );
+<table class="table table-responsive-lg">
+    <tr>
+        <th>Balance Date</th>
+        <th>Asset Total</th>
+        <th>Liability Total</th>
+        <th>Equity Total</th>
+    </tr>
+    <tr>
+        <td>@Model.BalanceDate.ToString("d/MM/yy")</td>
+        <td>@Model.Asset.Total</td>
+        <td>@Model.Liability.Total</td>
+        <td>@Model.Equity.Total</td>
+    </tr>
+</table>
 
-return response;
-</pre>
-<br>
-<p>
-  <button class="btn btn-link" onclick="location.href='@Url.Action("Index", "Home")'">Home</button>
-</p>
+<hr />
+<br />
+
+
+@*
+    Raw JSON Response
+*@
+
+<p class="h5">Raw JSON Response:</p>
+<textarea class="form-control" readonly style="height: 350px">@ViewBag.jsonResponse</textarea>

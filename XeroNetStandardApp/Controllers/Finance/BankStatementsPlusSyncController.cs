@@ -1,3 +1,4 @@
+using System;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 using Xero.NetStandard.OAuth2.Api;
@@ -21,7 +22,7 @@ namespace XeroNetStandardApp.Controllers
         /// GET: /BankStatementsPlusSync/
         /// </summary>
         /// <returns>Returns a list of bank statement responses</returns>
-        public async Task<ActionResult> Index()
+        public async Task<IActionResult> Index()
         {
             var accountingApi = new AccountingApi();
 
@@ -37,12 +38,11 @@ namespace XeroNetStandardApp.Controllers
                     TenantId,
                     accountsResponse._Accounts[0].AccountID.Value,
                     "2021-04-01",
-                    "2022-03-01"
+                    DateTime.Now.ToString("yyyy-MM-dd")
                 );
             }
-            
 
-            ViewBag.jsonResponse = JsonConvert.SerializeObject(bankStatementsResponse);
+            ViewBag.jsonResponse = JsonConvert.SerializeObject(bankStatementsResponse, Formatting.Indented);
             return View(bankStatementsResponse);
         }
     }

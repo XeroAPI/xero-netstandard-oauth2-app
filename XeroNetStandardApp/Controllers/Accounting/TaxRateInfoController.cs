@@ -25,7 +25,7 @@ namespace XeroNetStandardApp.Controllers
         /// GET: /TaxRateInfo/
         /// </summary>
         /// <returns>Returns a list of tax rates</returns>
-        public async Task<ActionResult> Index()
+        public async Task<IActionResult> Index()
         {
             // Call get tax rates endpoint
             var response = await Api.GetTaxRatesAsync(XeroToken.AccessToken, TenantId);
@@ -59,7 +59,7 @@ namespace XeroNetStandardApp.Controllers
         /// <param name="rate">Rate of tax component to create</param>
         /// <returns>Returns action result to redirect user to get tax rates page</returns>
         [HttpPost]
-        public async Task<ActionResult> Create(string name, string status, string reportTaxType, decimal rate)
+        public async Task<IActionResult> Create(string name, string status, string reportTaxType, decimal rate)
         {
             // Construct tax rates object
             var taxRates = new TaxRates

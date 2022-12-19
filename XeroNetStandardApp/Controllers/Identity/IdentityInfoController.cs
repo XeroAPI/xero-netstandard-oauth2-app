@@ -20,7 +20,7 @@ namespace XeroNetStandardApp.Controllers
         /// GET: /IdentityInfo/
         /// </summary>
         /// <returns>Returns a list of connections</returns>
-        public async Task<ActionResult> Index()
+        public async Task<IActionResult> Index()
         {
             // Call get connections endpoint
             var response = await Api.GetConnectionsAsync(XeroToken.AccessToken);
@@ -35,7 +35,7 @@ namespace XeroNetStandardApp.Controllers
         /// <param name="connectionId">Id of connection to delete</param>
         /// <returns>Returns action result to redirect user to get connections page</returns>
         [HttpGet]
-        public async Task<ActionResult> Delete(string connectionId)
+        public async Task<IActionResult> Delete(string connectionId)
         {
             // Call delete connection endpoint
             await Api.DeleteConnectionAsync(XeroToken.AccessToken, Guid.Parse(connectionId));

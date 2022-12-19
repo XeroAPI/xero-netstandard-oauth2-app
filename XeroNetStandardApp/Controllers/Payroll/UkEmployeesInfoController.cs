@@ -23,7 +23,7 @@ namespace XeroNetStandardApp.Controllers
         /// GET: /UkEmployeesInfo#Index
         /// </summary>
         /// <returns>Returns a list of employees</returns>
-        public async Task<ActionResult> Index()
+        public async Task<IActionResult> Index()
         {
             // Call get employees endpoint
             var response = await Api.GetEmployeesAsync(XeroToken.AccessToken, TenantId);
@@ -54,7 +54,7 @@ namespace XeroNetStandardApp.Controllers
         /// <param name="lastName">Lastname of new employee to create</param>
         /// <returns></returns>
         [HttpPost]
-        public async Task<ActionResult> Create(string firstName, string lastName)
+        public async Task<IActionResult> Create(string firstName, string lastName)
         {
             // Call create employee endpoint
             await Api.CreateEmployeeAsync(XeroToken.AccessToken, TenantId, ConstructEmployee(firstName, lastName));

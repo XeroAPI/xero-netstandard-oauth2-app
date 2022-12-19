@@ -1,30 +1,45 @@
 @model dynamic
 
-<h2>Summary of all the reports published within a given period</h2>
+<h2>Report History Within a Given Period</h2>
 
-<p><b>Raw JSON Response:</b></p>
-<textarea class="form-control" readonly style="height: 350px">
-@ViewBag.jsonResponse;
-</textarea>
-<br>
-<p><b>Code Example:</b></p>
-<p>For a specified organisation, provides a summary of all the reports published to current date.</p>
-<pre>
-// Assuming accessToken and xeroTenantId has been provided
+<table class="table table-responsive-lg">
+    <tr>
+        <th>Organisation Id</th>
+        <th>End Date</th>
+    </tr>
+    <tr>
+        <td>@Model.OrganisationId.ToString().Substring(0,8)</td>
+        <td>@Model.EndDate.ToString("d/MM/yy")</td>
+    </tr>
+    
+</table>
 
-var FinanceApi = new FinanceApi();
+<br/>
 
-var response = await FinanceApi.GetAccountingActivityReportHistoryAsync(
-  accessToken,
-  xeroTenantId,
-  null
-  );
+<p class="h5">Report History Entries</p>
 
-ViewBag.jsonResponse = response.ToJson();
+<table class="table table-responsive-lg">
+    <tr>
+        <th>Report Name</th>
+        <th>Report Date Text</th>
+        <th>Published Date</th>
+    </tr>
+    @foreach (var report in Model.Reports)
+    {
+        <tr>
+            <td>@report.Name</td>
+            <td>@report.ReportDateText</td>
+            <td>@report.PublishedDate.ToString("d/MM/yy")</td>
+        </tr>
+    }
+</table>
 
-return View(response);
-</pre>
-<br>
-<p>
-  <button class="btn btn-link" onclick="location.href='@Url.Action("Index", "Home")'">Home</button>
-</p>
+<hr />
+<br />
+
+@*
+    Raw JSON Response
+*@
+
+<p class="h5">Raw JSON Response:</p>
+<textarea class="form-control" readonly style="height: 350px">@ViewBag.jsonResponse</textarea>

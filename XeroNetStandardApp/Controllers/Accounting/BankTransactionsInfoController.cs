@@ -19,7 +19,7 @@ namespace XeroNetStandardApp.Controllers
         /// GET: /BankTransactionsInfo/
         /// </summary>
         /// <returns>Returns list of bank transactions</returns>
-        public async Task<ActionResult> Index()
+        public async Task<IActionResult> Index()
         {
             // Call get bank transaction endpoint
             var response = await Api.GetBankTransactionsAsync(XeroToken.AccessToken, TenantId);

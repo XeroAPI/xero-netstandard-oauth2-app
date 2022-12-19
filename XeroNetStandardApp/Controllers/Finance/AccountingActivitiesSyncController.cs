@@ -23,7 +23,7 @@ namespace XeroNetStandardApp.Controllers
         /// GET: /AccountingUsage/
         /// </summary>
         /// <returns>Returns information regarding account usage</returns>
-        public async Task<ActionResult> AccountingUsage()
+        public async Task<IActionResult> AccountingUsage()
         {
             // Call endpoint, requesting account activity. Note, 12 months prior to the end month will be used
             var response = await Api.GetAccountingActivityAccountUsageAsync(XeroToken.AccessToken, TenantId);
@@ -37,7 +37,7 @@ namespace XeroNetStandardApp.Controllers
         /// GET: /LockHistory/
         /// </summary>
         /// <returns>Returns information regarding lock history</returns>
-        public async Task<ActionResult> LockHistory()
+        public async Task<IActionResult> LockHistory()
         {
             // Call endpoint, requesting for a history of locking accounting books until now
             var response = await Api.GetAccountingActivityLockHistoryAsync(XeroToken.AccessToken, TenantId);
@@ -51,9 +51,9 @@ namespace XeroNetStandardApp.Controllers
         /// GET: /ReportHistory/
         /// </summary>
         /// <returns>Returns information regarding report history</returns>
-        public async Task<ActionResult> ReportHistory()
+        public async Task<IActionResult> ReportHistory()
         {
-            // Requesting, for a specified organisation, a summary of all the reports published to this day.
+            // Requesting, for a specified organisation, a summary of all the reports published to this day
             var response = await Api.GetAccountingActivityReportHistoryAsync(XeroToken.AccessToken, TenantId);
 
             ViewBag.jsonResponse = response.ToJson();
@@ -65,9 +65,9 @@ namespace XeroNetStandardApp.Controllers
         /// GET: /UserActivities/
         /// </summary>
         /// <returns>Returns information regarding user activities</returns>
-        public async Task<ActionResult> UserActivities()
+        public async Task<IActionResult> UserActivities()
         {
-            // Requesting, for a specified organisation, a summary of all the reports published to this day.
+            // Requesting, for a specified organisation, a summary of all the reports published to this day
             var response = await Api.GetAccountingActivityUserActivitiesAsync(XeroToken.AccessToken, TenantId);
 
             ViewBag.jsonResponse = response.ToJson();

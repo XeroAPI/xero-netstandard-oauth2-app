@@ -42,7 +42,7 @@ namespace XeroNetStandardApp.Controllers
         /// <param name="code">Returned code</param>
         /// <param name="state">Returned state</param>
         /// <returns>Redirect to organisations page</returns>
-        public async Task<ActionResult> Callback(string code, string state)
+        public async Task<IActionResult> Callback(string code, string state)
         {
             var clientState = GetCurrentState();
             if (state != clientState)
@@ -71,7 +71,7 @@ namespace XeroNetStandardApp.Controllers
         /// <para>GET /Authorization/Disconnect</para>
         /// </summary>
         /// <returns></returns>
-        public async Task<ActionResult> Disconnect()
+        public async Task<IActionResult> Disconnect()
         {
             await _client.DeleteConnectionAsync(XeroToken, XeroToken.Tenants[0]);
             tokenIO.DestroyToken();
@@ -84,7 +84,7 @@ namespace XeroNetStandardApp.Controllers
         ///<para>GET: /Authorization/Revoke</para>
         /// </summary>
         /// <returns>Redirect to home page</returns>
-        public async Task<ActionResult> Revoke()
+        public async Task<IActionResult> Revoke()
         {
             await _client.RevokeAccessTokenAsync(XeroToken);
             tokenIO.DestroyToken();

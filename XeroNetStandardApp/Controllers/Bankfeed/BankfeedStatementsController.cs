@@ -26,7 +26,7 @@ namespace XeroNetStandardApp.Controllers
         /// </summary>
         /// <returns>Return a list of delivered statements</returns>
         [HttpGet]
-        public async Task<ActionResult> Index()
+        public async Task<IActionResult> Index()
         {
             // Call get statements endpoint
             var response = await Api.GetStatementsAsync(XeroToken.AccessToken, TenantId);
@@ -62,7 +62,7 @@ namespace XeroNetStandardApp.Controllers
         /// <param name="startBalanceAmount">Start balance amount of statement to create</param>
         /// <returns></returns>
         [HttpPost]
-        public async Task<ActionResult> Create(
+        public async Task<IActionResult> Create(
             string feedConnectionId,
             string startBalanceAmount,
             string startBalanceIndicator

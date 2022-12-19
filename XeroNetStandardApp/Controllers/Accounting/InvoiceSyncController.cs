@@ -27,7 +27,7 @@ namespace XeroNetStandardApp.Controllers
         /// GET: /InvoiceSync/
         /// </summary>
         /// <returns>Returns list of invoices for last 7 days</returns>
-        public async Task<ActionResult> Index()
+        public async Task<IActionResult> Index()
         {
             // Call get invoices endpoint
             var response = await Api.GetInvoicesAsync(XeroToken.AccessToken, TenantId, where: GetSevenDayInvoiceFilter());
@@ -59,7 +59,7 @@ namespace XeroNetStandardApp.Controllers
         /// <param name="lineAccountCode">Line item account code</param>
         /// <returns>Returns action result to redirect user to get invoices page</returns>
         [HttpPost]
-        public async Task<ActionResult> Create(string name, string lineDescription, string lineQuantity,
+        public async Task<IActionResult> Create(string name, string lineDescription, string lineQuantity,
             string lineUnitAmount, string lineAccountCode)
         {
             // Construct invoice

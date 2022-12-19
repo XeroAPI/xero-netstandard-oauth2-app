@@ -12,29 +12,3 @@
     <br>
     <input type="submit" class= "btn btn-primary"/>
 </form>
-
-<hr>
-
-<p><b>Code Example:</b></p>
-<p>Create Contact</p>
-<pre>
-// Assuming accessToken and xeroTenantId has been provided
-var contact = new Contact{
-    Name = name,
-    EmailAddress = emailAddress
-};
-
-var contacts = new Contacts();
-contacts._Contacts = new List<Contact>() { contact };
-
-var AccountingApi = new AccountingApi();
-await AccountingApi.CreateContactsAsync(accessToken, xeroTenantId, contacts);
-</pre>
-
-<br>
-<p>
-  <button class="btn btn-link" onclick="location.href='@Url.Action("Index", "Home")'">Home</button>
-</p>
-<br>
-<br>
-<br>

@@ -25,7 +25,7 @@ namespace XeroNetStandardApp.Controllers
         /// GET: /ManualJournalInfo/
         /// </summary>
         /// <returns>Returns a list of manual journals</returns>
-        public async Task<ActionResult> Index()
+        public async Task<IActionResult> Index()
         {
             // Call get manual journals endpoint
             var response = await Api.GetManualJournalsAsync(XeroToken.AccessToken, TenantId);
@@ -73,7 +73,7 @@ namespace XeroNetStandardApp.Controllers
         /// <param name="taxType">Tax type of manual journal lines to create</param>
         /// <returns>Returns action result to redirect user to get journals page</returns>
         [HttpPost]
-        public async Task<ActionResult> Create(string narration, string taxType)
+        public async Task<IActionResult> Create(string narration, string taxType)
         {
             // Construct manual journals object
             // Manual journals must contain at least two journal lines

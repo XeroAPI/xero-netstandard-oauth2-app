@@ -1,43 +1,36 @@
 @model dynamic
 
-<h2>Xero BankTransactions</h2>
+<h2>Xero Bank Transactions</h2>
 
-<table class="table table-responsive fixed-table-body">
-  <tr>
-    <th>Date</th>
-    <th>Reference</th>
-    <th>Type</th>
-    <th>Total</th>
-  </tr>
-  @foreach (var bankTransaction in Model) {
+<table class="table table-responsive-lg">
     <tr>
-      <td>@bankTransaction.Date.ToString("dddd, dd MMMM yyyy")</td>
-      <td>@bankTransaction.Reference</td>
-      <td>@bankTransaction.Type</td>
-      <td>@bankTransaction.Total</td>
+        <th>Transaction Date</th>
+        <th>Type</th>
+        <th>Total</th>
+        <th>Total Tax</th>
+        <th>Status</th>
+        <th>Is Reconciled?</th>
+        <th>Last Updated</th>
     </tr>
-  }
+    @foreach (var bankTransaction in Model) {
+        <tr>
+            <td>@bankTransaction.Date.ToString("d/MM/yyyy")</td>
+            <td>@bankTransaction.Type</td>
+            <td>@bankTransaction.Total</td>
+            <td>@bankTransaction.TotalTax </td>
+            <td>@bankTransaction.Status</td>
+            <td>@bankTransaction.IsReconciled</td>
+            <td>@bankTransaction.UpdatedDateUTC.ToString("d/MM/yyyy")</td>
+        </tr>
+    }
 </table>
-<br>
-<p><b>Raw JSON Response:</b></p>
-<textarea class="form-control" readonly style="height: 350px">
-@ViewBag.jsonResponse;
-</textarea>
-<br>
-<p><b>Code Example:</b></p>
-<p>Getting all Bank Transactions</p>
-<pre>
-// Assuming accessToken and xeroTenantId has been provided
-var AccountingApi = new AccountingApi();
 
-var response = await AccountingApi.GetBankTransactionsAsync(accessToken, xeroTenantId);
-return response._BankTransactions;
-</pre>
-<br>
-<p>
-  <button class="btn btn-link" onclick="location.href='@Url.Action("Index", "Home")'">Home</button>
-</p>
+<hr/>
+<br/>
 
-<br>
-<br>
-<br>
+@*
+    Raw JSON Response
+*@
+
+<p class="h5">Raw JSON Response:</p>
+<textarea class="form-control" readonly style="height: 350px">@ViewBag.jsonResponse</textarea>

@@ -19,12 +19,12 @@ namespace XeroNetStandardApp.Controllers
         /// GET: /CashValidationSync/
         /// </summary>
         /// <returns>Returns a list of cash validations</returns>
-        public async Task<ActionResult> Index()
+        public async Task<IActionResult> Index()
         {
             // Call get cash validation endpoint
             var response = await Api.GetCashValidationAsync(XeroToken.AccessToken, TenantId);
 
-            ViewBag.jsonResponse = JsonConvert.SerializeObject(response);
+            ViewBag.jsonResponse = JsonConvert.SerializeObject(response, Formatting.Indented);
             return View(response);
         }
     }
