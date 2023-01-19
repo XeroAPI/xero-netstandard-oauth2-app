@@ -1,72 +1,33 @@
-﻿@using Xero.NetStandard.OAuth2.Model.Accounting;
-@using static Xero.NetStandard.OAuth2.Model.Accounting.TaxRate;
+﻿@using static Xero.NetStandard.OAuth2.Model.Accounting.TaxRate;
 @model dynamic
 
 <h2>Create Tax Rates</h2>
 <form method="POST">
-  <label for="name">Name:</label>
-  <br>
-  <input class="form-control" type="text" id="name" placeholder="" name="name" />
-  <br>
-  <label for="rate">Rate:</label>
-  <br>
-  <input class="form-control" type="number" id="rate" placeholder="0.0" name="rate" />
-  <br>
-  <label for="taxType">Tax Type:</label>
-  <br>
-  <select name="reportTaxType">
-      @foreach (var reportTaxType in Enum.GetValues(typeof(ReportTaxTypeEnum))){
-        <option value=@reportTaxType selected="@(reportTaxType.ToString() == "NONE")">@reportTaxType</option>
-    }
-  </select>
-  <br>
-  <br>
-  <label for="status">Status:</label>
-  <br>
-  <select name="status">
-      @foreach (var status in Enum.GetValues(typeof(StatusEnum))){
-        <option value=@status selected="@(status.ToString() == "ACTIVE")">@status</option>
-    }
-  </select>
-  <br>
-  <br>
-  <input class="btn btn-primary" type="submit" />
+    <label for="name">Name:</label>
+    <br>
+    <input class="form-control" type="text" id="name" placeholder="" name="name" />
+    <br>
+    <label for="rate">Rate:</label>
+    <br>
+    <input class="form-control" type="number" id="rate" placeholder="0.0" name="rate" />
+    <br>
+    <label for="taxType">Tax Type:</label>
+    <br>
+    <select name="reportTaxType">
+        @foreach (var reportTaxType in Enum.GetValues(typeof(ReportTaxTypeEnum))){
+            <option value=@reportTaxType selected="@(reportTaxType.ToString() == "NONE")">@reportTaxType</option>
+        }
+    </select>
+    <br>
+    <br>
+    <label for="status">Status:</label>
+    <br>
+    <select name="status">
+        @foreach (var status in Enum.GetValues(typeof(StatusEnum))){
+            <option value=@status selected="@(status.ToString() == "ACTIVE")">@status</option>
+        }
+    </select>
+    <br>
+    <br>
+    <input class="btn btn-primary" type="submit" />
 </form>
-<hr>
-
-<br>
-<p><b>Code Example:</b></p>
-<p>Post Tax Rates</p>
-<pre>
-// Assuming accessToken and xeroTenantId has been provided
-
-var taxComponent = new TaxComponent() {
-    Name = "State Tax",
-    Rate = new decimal(2.25)
-};
-var taxComponents = new List<TaxComponent>();
-taxComponents.Add(taxComponent);
-
-var taxRate = new TaxRate()
-{
-    Name = name,
-    Status = (StatusEnum)Enum.Parse(typeof(StatusEnum), status),
-    ReportTaxType = (ReportTaxTypeEnum)Enum.Parse(typeof(ReportTaxTypeEnum), reportTaxType),
-    TaxComponents = taxComponents
-};
-
-var taxRates = new TaxRates();
-var taxRatesList = new List<TaxRate>();
-taxRatesList.Add(taxRate);
-taxRates._TaxRates = taxRatesList;
-
-var AccountingApi = new AccountingApi();
-
-await AccountingApi.CreateTaxRatesAsync(accessToken, xeroTenantId, taxRates);
-
-</pre>
-<button class="btn btn-link" onclick="location.href='@Url.Action("Index", "Home")'">Home</button>
-
-<br>
-<br>
-<br>

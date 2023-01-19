@@ -1,39 +1,30 @@
 ﻿using System;
 using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
+using XeroNetStandardApp.IO;
 using XeroNetStandardApp.Models;
 
 namespace XeroNetStandardApp.Controllers
 {
-  public class HomeController : Controller
-  {
-    public IActionResult Index([FromQuery] Guid? tenantId)
+    public class HomeController : Controller
     {
-      bool firstTimeConnection = false;
+        public IActionResult Index([FromQuery] Guid? tenantId)
+        {
+            var tokenIO = LocalStorageTokenIO.Instance;
+            if (tenantId != null) tokenIO.StoreTenantId(tenantId.ToString());
+            
+            return View(tokenIO.TokenExists());
+        }
 
-      if (TokenUtilities.TokenExists())
-      {
-        firstTimeConnection = true;
-      }
+        public IActionResult Privacy()
+        {
+            return View();
+        }
 
-      if (tenantId is Guid tenantIdValue)
-      {
-        TokenUtilities.StoreTenantId(tenantIdValue);
-      }
-
-      return View(firstTimeConnection);
+        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
+        public IActionResult Error()
+        {
+            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+        }
     }
-    public IActionResult Privacy()
-    {
-      return View();
-    }
-
-    [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-    public IActionResult Error()
-    {
-      return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
-    }
-  }
 }
-
-

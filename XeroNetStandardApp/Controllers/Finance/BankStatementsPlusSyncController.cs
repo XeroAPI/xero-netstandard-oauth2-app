@@ -1,3 +1,4 @@
+using System;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 using Xero.NetStandard.OAuth2.Api;
@@ -13,51 +14,35 @@ namespace XeroNetStandardApp.Controllers
     /// Controller implementing methods demonstrating following Finance endpoints
     /// <para>- GET: /BankStatementsPlusSync/</para>
     /// </summary>
-    public class BankStatementsPlusSync : Controller
+    public class BankStatementsPlusSync : ApiAccessorController<FinanceApi>
     {
-        private readonly IOptions<XeroConfiguration> _xeroConfig;
-        private readonly FinanceApi _financeApi;
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="xeroConfig"></param>
-        public BankStatementsPlusSync(IOptions<XeroConfiguration> xeroConfig)
-        {
-            _xeroConfig = xeroConfig;
-            _financeApi = new FinanceApi();
-        }
-
+        public BankStatementsPlusSync(IOptions<XeroConfiguration> xeroConfig):base(xeroConfig){}
+        
         /// <summary>
         /// GET: /BankStatementsPlusSync/
         /// </summary>
         /// <returns>Returns a list of bank statement responses</returns>
-        public async Task<ActionResult> Index()
+        public async Task<IActionResult> Index()
         {
-            // Token and TenantId setup
-            var xeroToken = await TokenUtilities.GetXeroOAuth2Token(_xeroConfig.Value);
-            var xeroTenantId = TokenUtilities.GetXeroTenantId(xeroToken);
-
             var accountingApi = new AccountingApi();
 
             // Call get bank statement accounting endpoint
             var whereQuery = "Status==\"ACTIVE\" AND Type==\"BANK\"";
-            var accountsResponse = await accountingApi.GetAccountsAsync(xeroToken.AccessToken, xeroTenantId, null, whereQuery);
+            var accountsResponse = await accountingApi.GetAccountsAsync(XeroToken.AccessToken, TenantId, where: whereQuery);
 
             BankStatementAccountingResponse bankStatementsResponse = null;
             if (accountsResponse._Accounts.Count > 0)
             {
-                bankStatementsResponse = await _financeApi.GetBankStatementAccountingAsync(
-                    xeroToken.AccessToken,
-                    xeroTenantId,
+                bankStatementsResponse = await Api.GetBankStatementAccountingAsync(
+                    XeroToken.AccessToken,
+                    TenantId,
                     accountsResponse._Accounts[0].AccountID.Value,
                     "2021-04-01",
-                    "2022-03-01"
+                    DateTime.Now.ToString("yyyy-MM-dd")
                 );
             }
-            
 
-            ViewBag.jsonResponse = JsonConvert.SerializeObject(bankStatementsResponse);
+            ViewBag.jsonResponse = JsonConvert.SerializeObject(bankStatementsResponse, Formatting.Indented);
             return View(bankStatementsResponse);
         }
     }

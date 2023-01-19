@@ -15,16 +15,9 @@ namespace XeroNetStandardApp.Controllers
     /// <para>- GET: /ManualJournalInfo/</para>
     /// <para>- POST: /ManualJournalInfo#Create</para>
     /// </summary>
-    public class ManualJournalInfo : Controller
+    public class ManualJournalInfo : ApiAccessorController<AccountingApi>
     {
-        private readonly IOptions<XeroConfiguration> _xeroConfig;
-        private readonly AccountingApi _accountingApi;
-
-        public ManualJournalInfo(IOptions<XeroConfiguration> xeroConfig)
-        {
-            _xeroConfig = xeroConfig;
-            _accountingApi = new AccountingApi();
-        }
+        public ManualJournalInfo(IOptions<XeroConfiguration> xeroConfig) : base(xeroConfig) { }
 
         #region GET Endpoints
 
@@ -32,14 +25,10 @@ namespace XeroNetStandardApp.Controllers
         /// GET: /ManualJournalInfo/
         /// </summary>
         /// <returns>Returns a list of manual journals</returns>
-        public async Task<ActionResult> Index()
+        public async Task<IActionResult> Index()
         {
-            // Token and TenantId setup
-            var xeroToken = await TokenUtilities.GetXeroOAuth2Token(_xeroConfig.Value);
-            var xeroTenantId = TokenUtilities.GetXeroTenantId(xeroToken);
-
             // Call get manual journals endpoint
-            var response = await _accountingApi.GetManualJournalsAsync(xeroToken.AccessToken, xeroTenantId);
+            var response = await Api.GetManualJournalsAsync(XeroToken.AccessToken, TenantId);
 
             ViewBag.jsonResponse = response.ToJson();
             return View(response._ManualJournals);
@@ -53,12 +42,8 @@ namespace XeroNetStandardApp.Controllers
         [HttpGet]
         public async Task<IActionResult> FindJournal(Guid manualJournalId)
         {
-            // Token and TenantId setup
-            var xeroToken = await TokenUtilities.GetXeroOAuth2Token(_xeroConfig.Value);
-            var xeroTenantId = TokenUtilities.GetXeroTenantId(xeroToken);
-
             // Call get manual journal for a specific journal
-            var response = await _accountingApi.GetManualJournalAsync(xeroToken.AccessToken, xeroTenantId, manualJournalId);
+            var response = await Api.GetManualJournalAsync(XeroToken.AccessToken, TenantId, manualJournalId);
 
             ViewBag.jsonResponse = response.ToJson();
             return View(response._ManualJournals.First());
@@ -88,12 +73,8 @@ namespace XeroNetStandardApp.Controllers
         /// <param name="taxType">Tax type of manual journal lines to create</param>
         /// <returns>Returns action result to redirect user to get journals page</returns>
         [HttpPost]
-        public async Task<ActionResult> Create(string narration, string taxType)
+        public async Task<IActionResult> Create(string narration, string taxType)
         {
-            // Token and TenantId setup
-            var xeroToken = await TokenUtilities.GetXeroOAuth2Token(_xeroConfig.Value);
-            var xeroTenantId = TokenUtilities.GetXeroTenantId(xeroToken);
-
             // Construct manual journals object
             // Manual journals must contain at least two journal lines
             var manualJournalLines = new List<ManualJournalLine>
@@ -126,7 +107,7 @@ namespace XeroNetStandardApp.Controllers
             };
 
             // Call create manual journal endpoint
-            await _accountingApi.CreateManualJournalsAsync(xeroToken.AccessToken, xeroTenantId, manualJournals);
+            await Api.CreateManualJournalsAsync(XeroToken.AccessToken, TenantId, manualJournals);
 
             return RedirectToAction("Index", "ManualJournalInfo");
         }

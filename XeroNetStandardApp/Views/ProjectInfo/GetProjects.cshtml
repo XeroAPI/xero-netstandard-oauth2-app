@@ -1,0 +1,48 @@
+﻿@using Xero.NetStandard.OAuth2.Model.Project
+@model dynamic
+
+<h2>Xero Projects</h2>
+
+@*
+    Table view of Projects
+*@
+
+<table class="table table-responsive-lg">
+    <tr>
+        <th>Project Name</th>
+        <th>Project ID</th>
+        <th> Estimate Amount</th>
+        <th>Time Entries</th>
+        <th></th>
+        <th>Tasks</th>
+        <th></th>
+        <th>Edit Project</th>
+    </tr>
+    @foreach (var project in Model)
+    {
+        <tr>
+            <td>@project.Name</td>
+            <td>@(project.ProjectId.ToString().Substring(0, 8))</td>
+            <td>@(project.Estimate.Value + " " + project.Estimate.Currency)</td>
+            <td><button class="btn btn-link" onclick="location.href='@Url.Action("GetTimeEntries", "ProjectTimeEntries", new { projectId = (Guid) @project.ProjectId } )'">View Time Entries</button></td>
+            <td><button class="btn btn-link" onclick="location.href='@Url.Action("CreateTimeEntry", "ProjectTimeEntries", new { projectId = (Guid) @project.ProjectId } )'">Create Time Entry</button></td>
+            <td>
+                <button class="btn btn-link" onclick="location.href='@Url.Action("GetTasks", "ProjectTask", new { projectId = (Guid)@project.ProjectId })'">View Tasks</button>
+            </td>
+            <td>
+                <button class="btn btn-link" onclick="location.href='@Url.Action("CreateTask", "ProjectTask", new { projectId = (Guid)@project.ProjectId, currencyCode = @project.Estimate.Currency })'">Create Task</button>
+            </td>
+            <td><button class="btn btn-primary" onclick="location.href='@Url.Action("UpdateProject", new { projectId = (Guid) @project.ProjectId } )'">Edit</button></td>
+        </tr>
+    }
+</table>
+
+<hr/>
+<br/>
+
+@*
+    Raw JSON Response
+*@
+
+<p class ="h5">Raw JSON Response:</p>
+<textarea class="form-control" readonly style="height: 350px">@ViewBag.jsonResponse</textarea>

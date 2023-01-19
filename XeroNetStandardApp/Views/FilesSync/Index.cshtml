@@ -1,66 +1,46 @@
 @model dynamic
 
 <h2>Xero Files</h2>
-<br>
-<table class="table table-responsive fixed-table-body">
-  <tr>
-    <th>File Name</th>
-    <th>MimeType</th>
-    <th>Size</th>
-    <th>CreatedDateUtc</th>
-    <th>UpdatedDateUtc</th>
-    <th>Id</th>
-    <th>FolderId</th>
-    <th>Update</th>
-    <th>Delete</th>
-  </tr>
-  @foreach (var item in Model)
-  {
+
+<table class="table table-responsive-lg">
     <tr>
-      <td>@item.Name</td>
-      <td>@item.MimeType</td>
-      <td>@item.Size</td>
-      <td>@item.CreatedDateUtc</td>
-      <td>@item.UpdatedDateUtc</td>
-      <td>@item.Id.ToString()</td>
-      <td>@item.FolderId</td>
-      <td>
-        <button class="btn btn-primary" onclick="location.href='@Url.Action("Modify", "FilesSync", new { fileID = @item.Id, fileName = @item.Name })'">Rename</button>
-      </td>
-      <td>
-        <button class="btn btn-primary" onclick="location.href='@Url.Action("Delete", "FilesSync", new { fileID = @item.Id })'">Delete</button>
-      </td>
+        <th>File Name</th>
+        <th>MimeType</th>
+        <th>Size</th>
+        <th>CreatedDateUtc</th>
+        <th>UpdatedDateUtc</th>
+        <th>Id</th>
+        <th>Folder Id</th>
+        <th>Rename</th>
+        <th>Delete</th>
     </tr>
-  }
+    @foreach (var item in Model)
+    {
+        <tr>
+            <td>@item.Name</td>
+            <td>@item.MimeType</td>
+            <td>@(item.Size / 1024) KB</td>
+            <td>@item.CreatedDateUtc.ToString("d/MM/yy")</td>
+            <td>@item.UpdatedDateUtc.ToString("d/MM/yy")</td>
+            <td>@item.Id?.ToString().Substring(0,8)</td>
+            <td>@item.FolderId?.ToString().Substring(0,8)</td>
+            <td>
+                <button class="btn btn-link" onclick="location.href='@Url.Action("Modify", new { fileID = @item.Id })'">Rename</button>
+            </td>
+            <td>
+                <button class="btn btn-danger" onclick="location.href='@Url.Action("Delete", new { fileID = @item.Id })'">Delete</button>
+            </td>
+        </tr>
+    }
 </table>
+
 <hr>
 <br>
-<h5>Upload File</h5>
-<p>
-  <form method="post" enctype="multipart/form-data" asp-controller="FilesSyncFileUpload" asp-action="Index">
+
+<h5>Upload New File</h5>
+
+<form method="post" enctype="multipart/form-data" asp-controller="FilesSync" asp-action="Upload">
     <input class="form-control" type="file" name="files" multiple />
+    <br/>
     <input class="btn btn-primary form-control" type="submit" value="Upload New File" />
-  </form>
-</p>
-
-<br>
-<p><b>Raw JSON Response:</b></p>
-<textarea class="form-control" readonly style="height: 350px">
-  @ViewBag.jsonResponse;
-</textarea>
-<br>
-<p><b>Code Example:</b></p>
-<p>Get all Files</p>
-<pre>
-// Assuming accessToken and xeroTenantId has been provided
-var FilesApi = new FilesApi();
-var response = await FilesApi.GetFilesAsync(accessToken, xeroTenantId);
-var filesItems = response.Items;
-</pre>
-<p>
-  <button class="btn btn-link" onclick="location.href='@Url.Action("Index", "Home")'">Home</button>
-</p>
-
-<br>
-<br>
-<br>
+</form>

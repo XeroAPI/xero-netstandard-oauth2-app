@@ -1,0 +1,44 @@
+﻿@model dynamic
+
+<h2>@Model.Item1 Tasks</h2>
+
+<table class="table table-responsive-lg">
+    <tr>
+        <th>Task Name</th>
+        <th>Task Rate</th>
+        <th>Estimated Time to Perform (min)</th>
+        <th>Charge Type</th>
+        <th>Edit</th>
+        <th>Delete</th>
+    </tr>
+    @foreach (var task in Model.Item2.Items)
+    {
+        <tr>
+            <td>@task.Name</td>
+            <td>@(task.Rate.Value + " " + task.Rate.Currency)</td>
+            <td>@task.EstimateMinutes</td>
+            <td>@task.ChargeType</td>
+            <td>
+                <button class="btn btn-primary" onclick="location.href='@Url.Action("UpdateTask", values: new { projectId = (Guid)@task.ProjectId, taskId = (Guid)@task.TaskId})'">Edit</button>
+            </td>
+            <td>
+                <button class="btn btn-danger" onclick="location.href='@Url.Action("DeleteTask", values: new { projectId = (Guid)@task.ProjectId, taskId = (Guid)@task.TaskId})'">Delete</button>
+            </td>
+        </tr>
+    }
+</table>
+
+<hr/>
+<br />
+
+@*
+    Raw JSON Response
+*@
+
+<p class="h5">Raw JSON Response:</p>
+<textarea class="form-control" readonly style="height: 350px">
+@ViewBag.jsonResponse
+</textarea>
+
+<br />
+<button class="btn btn-link" onclick="location.href='@Url.Action("GetProjects", "ProjectInfo")'">Back</button>

@@ -1,0 +1,29 @@
+﻿@model dynamic
+
+<h2>Create a Xero Project</h2>
+
+@*
+    Create project form
+*@
+
+<form method="POST">
+    <label for="contactId">Contact:</label>
+    <br>
+    <select id="contactId" name="contactId">
+        @foreach (var contact in Model) {
+            <option value=@contact.Item2>@contact.Item1</option>
+        }
+    </select>
+    <br>
+    <br>
+    <label>Project Name:</label>
+    <input class="form-control" type="text" id="name" placeholder="Enter a name for the project" name="name" required/>
+    <br>
+    <label for="Number">Estimated Amount:</label>
+    <br>
+    <input class="form-control" type="number" step="any" id="estimateAmount" placeholder="e.g. 10,000.00" name="estimateAmount" required/>
+    <br>
+    <br>
+    <input class="btn btn-primary" type="submit"/>
+</form>
+

@@ -2,28 +2,33 @@
 
 <h2>Xero Profit and Loss Statement</h2>
 
-<p><b>Raw JSON Response:</b></p>
-<textarea class="form-control" readonly style="height: 350px">
-@ViewBag.jsonResponse;
-</textarea>
-<br>
-<p><b>Code Example:</b></p>
-<p>Requesting profit and loss statement for the past 12 months from today</p>
-<pre>
-// Assuming accessToken and xeroTenantId has been provided
+@*
+    Profit Loss Response Details
+*@
 
-var FinanceApi = new FinanceApi();
+<table class="table table-responsive-lg">
+    <tr>
+        <th>Start Date</th>
+        <th>End Date</th>
+        <th>Net Profit Loss</th>
+        <th>Revenue Total</th>
+        <th>Expenses Total</th>
+    </tr>
+    <tr>
+        <td>@Model.StartDate.ToString("d/MM/yy")</td>
+        <td>@Model.EndDate.ToString("d/MM/yy")</td>
+        <td>@Model.NetProfitLoss</td>
+        <td>@Model.Revenue.Total</td>
+        <td>@Model.Expense.Total</td>
+    </tr>
+</table>
 
-var response = await FinanceApi.GetFinancialStatementProfitAndLossAsync(
-  accessToken,
-  xeroTenantId,
-  null,
-  null
-  );
+<hr/>
+<br/>
 
-return response;
-</pre>
-<br>
-<p>
-  <button class="btn btn-link" onclick="location.href='@Url.Action("Index", "Home")'">Home</button>
-</p>
+@*
+    Raw JSON Response
+*@
+
+<p class="h5">Raw JSON Response:</p>
+<textarea class="form-control" readonly style="height: 350px">@ViewBag.jsonResponse</textarea>

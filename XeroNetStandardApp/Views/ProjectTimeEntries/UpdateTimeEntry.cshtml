@@ -1,0 +1,33 @@
+﻿@model dynamic
+
+<h2>Editing Time Entry</h2>
+
+<form method="POST">
+    <hidden value="@Model.TimeEntry.TimeEntryId" name="timeEntryId" />
+    <hidden value="@Model.TimeEntry.ProjectId" name="projectId" />
+
+    <label>Task:</label>
+    <br/>
+    <select id="taskId" name="taskId" required>
+        @foreach (var task in Model.Tasks)
+        {
+            <option value=@task.TaskId>@task.Name</option>
+        }
+    </select>
+    
+    <br/>
+    <br/>
+
+    <label>Duration (logged minutes):</label>
+    <input class="form-control" type="number" step="1" id="duration" name="duration" value="@Model.TimeEntry.Duration" required/>
+
+    <br/>
+    <br/>
+    <input class="btn btn-primary" type="submit"/>
+</form>
+
+<br />
+<br />
+<br />
+
+<button class="btn btn-link" onclick="location.href='@Url.Action("GetTimeEntries", values: new {@Model.TimeEntry.ProjectId})'">Back</button>

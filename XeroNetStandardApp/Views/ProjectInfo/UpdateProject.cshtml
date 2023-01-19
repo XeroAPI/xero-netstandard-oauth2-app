@@ -1,0 +1,20 @@
+﻿@model dynamic
+
+<h2>Editing Project: @Model.Name</h2>
+
+<form method="POST">
+    <br/>
+    <label name="ProjectId" value="@Model.ProjectId"></label>
+    <label>Project Name:</label>
+    <input class="form-control" type="text" value="@Model.Name" id="name" placeholder="Enter new name for the project" name="name" required/>
+    <br/>
+    <label>Estimated Amount:</label>
+    <input class="form-control" type="number" step="any" value="@Model.Estimate.Value" id="estimateAmount" placeholder="Enter new estimated amount for the project" name="estimateAmount" required />
+    <br />
+    <br />
+    <input class="btn btn-primary" type="submit" />
+</form>
+
+<br/>
+
+<button class="btn btn-link" onclick="location.href='@Url.Action("GetProjects")'">Back</button>

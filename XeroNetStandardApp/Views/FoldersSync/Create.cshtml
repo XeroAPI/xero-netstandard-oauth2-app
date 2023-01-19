@@ -2,30 +2,12 @@
 
 <form method="POST">
     <label for="Name">Folder Name:</label>
+    
     <br>
+    
     <input class="form-control" type="text" id="Name" placeholder="Enter a folder name" name="Name" required/>
+    
     <br>
 
     <input class= "btn btn-primary" type="submit" />
 </form>
-<br>
-<p><b>Code Example:</b></p>
-<p>Create New Folder</p>
-<pre>
-// Assuming accessToken and xeroTenantId has been provided
-Folder folder = new Folder{
-  Name = name,
-  Email = email,
-  Id = Guid.NewGuid()
-};
-
-await FilesApi.CreateFolderAsync(accessToken, xeroTenantId, folder);
-</pre>
-
-<br>
-<p>
-  <button class= "btn btn-link" onclick="location.href='@Url.Action("Index", "Home")'">Home</button>
-</p>
-<br>
-<br>
-<br>

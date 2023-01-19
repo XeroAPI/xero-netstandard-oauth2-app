@@ -1,8 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
-using Xero.NetStandard.OAuth2.Api;
 using Xero.NetStandard.OAuth2.Config;
 using Microsoft.Extensions.Options;
+using Xero.NetStandard.OAuth2.Api;
 
 namespace XeroNetStandardApp.Controllers
 {
@@ -10,29 +10,19 @@ namespace XeroNetStandardApp.Controllers
     /// Controller implementing methods demonstrating following accounting endpoints:
     /// <para>- GET: /BankTransactionsInfo/</para>
     /// </summary>
-    public class BankTransactionsInfo : Controller
+    public class BankTransactionsInfo : ApiAccessorController<AccountingApi>
     {
-        private readonly IOptions<XeroConfiguration> _xeroConfig;
-        private readonly AccountingApi _accountingApi;
 
-        public BankTransactionsInfo(IOptions<XeroConfiguration> xeroConfig)
-        {
-           _xeroConfig = xeroConfig;
-           _accountingApi = new AccountingApi();
-        }
+        public BankTransactionsInfo(IOptions<XeroConfiguration> xeroConfig): base(xeroConfig) { }
 
         /// <summary>
         /// GET: /BankTransactionsInfo/
         /// </summary>
         /// <returns>Returns list of bank transactions</returns>
-        public async Task<ActionResult> Index()
+        public async Task<IActionResult> Index()
         {
-            // Token and TenantId setup
-            var xeroToken = await TokenUtilities.GetXeroOAuth2Token(_xeroConfig.Value);
-            var xeroTenantId = TokenUtilities.GetXeroTenantId(xeroToken);
-
             // Call get bank transaction endpoint
-            var response = await _accountingApi.GetBankTransactionsAsync(xeroToken.AccessToken, xeroTenantId);
+            var response = await Api.GetBankTransactionsAsync(XeroToken.AccessToken, TenantId);
 
             ViewBag.jsonResponse = response.ToJson();
             return View(response._BankTransactions);

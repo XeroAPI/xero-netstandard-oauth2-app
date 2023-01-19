@@ -1,30 +1,44 @@
 @model dynamic
 
-<h2>Xero History of Locking of Accounting Books</h2>
+<h2>Locking of Accounting Books History</h2>
 
-<p><b>Raw JSON Response:</b></p>
-<textarea class="form-control" readonly style="height: 350px">
-@ViewBag.jsonResponse;
-</textarea>
-<br>
-<p><b>Code Example:</b></p>
-<p>Provides a history of locking of accounting books using current date. Locking may be an indicator of good accounting practices that could reduce the risk of changes to accounting records in prior periods.</p>
-<pre>
-// Assuming accessToken and xeroTenantId has been provided
+<table class="table table-responsive-lg">
+    <tr>
+        <th>Organisation Id</th>
+        <th>End Date</th>
+    </tr>
+    <tr>
+        <td>@Model.OrganisationId.ToString().Substring(0,8)</td>
+        <td>@Model.EndDate.ToString("d/MM/yy")</td>
+    </tr>
+</table>
 
-var FinanceApi = new FinanceApi();
+<br/>
 
-var response = await FinanceApi.GetAccountingActivityLockHistoryAsync(
-  accessToken,
-  xeroTenantId,
-  null
-  );
+<p class="h5">Lock History Dates</p>
 
-ViewBag.jsonResponse = response.ToJson();
+<table class="table table-responsive-lg">
+    <tr>
+        <th>Hard Lock Date</th>
+        <th>Soft Lock Date</th>
+        <th>Updated Date</th>
+    </tr>
+    @foreach (var lockModel in Model.LockDates)
+    {
+        <tr>
+            <td>@lockModel.HardLockDate.ToString("d/MM/yy")</td>
+            <td>@lockModel.SoftLockDate.ToString("d/MM/yy")</td>
+            <td>@lockModel.UpdatedDateUtc.ToString("d/MM/yy")</td>
+        </tr>
+    }
+</table>
 
-return View(response);
-</pre>
-<br>
-<p>
-  <button class="btn btn-link" onclick="location.href='@Url.Action("Index", "Home")'">Home</button>
-</p>
+<hr />
+<br />
+
+@*
+    Raw JSON Response
+*@
+
+<p class="h5">Raw JSON Response:</p>
+<textarea class="form-control" readonly style="height: 350px">@ViewBag.jsonResponse</textarea>

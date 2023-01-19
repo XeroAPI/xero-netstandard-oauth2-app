@@ -3,10 +3,10 @@ using Microsoft.Extensions.Options;
 using System;
 using Xero.NetStandard.OAuth2.Config;
 using Xero.NetStandard.OAuth2.Model.Accounting;
-using Xero.NetStandard.OAuth2.Api;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using static Xero.NetStandard.OAuth2.Model.Accounting.TaxRate;
+using Xero.NetStandard.OAuth2.Api;
 
 namespace XeroNetStandardApp.Controllers
 {
@@ -15,16 +15,9 @@ namespace XeroNetStandardApp.Controllers
     /// <para>- GET: /TaxRateInfo/</para>
     /// <para>- POST: /TaxRateInfo#Create</para>
     /// </summary>
-    public class TaxRateInfoController : Controller
+    public class TaxRateInfoController : ApiAccessorController<AccountingApi>
     {
-        private readonly IOptions<XeroConfiguration> _xeroConfig;
-        private readonly AccountingApi _accountingApi;
-
-        public TaxRateInfoController(IOptions<XeroConfiguration> xeroConfig)
-        {
-            _xeroConfig = xeroConfig;
-            _accountingApi = new AccountingApi();
-        }
+        public TaxRateInfoController(IOptions<XeroConfiguration> xeroConfig):base(xeroConfig){}
 
         #region GET Endpoints
 
@@ -32,14 +25,10 @@ namespace XeroNetStandardApp.Controllers
         /// GET: /TaxRateInfo/
         /// </summary>
         /// <returns>Returns a list of tax rates</returns>
-        public async Task<ActionResult> Index()
+        public async Task<IActionResult> Index()
         {
-            // Token and TenantId setup
-            var xeroToken = await TokenUtilities.GetXeroOAuth2Token(_xeroConfig.Value);
-            var xeroTenantId = TokenUtilities.GetXeroTenantId(xeroToken);
-
             // Call get tax rates endpoint
-            var response = await _accountingApi.GetTaxRatesAsync(xeroToken.AccessToken, xeroTenantId);
+            var response = await Api.GetTaxRatesAsync(XeroToken.AccessToken, TenantId);
 
             ViewBag.jsonResponse = response.ToJson();
             return View(response._TaxRates);
@@ -70,12 +59,8 @@ namespace XeroNetStandardApp.Controllers
         /// <param name="rate">Rate of tax component to create</param>
         /// <returns>Returns action result to redirect user to get tax rates page</returns>
         [HttpPost]
-        public async Task<ActionResult> Create(string name, string status, string reportTaxType, decimal rate)
+        public async Task<IActionResult> Create(string name, string status, string reportTaxType, decimal rate)
         {
-            // Token and TenantId setup
-            var xeroToken = await TokenUtilities.GetXeroOAuth2Token(_xeroConfig.Value);
-            var xeroTenantId = TokenUtilities.GetXeroTenantId(xeroToken);
-
             // Construct tax rates object
             var taxRates = new TaxRates
             {
@@ -98,7 +83,7 @@ namespace XeroNetStandardApp.Controllers
             };
 
             // Call create tax rates endpoint
-            await _accountingApi.CreateTaxRatesAsync(xeroToken.AccessToken, xeroTenantId, taxRates);
+            await Api.CreateTaxRatesAsync(XeroToken.AccessToken, TenantId, taxRates);
 
             return RedirectToAction("Index", "TaxRateInfo");
         }

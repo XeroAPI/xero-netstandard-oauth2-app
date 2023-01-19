@@ -1,41 +1,30 @@
 @model dynamic
 
-<h2>Xero UK Payroll Employees</h2>
+<h2>UK Payroll Employees</h2>
 
 <table class="table">
-  <tr>
-    <th>First Name</th>
-    <th>Last Name</th>
-    <th>Job Title</th>
-    <th>Gender</th>
-  </tr>
-  @foreach (var employee in Model) {
     <tr>
-      <td>@employee.FirstName</td>
-      <td>@employee.LastName</td>
-      <td>@employee.Title</td>
-      <td>@employee.Gender</td>
+        <th>First Name</th>
+        <th>Last Name</th>
+        <th>Gender</th>
     </tr>
-  }
+    @foreach (var employee in Model) {
+        <tr>
+            <td>@employee.FirstName</td>
+            <td>@employee.LastName</td>
+            <td>@employee.Gender</td>
+        </tr>
+    }
 </table>
-<br>
-<p><b>Raw JSON Response:</b></p>
+
+<hr/>
+<br/>
+
+@*
+    Raw JSON Response
+*@
+
+<p class="h5">Raw JSON Response:</p>
 <textarea class="form-control" readonly style="height: 350px">
-  @ViewBag.jsonResponse;
+    @ViewBag.jsonResponse
 </textarea>
-<br>
-<p><b>Code Example:</b></p>
-<p>Get all UK Employees</p>
-<pre>
-// Assuming accessToken and xeroTenantId has been provided
-var PayrollUKApi = new PayrollUkApi();
-var response = await PayrollUKApi.GetEmployeesAsync(accessToken, xeroTenantId);
-return response._Employees;
-</pre>
-<br>
-<p>
-  <button class="btn btn-link" onclick="location.href='@Url.Action("Index", "Home")'">Home</button>
-</p>
-<br>
-<br>
-<br>

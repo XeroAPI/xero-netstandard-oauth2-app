@@ -1,51 +1,38 @@
 @model dynamic
 
 <h2>Xero Folders</h2>
-</br>
-<table class="table table-responsive fixed-table-body">
-  <tr>
-    <th>Folder Name</th>
-    <th>FileCount</th>
-    <th>Email</th>
-    <th>Is Inbox?</th>
-    <th>Id</th>
-    <th>Update</th>
-    <th>Delete</th>
-  </tr>
-  @for(int i = 0; i < Model.Count; i++) {
+
+<table class="table table-responsive-lg">
     <tr>
-      <td>@Model[i].Name</td>
-      <td>@Model[i].FileCount.ToString()</td>
-      <td>@Model[i].Email</td>
-      <td>@Model[i].IsInbox.ToString()</td>
-      <td>@Model[i].Id.ToString()</td>
-      <td>
-        <button class= "btn btn-primary" onclick="location.href='@Url.Action("Modify", "FoldersSync", new { folderId = @Model[i].Id, folderName = @Model[i].Name })'">Rename</button>
-      </td>
-      <td>
-        <button class= "btn btn-primary" onclick="location.href='@Url.Action("Delete", "FoldersSync", new { folderId = @Model[i].Id })'">Delete</button>
-      </td>
+        <th>Folder Name</th>
+        <th>File Count</th>
+        <th>Email</th>
+        <th>Id</th>
+        <th>Rename</th>
+        <th>Delete</th>
     </tr>
-  }
+    @for(int i = 0; i < Model.Count; i++) {
+        <tr>
+            <td>@Model[i].Name</td>
+            <td>@Model[i].FileCount.ToString()</td>
+            <td>@Model[i].Email</td>
+            <td>@Model[i].Id.ToString().Substring(0,8)</td>
+            <td>
+                <button class="btn btn-link" disabled="@Model[i].IsInbox" onclick="location.href='@Url.Action("Modify", new { folderId = @Model[i].Id })'">Rename</button>
+            </td>
+            <td>
+                <button class= "btn btn-danger" disabled="@Model[i].IsInbox" onclick="location.href='@Url.Action("Delete", new { folderId = @Model[i].Id })'">Delete</button>
+            </td>
+        </tr>
+    }
 </table>
 
-<br>
-<p><b>Raw JSON Response:</b></p>
-<textarea class="form-control" readonly style="height: 350px">
-@ViewBag.jsonResponse;
-</textarea>
-<br>
-<p><b>Code Example:</b></p>
-<p>Get all Folders</p>
-<pre>
-// Assuming accessToken and xeroTenantId has been provided
-var FilesApi = new FilesApi();
-var response = await FilesApi.GetFoldersAsync(accessToken, xeroTenantId);
-</pre>
-<p>
-  <button class="btn btn-link" onclick="location.href='@Url.Action("Index", "Home")'">Home</button>
-</p>
+<hr />
+<br />
 
-<br>
-<br>
-<br>
+@*
+    Raw JSON Response
+*@
+
+<p class="h5">Raw JSON Response:</p>
+<textarea class="form-control" readonly style="height: 350px">@ViewBag.jsonResponse</textarea>

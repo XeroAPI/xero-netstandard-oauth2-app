@@ -2,29 +2,51 @@
 
 <h2>Xero User Activities</h2>
 
-<p><b>Raw JSON Response:</b></p>
-<textarea class="form-control" readonly style="height: 350px">
-@ViewBag.jsonResponse;
-</textarea>
-<br>
-<p><b>Code Example:</b></p>
-<p>For a specified organisation, provides a list of all the users registered, and a history of their accounting transactions. Also identifies the existence of an external accounting advisor and the level of interaction.</p>
-<pre>
-// Assuming accessToken and xeroTenantId has been provided
+<table class="table table-responsive-lg">
+    <tr>
+        <th>Organisation Id</th>
+        <th>Data Month</th>
+    </tr>
 
-var FinanceApi = new FinanceApi();
+    <tr>
+        <td>@Model.OrganisationId</td>
+        <td>@Model.DataMonth</td>
+    </tr>
+    
+</table>
 
-var response = await FinanceApi.GetAccountingActivityUserActivitiesAsync(
-  accessToken,
-  xeroTenantId,
-  null
-  );
+<br/>
 
-ViewBag.jsonResponse = response.ToJson();
+<p class="h5">Users</p>
 
-return View(response);
-</pre>
-<br>
-<p>
-  <button class="btn btn-link" onclick="location.href='@Url.Action("Index", "Home")'">Home</button>
-</p>
+<table class="table table-responsive-lg">
+    <tr>
+        <th>Name</th>
+        <th>User Created</th>
+        <th>Last Login</th>
+        <th>Is External Partner</th>
+        <th>Has Accountant Role</th>
+        <th>Number of Logins</th>
+    </tr>
+    @foreach (var user in Model.Users)
+    {
+        <tr>
+            <td>@user.UserId.ToString().Substring(0,8)</td>
+            <td>@user.UserCreatedDateUtc.ToString("d/MM/yy")</td>
+            <td>@user.LastLoginDateUtc.ToString("d/MM/yy")</td>
+            <td>@user.IsExternalPartner</td>
+            <td>@user.HasAccountantRole</td>
+            <td>@user.NumberOfLogins</td>
+        </tr>
+    }
+</table>
+
+<hr/>
+<br/>
+
+@*
+    Raw JSON Response
+*@
+
+<p class="h5">Raw JSON Response:</p>
+<textarea class="form-control" readonly style="height: 350px">@ViewBag.jsonResponse</textarea>

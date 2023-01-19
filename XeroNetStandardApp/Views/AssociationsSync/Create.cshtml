@@ -1,52 +1,40 @@
 @model dynamic
 
 <h2>Create Association</h2>
+
 <form method="POST">
     <label for="fileId">File ID:</label>
-    <br>
+    
+    <br/>
+
     <select id="fileId" name="fileId">
     @foreach (var fileId in Model) {
-    <option value=@fileId>@fileId</option>
+        <option value=@fileId>@fileId</option>
     }
+    
     </select>
-    <br>
+    
+    <br/>
+    
     <label for="invoiceId">Invoice ID:</label>
-    <br>
+    
+    <br/>
+    
     <select id="invoiceId" name="invoiceId">
-    @foreach (var invoiceId in ViewBag.invoiceIds) {
-    <option value=@invoiceId>@invoiceId</option>
-    }
+        @foreach (var invoiceId in ViewBag.invoiceIds) {
+            <option value=@invoiceId>@invoiceId</option>
+        }
     </select>
-    <br>
+    
+    <br/>
+    
     <label for="objectType">Object Type:</label>
-    <br>
+    
+    <br/>
+    
     <input class="form-control" type="text" id="objectType" placeholder="Enter object type" name="objectType" required />
-    <br>
+    
+    <br/>
 
     <input class="btn btn-primary" type="submit" />
 </form>
-<hr>
-
-<p><b>Code Example:</b></p>
-<p>Create New Association</p>
-<pre>
-// Assuming accessToken and xeroTenantId has been provided
-var FilesApi = new FilesApi();
-
-var fileIdGuid = new Guid(fileId);
-var invoiceIdGuid = new Guid(invoiceId);
-Enum.TryParse&#60;ObjectType>(objectType, out var objectTypeEnum);
-
-Association association = new Association{
-    FileId = fileIdGuid,
-    ObjectId = invoiceIdGuid,
-    ObjectType = objectTypeEnum,
-    ObjectGroup = ObjectGroup.Invoice
-};
-
-var response = await FilesApi.CreateFileAssociationAsync(accessToken, xeroTenantId, fileIdGuid, association);
-</pre>
-<br>
-<p>
-  <button class="btn btn-link" onclick="location.href='@Url.Action("Index", "Home")'">Home</button>
-</p>

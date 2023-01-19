@@ -1,0 +1,45 @@
+﻿@model dynamic
+
+<h2>@Model.Item1.Name Time Entries</h2>
+
+<table class="table table-responsive-lg">
+    <tr>
+        <th>Task Name</th>
+        <th>User</th>
+        <th>Duration</th>
+        <th>Status</th>
+        <th>Edit</th>
+        <th>Delete</th>
+    </tr>
+    @foreach (var item in Model.Item2)
+    {
+        <tr>
+            <td>@item.TaskName</td>
+            <td>@item.UserName</td>
+            <td>@item.Data.Duration</td>
+            <td>@item.Data.Status.ToString()</td>
+            <td>
+                <button class="btn btn-primary" onclick="location.href='@Url.Action("UpdateTimeEntry", new { @Model.Item1.ProjectId, @item.Data.TimeEntryId })'">Edit</button>
+            </td>
+            <td>
+                <button class="btn btn-danger" onclick="location.href='@Url.Action("DeleteTimeEntry", new { @Model.Item1.ProjectId, @item.Data.TimeEntryId })'">Delete</button>
+            </td>
+        </tr>
+    }
+</table>
+
+<hr/>
+
+@*
+    Raw JSON Response
+*@
+
+<p class="h5">Raw JSON Response:</p>
+<textarea class="form-control" readonly style="height: 350px">
+@ViewBag.jsonResponse
+</textarea>
+
+<br />
+<br/>
+
+<button class="btn btn-link" onclick="location.href='@Url.Action("GetProjects", "ProjectInfo")'">Back</button>

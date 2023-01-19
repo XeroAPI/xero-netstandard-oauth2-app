@@ -1,0 +1,32 @@
+﻿@model dynamic
+
+<h2>Xero Accounts</h2>
+
+<table class="table table-responsive-lg">
+    <tr>
+        <th>Name</th>
+        <th>Code</th>
+        <th>Type</th>
+        <th>Tax Rate</th>
+        <th>CurrencyCode</th>
+    </tr>
+    @foreach (var account in Model) {
+        <tr>
+            <td>@account.Name</td>
+            <td>@account.Code</td>
+            <td>@account.Type.ToString()</td>
+            <td>@account.TaxType.ToString()</td>
+            <td>@account.CurrencyCode.ToString()</td>
+        </tr>
+    }
+</table>
+
+<hr/>
+<br/>
+
+@*
+    Raw JSON Response
+*@
+
+<p class="h5">Raw JSON Response:</p>
+<textarea class="form-control" readonly style="height: 350px">@ViewBag.jsonResponse</textarea>

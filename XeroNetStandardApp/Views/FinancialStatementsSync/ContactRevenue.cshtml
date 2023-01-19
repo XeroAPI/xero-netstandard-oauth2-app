@@ -2,30 +2,49 @@
 
 <h2>Xero Contact Revenue</h2>
 
-<p><b>Raw JSON Response:</b></p>
-<textarea class="form-control" readonly style="height: 350px">
-@ViewBag.jsonResponse;
-</textarea>
-<br>
-<p><b>Code Example:</b></p>
-<p>Requesting for revenue by contact report for the past 12 months excluding manual journals</p>
-<pre>
-// Assuming accessToken and xeroTenantId has been provided
+@*
+    Income by Contact Response Details
+*@
 
-var FinanceApi = new FinanceApi();
+<p class="h5">Contact Revenue Details:</p>
 
-var response = await FinanceApi.GetFinancialStatementContactsRevenueAsync(
-  accessToken,
-  xeroTenantId,
-  null,
-  null,
-  null,
-  null
-  );
+<table class="table table-responsive-lg">
+    <tr>
+        <th>Start Date</th>
+        <th>End Date</th>
+        <th>Total</th>
+    </tr>
+    <tr>
+        <td>@Model.StartDate.ToString("d/MM/yy")</td>
+        <td>@Model.EndDate.ToString("d/MM/yy")</td>
+        <td>@Model.Total</td>
+    </tr>
+</table>
 
-return response;
-</pre>
-<br>
-<p>
-  <button class="btn btn-link" onclick="location.href='@Url.Action("Index", "Home")'">Home</button>
-</p>
+<br/>
+
+<p class="h5">Associated Contacts:</p>
+
+<table class="table table-responsive-lg">
+    <tr>
+        <th>Name</th>
+        <th>Total</th>
+    </tr>
+    @foreach(var contact in Model.Contacts)
+{
+    <tr>
+        <td>@contact.Name</td>
+        <td>@contact.Total</td>
+    </tr>
+}
+</table>
+
+<hr />
+<br />
+
+@*
+    Raw JSON Response
+*@
+
+<p class="h5">Raw JSON Response:</p>
+<textarea class="form-control" readonly style="height: 350px">@ViewBag.jsonResponse</textarea>

@@ -1,36 +1,24 @@
 ﻿@model dynamic
 
 <h2>Pay Items</h2>
-<table class="table table-responsive fixed-table-body">
-  <tr>
-    <th>Name</th>
-  </tr>
-  @foreach (var item in Model)
-  {
+<table class="table table-responsive-lg">
     <tr>
-      <td>@item</td>
+        <th>Name</th>
     </tr>
-  }
+    @foreach (var item in Model)
+    {
+        <tr>
+            <td>@item</td>
+        </tr>
+    }
 </table>
-<hr>
 
-<br>
-<p><b>Raw JSON Response:</b></p>
-<textarea class="form-control" readonly style="height: 350px">
-  @ViewBag.jsonResponse;
-</textarea>
-<br>
-<p><b>Code Example:</b></p>
-<p>Get all pay items</p>
-<pre>
-// Assuming accessToken and xeroTenantId has been provided
-var PayrollAUApi = new PayrollAuApi();
+<hr />
+<br />
 
-var response = await PayrollAUApi.GetPayItemsAsync(accessToken, xeroTenantId);
-var payItems = response._PayItems();
-</pre>
-<button class="btn btn-link" onclick="location.href='@Url.Action("Index", "Home")'">Home</button>
+@*
+    Raw JSON Response
+*@
 
-<br>
-<br>
-<br>
+<p class="h5">Raw JSON Response:</p>
+<textarea class="form-control" readonly style="height: 350px">@ViewBag.jsonResponse</textarea>

@@ -11,16 +11,9 @@ namespace XeroNetStandardApp.Controllers
     /// Controller implementing methods demonstrating following asset endpoints:
     /// <para>- GET: /Assets</para>
     /// </summary>
-    public class AssetsInfo : Controller
+    public class AssetsInfo : ApiAccessorController<AssetApi>
     {
-        private readonly IOptions<XeroConfiguration> _xeroConfig;
-        private readonly AssetApi _assetApi;
-
-        public AssetsInfo(IOptions<XeroConfiguration> xeroConfig)
-        {
-            _xeroConfig = xeroConfig;
-            _assetApi = new AssetApi();
-        }
+        public AssetsInfo(IOptions<XeroConfiguration> xeroConfig):base(xeroConfig){}
 
         #region GET Endpoints
 
@@ -28,14 +21,10 @@ namespace XeroNetStandardApp.Controllers
         /// GET: /Assets/
         /// </summary>
         /// <returns>Returns list of assets</returns>
-        public async Task<ActionResult> Index()
+        public async Task<IActionResult> Index()
         {
-            // Token and TenantId setup
-            var xeroToken = await TokenUtilities.GetXeroOAuth2Token(_xeroConfig.Value);
-            var xeroTenantId = TokenUtilities.GetXeroTenantId(xeroToken);
-
             // Call get assets endpoint
-            var response = await _assetApi.GetAssetsAsync(xeroToken.AccessToken, xeroTenantId, AssetStatusQueryParam.DRAFT);
+            var response = await Api.GetAssetsAsync(XeroToken.AccessToken, TenantId, AssetStatusQueryParam.DRAFT);
 
             ViewBag.jsonResponse = response.ToJson();
             return View(response.Items);
@@ -63,12 +52,8 @@ namespace XeroNetStandardApp.Controllers
         /// <param name="number"></param>
         /// <returns>Returns action result redirecting user to get assets page</returns>
         [HttpPost]
-        public async Task<ActionResult> Create(string name, string number)
+        public async Task<IActionResult> Create(string name, string number)
         {
-            // Token and TenantId setup
-            var xeroToken = await TokenUtilities.GetXeroOAuth2Token(_xeroConfig.Value);
-            var xeroTenantId = TokenUtilities.GetXeroTenantId(xeroToken);
-
             // Construct asset object
             var asset = new Asset
             {
@@ -77,7 +62,7 @@ namespace XeroNetStandardApp.Controllers
             };
 
             // Call create asset endpoint
-            await _assetApi.CreateAssetAsync(xeroToken.AccessToken, xeroTenantId, asset);
+            await Api.CreateAssetAsync(XeroToken.AccessToken, TenantId, asset);
 
             return RedirectToAction("Index", "AssetsInfo");
         }

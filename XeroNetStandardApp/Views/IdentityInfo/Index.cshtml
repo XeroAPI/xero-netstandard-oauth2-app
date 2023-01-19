@@ -2,47 +2,39 @@
 
 <h2>Xero Connections</h2>
 
-<table class="table table-responsive fixed-table-body">
-  <tr>
-    <th>Connection ID</th>
-    <th>Tenant ID</th>
-    <th>Tenant Type</th>
-    <th>Tenant Name</th>
-    <th>Created Date (UTC)</th>
-    <th>Updated Date (UTC)</th>
-    <th>Delete this Connection Using Connection Id</th>
-  </tr>
-  @foreach (var connection in Model) {
+<table class="table table-responsive-lg">
     <tr>
-      <td>@connection.Id</td>
-      <td>@connection.TenantId</td>
-      <td>@connection.TenantType</td>
-      <td>@connection.TenantName</td>
-      <td>@connection.CreatedDateUtc</td>
-      <td>@connection.UpdatedDateUtc</td>
-      <td>
-        <button class= "btn btn-primary" onclick="location.href='@Url.Action("Delete", "IdentityInfo", new { connectionId = @connection.Id })'">Delete</button>
-      </td>
+        <th>Tenant Name</th>
+        <th>Connection ID</th>
+        <th>Tenant ID</th>
+        <th>Tenant Type</th>
+        <th>Created Date</th>
+        <th>Updated Date</th>
+        <th>Delete Connection</th>
     </tr>
+  @foreach (var connection in Model) {
+      <tr>
+          <td>@connection.TenantName</td>
+          <td>@connection.Id.ToString().Substring(0, 8)</td>
+          <td>@connection.TenantId.ToString().Substring(0, 8)</td>
+          <td>@connection.TenantType</td>
+
+          <td>
+              @connection.CreatedDateUtc.ToString("d/M/yy")</td>
+          <td>@connection.UpdatedDateUtc.ToString("d/M/yy")</td>
+          <td>
+              <button class="btn btn-danger" onclick="location.href='@Url.Action("Delete", "IdentityInfo", new { connectionId = @connection.Id })'">Delete</button>
+          </td>
+      </tr>
   }
 </table>
-<br>
-<p><b>Raw JSON Response:</b></p>
-<textarea class="form-control" readonly style="height: 350px">
-@ViewBag.jsonResponse;
-</textarea>
-<br>
-<p><b>Code Example:</b></p>
-<p>Get all Xero Connections</p>
-<pre>
-// Assuming accessToken and xeroTenantId has been provided
-var IdentityApi = new IdentityApi();
-return await IdentityApi.GetConnectionsAsync(accessToken);
-</pre>
-<br>
-<p>
-  <button class="btn btn-link" onclick="location.href='@Url.Action("Index", "Home")'">Home</button>
-</p>
-<br>
-<br>
-<br>
+
+<hr />
+<br />
+
+@*
+    Raw JSON Response
+*@
+
+<p class="h5">Raw JSON Response:</p>
+<textarea class="form-control" readonly style="height: 350px">@ViewBag.jsonResponse</textarea>

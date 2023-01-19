@@ -12,28 +12,18 @@ namespace XeroNetStandardApp.Controllers
     /// <para>- GET: /IdentityInfo/</para>
     /// <para>- GET: /Contacts#Delete</para>
     /// </summary>
-    public class IdentityInfo : Controller
+    public class IdentityInfo : ApiAccessorController<IdentityApi>
     {
-        private readonly IOptions<XeroConfiguration> _xeroConfig;
-        private readonly IdentityApi _identityApi;
-
-        public IdentityInfo(IOptions<XeroConfiguration> xeroConfig)
-        {
-            _xeroConfig = xeroConfig;
-            _identityApi = new IdentityApi();
-        }
+        public IdentityInfo(IOptions<XeroConfiguration> xeroConfig):base(xeroConfig){}
 
         /// <summary>
         /// GET: /IdentityInfo/
         /// </summary>
         /// <returns>Returns a list of connections</returns>
-        public async Task<ActionResult> Index()
+        public async Task<IActionResult> Index()
         {
-            // Token setup
-            var xeroToken = await TokenUtilities.GetXeroOAuth2Token(_xeroConfig.Value);
-            
             // Call get connections endpoint
-            var response = await _identityApi.GetConnectionsAsync(xeroToken.AccessToken);
+            var response = await Api.GetConnectionsAsync(XeroToken.AccessToken);
 
             response.ForEach(connection => ViewBag.jsonResponse += connection.ToJson());
             return View(response);
@@ -45,13 +35,10 @@ namespace XeroNetStandardApp.Controllers
         /// <param name="connectionId">Id of connection to delete</param>
         /// <returns>Returns action result to redirect user to get connections page</returns>
         [HttpGet]
-        public async Task<ActionResult> Delete(string connectionId)
+        public async Task<IActionResult> Delete(string connectionId)
         {
-            // Token setup
-            var xeroToken = await TokenUtilities.GetXeroOAuth2Token(_xeroConfig.Value);
-
             // Call delete connection endpoint
-            await _identityApi.DeleteConnectionAsync(xeroToken.AccessToken, Guid.Parse(connectionId));
+            await Api.DeleteConnectionAsync(XeroToken.AccessToken, Guid.Parse(connectionId));
 
             return RedirectToAction("Index", "IdentityInfo");
         }

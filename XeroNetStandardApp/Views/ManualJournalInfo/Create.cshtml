@@ -3,72 +3,18 @@
 
 <h2>Create Manual Journals</h2>
 <form method="POST">
-  <label for="narration">Narration:</label>
-  <br>
-  <input class="form-control" type="text" id="narration" placeholder="" name="narration" />
-  <br>
-  <label for="taxType">Tax Type:</label>
-  <br>
-  <select name="taxType">
-      @foreach (var taxType in Enum.GetValues(typeof(TaxType))){
-        <option value=@taxType selected="@(taxType.ToString() == "NONE")">@taxType</option>
-    }
-  </select>
-  <br>
-  <br>
-  <input class="btn btn-primary" type="submit" />
+    <label for="narration">Narration:</label>
+    <br>
+    <input class="form-control" type="text" id="narration" placeholder="" name="narration" />
+    <br>
+    <label for="taxType">Tax Type:</label>
+    <br>
+    <select name="taxType">
+        @foreach (var taxType in Enum.GetValues(typeof(TaxType))){
+            <option value=@taxType selected="@(taxType.ToString() == "NONE")">@taxType</option>
+        }
+    </select>
+    <br>
+    <br>
+    <input class="btn btn-primary" type="submit" />
 </form>
-<hr>
-
-<br>
-<p><b>Code Example:</b></p>
-<p>Post Manual Journals</p>
-<pre>
-// Assuming accessToken and xeroTenantId has been provided
-
-// Creates two journal lines
-var manualJournalLines = new List<ManualJournalLine>();
-
-var credit = new ManualJournalLine
-{
-
-    LineAmount = new decimal(100.0),
-    AccountCode = "400",
-    Description = "Credit",
-    Tracking = new List<TrackingCategory>(),
-    TaxType = taxType
-};
-manualJournalLines.Add(credit);
-
-var debit = new ManualJournalLine
-{
-    LineAmount = new decimal(-100.0),
-    AccountCode = "120",
-    Description = "Debit",
-    TaxType = taxType
-};
-manualJournalLines.Add(debit);
-
-// Create manual journal
-ManualJournal manualJournal = new ManualJournal{
-    Narration = narration,
-    JournalLines = manualJournalLines,
-    Date = DateTime.Today
-};
-
-// Create list and attach manual journal
-// To bulk add manual journals, just add the additional manual journals to the list
-var manualJournals = new ManualJournals();
-var manualJournalsList = new List<ManualJournal>();
-manualJournalsList.Add(manualJournal);
-manualJournals._ManualJournals = manualJournalsList;
-
-var AccountingApi = new AccountingApi();
-await AccountingApi.CreateManualJournalsAsync(accessToken, xeroTenantId, manualJournals, null);
-
-</pre>
-<button class="btn btn-link" onclick="location.href='@Url.Action("Index", "Home")'">Home</button>
-
-<br>
-<br>
-<br>

@@ -1,0 +1,37 @@
+﻿@model dynamic
+
+<h2>Create a Xero Project Task</h2>
+
+<br/>
+
+@*
+    Create Task Form
+*@
+
+<form method="POST">
+    <label name="ProjectId" value="@Model.ProjectId"></label>
+    <label name="CurrencyCode" value="@Model.CurrencyCode"></label>
+    <label>Task Name:</label>
+    <input class="form-control" type="text" id="taskName" placeholder="Enter new name for the task for the selected project" name="taskName" required/>
+    <br/>
+    <label>Task Rate:</label>
+    <input class="form-control" type="number" step="any" id="taskRate" placeholder="What is the rate for this task?" name="taskRate" required/>
+    <br/>
+    <label>Estimate Minute:</label>
+    <input class="form-control" type="number" step="any" id="estimateMinute" placeholder="Enter estimated minute required for this task" name="estimateMinute" required/>
+    <br/>
+    <label>Task Charge Type:</label>
+    <br/>
+    <select id="taskChargeType" name="taskChargeType" required>
+        <option value="TIME">Per Hour</option>
+        <option value="FIXED">Fixed</option>
+        <option value="NONCHARGEABLE">Non-Chargeable</option>
+    </select>
+    <br/>
+    <br/>
+    <input class="btn btn-primary" type="submit"/>
+</form>
+
+
+<br />
+<button class="btn btn-link" onclick="location.href='@Url.Action("GetProjects", "ProjectInfo")'">Back</button>

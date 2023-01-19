@@ -13,16 +13,9 @@ namespace XeroNetStandardApp.Controllers
     /// <para>- GET: /NzEmployeesInfo#Index</para>
     /// <para>- POST: /NzEmployeesInfo#Create</para>
     /// </summary>
-    public class NzEmployeesInfo : Controller
+    public class NzEmployeesInfo : ApiAccessorController<PayrollNzApi>
     {
-        private readonly IOptions<XeroConfiguration> _xeroConfig;
-        private readonly PayrollNzApi _payrollNzApi;
-
-        public NzEmployeesInfo(IOptions<XeroConfiguration> xeroConfig)
-        {
-            _xeroConfig = xeroConfig;
-            _payrollNzApi = new PayrollNzApi();
-        }
+        public NzEmployeesInfo(IOptions<XeroConfiguration> xeroConfig):base(xeroConfig){}
 
         #region GET Endpoints
 
@@ -30,14 +23,10 @@ namespace XeroNetStandardApp.Controllers
         /// GET: /NzEmployeesInfo#Index
         /// </summary>
         /// <returns>Returns list of NZ employees</returns>
-        public async Task<ActionResult> Index()
+        public async Task<IActionResult> Index()
         {
-            // Token and TenantId setup
-            var xeroToken = await TokenUtilities.GetXeroOAuth2Token(_xeroConfig.Value);
-            var xeroTenantId = TokenUtilities.GetXeroTenantId(xeroToken);
-
             // Call get employees endpoint
-            var employees = await _payrollNzApi.GetEmployeesAsync(xeroToken.AccessToken, xeroTenantId);
+            var employees = await Api.GetEmployeesAsync(XeroToken.AccessToken, TenantId);
             ViewBag.jsonResponse = employees.ToJson();
 
             return View(employees._Employees);
@@ -64,14 +53,10 @@ namespace XeroNetStandardApp.Controllers
         /// <param name="lastName">Lastname of employee to create</param>
         /// <returns>Return action result to redirect user to get employees page</returns>
         [HttpPost]
-        public async Task<ActionResult> Create(string firstName, string lastName)
+        public async Task<IActionResult> Create(string firstName, string lastName)
         {
-            // Token and TenantId setup
-            var xeroToken = await TokenUtilities.GetXeroOAuth2Token(_xeroConfig.Value);
-            var xeroTenantId = TokenUtilities.GetXeroTenantId(xeroToken);
-
             // Call create employee endpoint
-            await _payrollNzApi.CreateEmployeeAsync(xeroToken.AccessToken, xeroTenantId, ConstructEmployee(firstName, lastName));
+            await Api.CreateEmployeeAsync(XeroToken.AccessToken, TenantId, ConstructEmployee(firstName, lastName));
 
             return RedirectToAction("Index", "NzEmployeesInfo");
         }
@@ -86,21 +71,21 @@ namespace XeroNetStandardApp.Controllers
         /// <returns></returns>
         private Employee ConstructEmployee(string firstName, string lastName)
         {
-            Address homeAddress = new Address
+            var homeAddress = new Address
             {
                 AddressLine1 = "123 Mock Address",
                 City = "Mock City",
                 PostCode = "1234"
             };
 
-            Employee employee = new Employee
+            var employee = new Employee
             {
                 FirstName = firstName,
                 LastName = lastName,
                 DateOfBirth = DateTime.Today.AddYears(-20),
                 Address = homeAddress,
                 Gender = Employee.GenderEnum.M,
-                Title = "worker"
+
             };
 
             return employee;

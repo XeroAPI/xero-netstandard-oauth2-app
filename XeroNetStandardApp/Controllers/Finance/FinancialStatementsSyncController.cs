@@ -15,31 +15,18 @@ namespace XeroNetStandardApp.Controllers
     /// <para>- GET: /ProfitAndLoss/</para>
     /// <para>- GET: /TrialBalance/</para>
     /// </summary>
-    public class FinancialStatementsSync : Controller
+    public class FinancialStatementsSync : ApiAccessorController<FinanceApi>
     {
-        private readonly IOptions<XeroConfiguration> _xeroConfig;
-        private readonly FinanceApi _financeApi;
-
-        public FinancialStatementsSync(IOptions<XeroConfiguration> xeroConfig)
-        {
-            _xeroConfig = xeroConfig;
-            _financeApi = new FinanceApi();
-        }
-
+        public FinancialStatementsSync(IOptions<XeroConfiguration> xeroConfig):base(xeroConfig){}
 
         /// <summary>
         /// GET: /BalanceSheet/
         /// </summary>
         /// <returns>Returns a list of financial statement balance sheets</returns>
-        public async Task<ActionResult> BalanceSheet()
+        public async Task<IActionResult> BalanceSheet()
         {
-            // Token and TenantId setup
-            var xeroToken = await TokenUtilities.GetXeroOAuth2Token(_xeroConfig.Value);
-            var xeroTenantId = TokenUtilities.GetXeroTenantId(xeroToken);
-
-
             // Call get financial statement balance sheets endpoint
-            var response = await _financeApi.GetFinancialStatementBalanceSheetAsync(xeroToken.AccessToken, xeroTenantId);
+            var response = await Api.GetFinancialStatementBalanceSheetAsync(XeroToken.AccessToken, TenantId);
 
             ViewBag.jsonResponse = response.ToJson();
             return View(response);
@@ -50,14 +37,10 @@ namespace XeroNetStandardApp.Controllers
         /// GET: /Cashflow/
         /// </summary>
         /// <returns>Returns list of financial statement cash flows</returns>
-        public async Task<ActionResult> Cashflow()
+        public async Task<IActionResult> Cashflow()
         {
-            // Token and TenantId setup
-            var xeroToken = await TokenUtilities.GetXeroOAuth2Token(_xeroConfig.Value);
-            var xeroTenantId = TokenUtilities.GetXeroTenantId(xeroToken);
-
             // Call get financial statement cash flow endpoint
-            var response = await _financeApi.GetFinancialStatementCashflowAsync(xeroToken.AccessToken, xeroTenantId);
+            var response = await Api.GetFinancialStatementCashflowAsync(XeroToken.AccessToken, TenantId);
 
             ViewBag.jsonResponse = response.ToJson();
             return View(response);
@@ -68,14 +51,10 @@ namespace XeroNetStandardApp.Controllers
         /// GET: /ContactExpense/
         /// </summary>
         /// <returns>Returns a list of financial statement contacts expenses</returns>
-        public async Task<ActionResult> ContactExpense()
+        public async Task<IActionResult> ContactExpense()
         {
-            // Token and TenantId setup
-            var xeroToken = await TokenUtilities.GetXeroOAuth2Token(_xeroConfig.Value);
-            var xeroTenantId = TokenUtilities.GetXeroTenantId(xeroToken);
-
             // Call get financial statement contacts expenses endpoint
-            var response = await _financeApi.GetFinancialStatementContactsExpenseAsync(xeroToken.AccessToken, xeroTenantId);
+            var response = await Api.GetFinancialStatementContactsExpenseAsync(XeroToken.AccessToken, TenantId);
 
             ViewBag.jsonResponse = response.ToJson();
             return View(response);
@@ -86,14 +65,10 @@ namespace XeroNetStandardApp.Controllers
         /// GET: /ContactRevenue/
         /// </summary>
         /// <returns>Returns a list of financial statement contacts revenue</returns>
-        public async Task<ActionResult> ContactRevenue()
+        public async Task<IActionResult> ContactRevenue()
         {
-            // Token and TenantId setup
-            var xeroToken = await TokenUtilities.GetXeroOAuth2Token(_xeroConfig.Value);
-            var xeroTenantId = TokenUtilities.GetXeroTenantId(xeroToken);
-
             // Call get financial statement contacts revenue endpoint
-            var response = await _financeApi.GetFinancialStatementContactsRevenueAsync(xeroToken.AccessToken, xeroTenantId);
+            var response = await Api.GetFinancialStatementContactsRevenueAsync(XeroToken.AccessToken, TenantId);
 
             ViewBag.jsonResponse = response.ToJson();
             return View(response);
@@ -104,35 +79,26 @@ namespace XeroNetStandardApp.Controllers
         /// GET: /ProfitAndLoss/
         /// </summary>
         /// <returns></returns>
-        public async Task<ActionResult> ProfitAndLoss()
+        public async Task<IActionResult> ProfitAndLoss()
         {
-            // Token and TenantId setup
-            var xeroToken = await TokenUtilities.GetXeroOAuth2Token(_xeroConfig.Value);
-            var xeroTenantId = TokenUtilities.GetXeroTenantId(xeroToken);
-
-            // Call get finanical statement profit and loss endpoint
-            var response = await _financeApi.GetFinancialStatementProfitAndLossAsync(xeroToken.AccessToken, xeroTenantId);
+            // Call get financial statement profit and loss endpoint
+            var response = await Api.GetFinancialStatementProfitAndLossAsync(XeroToken.AccessToken, TenantId);
 
             ViewBag.jsonResponse = response.ToJson();
             return View(response);
         }
-
-
+        
         /// <summary>
         /// GET: /TrialBalance/
         /// </summary>
         /// <returns></returns>
-        public async Task<ActionResult> TrialBalance()
+        public async Task<IActionResult> TrialBalance()
         {
-            // Token and TenantId setup
-            var xeroToken = await TokenUtilities.GetXeroOAuth2Token(_xeroConfig.Value);
-            var xeroTenantId = TokenUtilities.GetXeroTenantId(xeroToken);
-
             // Call get financial statement trial balance endpoint
-            var response = await _financeApi.GetFinancialStatementTrialBalanceAsync(xeroToken.AccessToken, xeroTenantId);
+            var trialBalanceResponse = await Api.GetFinancialStatementTrialBalanceAsync(XeroToken.AccessToken, TenantId);
 
-            ViewBag.jsonResponse = response.ToJson();
-            return View(response);
+            ViewBag.jsonResponse = trialBalanceResponse.ToJson();
+            return View(trialBalanceResponse);
         }
     }
 }

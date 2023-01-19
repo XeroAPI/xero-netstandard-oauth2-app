@@ -2,54 +2,42 @@
 
 <h2>Xero Bank Feed Connections</h2>
 
-<table class="table table-responsive fixed-table-body">
-  <tr>
-    <th>Connection ID</th>
-    <th>Account Token</th>
-    <th>Account Type</th>
-    <th>Account Number</th>
-    <th>Account Name</th>
-    <th>Account ID</th>
-    <th>Currency</th>
-    <th>Country</th>
-    <th>Delete</th>
-  </tr>
-  @foreach (var item in Model) {
+<table class="table table-responsive-lg">
     <tr>
-      <td>@item.Id.ToString()</td>
-      <td>@item.AccountToken</td>
-      <td>@item.AccountType.ToString()</td>
-      <td>@item.AccountNumber</td>
-      <td>@item.AccountName</td>
-      <td>@item.AccountId</td>
-      <td>@item.Currency</td>
-      <td>@item.Country</td>
-      <td>
-      <button class= "btn btn-primary" onclick="location.href='@Url.Action("Delete", "BankfeedConnections", new { bankfeedConnectionId = @item.Id })'">Delete</button>
-      </td>
+        <th>Connection ID</th>
+        <th>Account Token</th>
+        <th>Account Type</th>
+        <th>Account Number</th>
+        <th>Account Name</th>
+        <th>Account ID</th>
+        <th>Currency</th>
+        <th>Country</th>
+        <th>Delete</th>
     </tr>
+    @foreach (var item in Model) {
+        <tr>
+            <td>@item.Id.ToString().Substring(0,8)</td>
+            <td>@item.AccountToken</td>
+            <td>@item.AccountType.ToString()</td>
+            <td>@item.AccountNumber</td>
+            <td>@item.AccountName</td>
+            <td>@item.AccountId.ToString().Substring(0,8)</td>
+            <td>@item.Currency</td>
+            <td>@item.Country</td>
+            <td>
+                <button class= "btn btn-primary" onclick="location.href='@Url.Action("Delete", new { bankfeedConnectionId = @item.Id })'">Delete</button>
+            </td>
+        </tr>
 
-  }
+    }
 </table>
 
-<br>
-<p><b>Raw JSON Response:</b></p>
-<textarea class="form-control" readonly style="height: 350px">
-@ViewBag.jsonResponse;
-</textarea>
-<br>
-<p><b>Code Example:</b></p>
-<p>Getting all Feed Connections</p>
-<pre>
-  // Assuming accessToken and xeroTenantId has been provided
-  var BankFeedsApi = new BankFeedsApi();
-  var response = await BankFeedsApi.GetFeedConnectionsAsync(accessToken, xeroTenantId);
-  return response.Items;
-</pre>
-<p>
-  <button class="btn btn-link" onclick="location.href='@Url.Action("Index", "Home")'">Home</button>
-</p>
+<hr />
+<br />
 
-<br>
-<br>
-<br>
+@*
+    Raw JSON Response
+*@
+
+<p class="h5">Raw JSON Response:</p>
+<textarea class="form-control" readonly style="height: 350px">@ViewBag.jsonResponse</textarea>
