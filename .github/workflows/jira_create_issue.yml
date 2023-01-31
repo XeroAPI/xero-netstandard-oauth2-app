@@ -10,4 +10,6 @@ jobs:
   create_jira_issue:
     uses: XeroAPI/Xero-NetStandard/.github/workflows/jira_create_issue.yml@master
     secrets:
-      envPAT: ${{ secrets.envPAT }}
+      JIRA_BASE_URL: ${{ secrets.JIRA_BASE_URL }}
+      JIRA_USER_EMAIL: ${{ secrets.JIRA_USER_EMAIL }}
+      JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
