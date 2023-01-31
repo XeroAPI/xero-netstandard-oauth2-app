@@ -3,13 +3,11 @@ on:
     types:
       - opened
       - reopened
-
 name: Create Issue In Jira
 
 jobs:
   create_jira_issue:
-    name: Create Jira Issue
+    uses: Xero-NetStandard/.github/workflows/jira_create_issue.yml@main
     runs-on: ubuntu-latest
     steps:
-    - name: create jira issue
-      uses: XeroAPI/Xero-NetStandard/.github/workflows/jira_create_issue.yml
+      - uses: actions/create_jira_issue
