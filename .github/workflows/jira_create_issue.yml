@@ -8,5 +8,5 @@ on:
 
 jobs:
   create_jira_issue:
-    uses: Xero-NetStandard/.github/workflows/jira_create_issue.yml@main
+    uses: actions/Xero-NetStandard/.github/workflows/jira_create_issue.yml@main
     
