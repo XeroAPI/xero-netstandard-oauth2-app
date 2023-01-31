@@ -1,0 +1,15 @@
+on:
+  issues:
+    types:
+      - opened
+      - reopened
+
+name: Create Issue In Jira
+
+jobs:
+  create_jira_issue:
+    name: Create Jira Issue
+    runs-on: ubuntu-latest
+    steps:
+    - name: create jira issue
+      uses: Xero-NetStandard/.github/workflows/jira_create_issue.yml
