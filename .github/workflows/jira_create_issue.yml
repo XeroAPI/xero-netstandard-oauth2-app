@@ -12,4 +12,4 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: create jira issue
-      uses: Xero-NetStandard/.github/workflows/jira_create_issue.yml
+      uses: XeroAPI/Xero-NetStandard/blob/master/.github/workflows/jira_create_issue.yml
