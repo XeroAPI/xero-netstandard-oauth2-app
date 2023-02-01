@@ -52,11 +52,14 @@ namespace XeroNetStandardApp.IO
         /// <param name="xeroToken">Xero OAuth2 token to save</param>
         public void StoreToken(XeroOAuth2Token xeroToken)
         {
-            if (File.Exists(TokenFilePath))
+
+            if (!File.Exists(TokenFilePath))
             {
-                var serializedToken = JsonSerializer.Serialize(xeroToken);
-                File.WriteAllText(TokenFilePath, serializedToken);
+                File.Create(TokenFilePath).Dispose();
             }
+
+            var serializedToken = JsonSerializer.Serialize(xeroToken);
+            File.WriteAllText(TokenFilePath, serializedToken);
         }
 
         /// <summary>
@@ -82,7 +85,7 @@ namespace XeroNetStandardApp.IO
                 tenantId = JsonSerializer.Deserialize<TenantIdModel>(serializedTenantId)?.CurrentTenantId;
             }
 
-            if (xeroToken.Tenants.All((t) => t.TenantId.ToString() != tenantId))
+            if (xeroToken.AccessToken != null && xeroToken.Tenants.All((t) => t.TenantId.ToString() != tenantId))
             {
                 tenantId = xeroToken.Tenants.First().TenantId.ToString();
                 StoreTenantId(tenantId);

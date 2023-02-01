@@ -19,13 +19,17 @@ namespace XeroNetStandardApp.ViewComponents
             var tokenIO = LocalStorageTokenIO.Instance;
 
             var xeroToken = tokenIO.GetToken();
-            var tenantId = Guid.Parse(tokenIO.GetTenantId());
 
-            ViewBag.OrgPickerCurrentTenantId = tenantId;
-            ViewBag.OrgPickerTenantList = xeroToken?.Tenants.Select(
-                t => new TenantDetails { TenantName = t.TenantName, TenantId = t.TenantId })
-                .ToList();
-            
+            var tenantId = tokenIO.GetTenantId();
+            if (tenantId != null)
+            {
+                var tenantIdGuid = Guid.Parse(tenantId);
+
+                ViewBag.OrgPickerCurrentTenantId = tenantIdGuid;
+                ViewBag.OrgPickerTenantList = xeroToken?.Tenants.Select(
+                    t => new TenantDetails { TenantName = t.TenantName, TenantId = t.TenantId })
+                    .ToList();
+            }
 
             return Task.FromResult<IViewComponentResult>(View(tokenIO.TokenExists()));
         }
