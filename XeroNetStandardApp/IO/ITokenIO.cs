@@ -41,5 +41,10 @@ namespace XeroNetStandardApp.IO
         /// <param name="tenantId">Tenant Id to store</param>
         /// </summary>
         public void StoreTenantId(string tenantId);
+
+        /// <summary>
+        /// Delete the stored Tenant Id if exists
+        /// </summary>
+        public void DestroyTenantId();
     }
 }

@@ -63,12 +63,14 @@ namespace XeroNetStandardApp.IO
         }
 
         /// <summary>
-        /// Destroy json file holding Xero OAuth2 token data
+        /// Destroy json file holding Xero OAuth2 token data. Also destroy associated tenant id
         /// </summary>
         public void DestroyToken()
         {
             if (File.Exists(TokenFilePath))
                 File.Delete(TokenFilePath);
+            
+            DestroyTenantId();
         }
 
         /// <summary>
@@ -116,6 +118,15 @@ namespace XeroNetStandardApp.IO
         public bool TokenExists()
         {
             return File.Exists(TokenFilePath);
+        }
+
+        /// <summary>
+        /// Delete tenant id file if exists
+        /// </summary>
+        public void DestroyTenantId()
+        {
+            if (File.Exists(TenantIdFilePath))
+                File.Delete(TenantIdFilePath);
         }
     }
 
