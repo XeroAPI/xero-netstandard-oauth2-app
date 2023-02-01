@@ -21,7 +21,7 @@ namespace XeroNetStandardApp.ViewComponents
             var xeroToken = tokenIO.GetToken();
 
             var tenantId = tokenIO.GetTenantId();
-            if (tenantId != null)
+            if (tenantId != null && xeroToken?.AccessToken != null)
             {
                 var tenantIdGuid = Guid.Parse(tenantId);
 
