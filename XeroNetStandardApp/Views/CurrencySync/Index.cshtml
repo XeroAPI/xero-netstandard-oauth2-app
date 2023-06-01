@@ -1,0 +1,27 @@
+@model dynamic
+
+<h2>Currency Info</h2>
+
+<table class="table table-responsive-lg">
+    <tr>
+        <th>Currency Code</th>
+        <th>Currency Description</th>
+    </tr>
+
+    @foreach (var currency in Model) {
+        <tr>
+            <td>@currency.Code</td>
+            <td>@currency.Description</td>
+        </tr>
+    }
+</table>
+
+<hr />
+<br />
+
+@*
+    Raw JSON Response
+*@
+
+<p class="h5">Raw JSON Response:</p>
+<textarea class="form-control" readonly style="height: 350px">@ViewBag.jsonResponse</textarea>
