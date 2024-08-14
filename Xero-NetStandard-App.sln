@@ -5,6 +5,8 @@ VisualStudioVersion = 15.0.26124.0
 MinimumVisualStudioVersion = 15.0.26124.0
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XeroNetStandardApp", "XeroNetStandardApp\XeroNetStandardApp.csproj", "{EC11CBCF-95A9-42AD-9C77-824911A94C68}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Org.OpenAPITools", "..\..\Downloads\XERO-POC\dotNet\output\src\Org.OpenAPITools\Org.OpenAPITools.csproj", "{D473FA68-A0D9-4ABC-848A-206353CE6580}"
+EndProject
 Global
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -30,5 +32,17 @@ Global
 		{EC11CBCF-95A9-42AD-9C77-824911A94C68}.Release|x64.Build.0 = Release|Any CPU
 		{EC11CBCF-95A9-42AD-9C77-824911A94C68}.Release|x86.ActiveCfg = Release|Any CPU
 		{EC11CBCF-95A9-42AD-9C77-824911A94C68}.Release|x86.Build.0 = Release|Any CPU
+		{D473FA68-A0D9-4ABC-848A-206353CE6580}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D473FA68-A0D9-4ABC-848A-206353CE6580}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D473FA68-A0D9-4ABC-848A-206353CE6580}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{D473FA68-A0D9-4ABC-848A-206353CE6580}.Debug|x64.Build.0 = Debug|Any CPU
+		{D473FA68-A0D9-4ABC-848A-206353CE6580}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{D473FA68-A0D9-4ABC-848A-206353CE6580}.Debug|x86.Build.0 = Debug|Any CPU
+		{D473FA68-A0D9-4ABC-848A-206353CE6580}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D473FA68-A0D9-4ABC-848A-206353CE6580}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D473FA68-A0D9-4ABC-848A-206353CE6580}.Release|x64.ActiveCfg = Release|Any CPU
+		{D473FA68-A0D9-4ABC-848A-206353CE6580}.Release|x64.Build.0 = Release|Any CPU
+		{D473FA68-A0D9-4ABC-848A-206353CE6580}.Release|x86.ActiveCfg = Release|Any CPU
+		{D473FA68-A0D9-4ABC-848A-206353CE6580}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
