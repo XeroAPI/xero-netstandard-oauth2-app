@@ -20,8 +20,8 @@
             <td>@item.Name</td>
             <td>@item.MimeType</td>
             <td>@(item.Size / 1024) KB</td>
-            <td>@item.CreatedDateUtc.ToString("d/MM/yy")</td>
-            <td>@item.UpdatedDateUtc.ToString("d/MM/yy")</td>
+            <td>@(DateTime.Parse(item.CreatedDateUtc).ToString("d/MM/yy"))</td>
+            <td>@(DateTime.Parse(item.UpdatedDateUtc).ToString("d/MM/yy"))</td>
             <td>@item.Id?.ToString().Substring(0,8)</td>
             <td>@item.FolderId?.ToString().Substring(0,8)</td>
             <td>
