@@ -102,8 +102,8 @@ namespace XeroNetStandardApp.Controllers
                         byteArray = ms.ToArray();
                     }
 
-                    using var stream = new MemoryStream(byteArray);
-                    await Api.CreateInvoiceAttachmentByFileNameAsync(XeroToken.AccessToken, TenantId, invoiceId, formFile.FileName, stream);
+                    // Call attach file to invoice endpoint
+                    await Api.CreateInvoiceAttachmentByFileNameAsync(XeroToken.AccessToken, TenantId, invoiceId, formFile.FileName, byteArray);
                 }
             }
 
