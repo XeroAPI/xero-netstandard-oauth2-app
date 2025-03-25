@@ -125,8 +125,7 @@ namespace XeroNetStandardApp.Controllers
                         byteArray = ms.ToArray();
                     }
 
-                    using var stream = new MemoryStream(byteArray);
-                    await Api.CreatePurchaseOrderAttachmentByFileNameAsync(XeroToken.AccessToken, TenantId, Guid.Parse(purchaseOrderId), formFile.FileName, stream);       
+                    await Api.CreatePurchaseOrderAttachmentByFileNameAsync(XeroToken.AccessToken, TenantId, Guid.Parse(purchaseOrderId), formFile.FileName, byteArray);
                 }
             }
             
