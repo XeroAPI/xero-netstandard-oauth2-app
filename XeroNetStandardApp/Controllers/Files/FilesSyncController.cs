@@ -91,6 +91,7 @@ namespace XeroNetStandardApp.Controllers
                         byteArray,
                         formFile.FileName,
                         formFile.FileName,
+                        null,
                         formFile.ContentType
                     );
                 }
